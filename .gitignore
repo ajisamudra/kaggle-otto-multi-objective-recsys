@@ -130,4 +130,5 @@ dmypy.json
 
 # output
 /data
+/artifacts
 .DS_Store
