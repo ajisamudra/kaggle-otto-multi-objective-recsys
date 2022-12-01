@@ -16,7 +16,7 @@ train = train[train.ts > train_cutoff]
 last_week_unique_session = len(train.session.unique())
 
 # sample frac of session_id
-frac = 0.35
+frac = 0.2
 lucky_sessions_train = train.drop_duplicates(["session"]).sample(frac=frac)["session"]
 subset_of_train = train[train.session.isin(lucky_sessions_train)]
 subset_last_week_unique_session = len(subset_of_train.session.unique())
@@ -40,6 +40,9 @@ for grp in tqdm(subset_of_train.groupby("session")):
         train_features.append(grp[1].iloc[:cutoff])
         train_labels.append(grp[1].iloc[cutoff:])
 
+del subset_of_train
+gc.collect()
+
 # save subset train & its label to small-local-validation
 small_local_val_dir = get_small_local_validation_dir()
 print("create df train feature")
@@ -61,6 +64,3 @@ train_labels.columns = ["session", "type", "ground_truth"]
 filepath = small_local_val_dir / "train_labels.parquet"
 print(f"save df train feature to: {filepath}")
 train_labels.to_parquet(filepath)
-
-# # convert long format to session | list of ground truth for training
-# train_labels.groupby("session")["aid"].apply(list)
