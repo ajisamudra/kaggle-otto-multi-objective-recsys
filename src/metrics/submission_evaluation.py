@@ -9,7 +9,7 @@ from src.utils.constants import (
 )
 from src.utils.logger import get_logger
 from tqdm import tqdm
-
+logging = get_logger()
 
 def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20]):
     """
@@ -93,7 +93,6 @@ def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20
 
 if __name__ == "__main__":
 
-    logging = get_logger()
     DATA_DIR = get_small_local_validation_dir()
     OUTPUT_DIR = get_data_output_dir()
     filepath = OUTPUT_DIR / "covisit_retrieval"

@@ -2,6 +2,7 @@ import pandas as pd
 import gc
 import numpy as np
 import itertools
+from tqdm import tqdm
 from collections import Counter
 from src.utils.data import (
     get_top15_covisitation_buys,
@@ -13,6 +14,7 @@ from src.utils.constants import (
     check_directory,
     get_data_output_dir,
 )
+from src.metrics.submission_evaluation import measure_recall
 from src.utils.logger import get_logger
 
 DATA_DIR = get_small_local_validation_dir()
@@ -29,10 +31,10 @@ df_val = pd.read_parquet(DATA_DIR / "test.parquet")
 # TOP CLICKS AND ORDERS IN TEST
 logging.info("top clicks in validation set")
 top_clicks = df_val.loc[df_val["type"] == 0, "aid"].value_counts().index.values[:20]
-logging.info("top orders in validation set")
-top_orders = df_val.loc[df_val["type"] == 2, "aid"].value_counts().index.values[:20]
 logging.info("top carts in validation set")
 top_carts = df_val.loc[df_val["type"] == 1, "aid"].value_counts().index.values[:20]
+logging.info("top orders in validation set")
+top_orders = df_val.loc[df_val["type"] == 2, "aid"].value_counts().index.values[:20]
 
 logging.info("read covisitation buys")
 top_15_buys = get_top15_covisitation_buys()
@@ -49,106 +51,149 @@ type_weight_multipliers = {0: 1, 1: 6, 2: 3}
 
 
 def suggest_clicks(
-    df: pd.DataFrame, n_candidate: int, top_clicks: np.ndarray, covisit_click: dict
+    n_candidate: int,
+    ses2aids: dict,
+    ses2types: dict,
+    top_clicks: np.ndarray,
+    covisit_click: dict,
 ):
     """
     covisit_click is dict of aid as key and list of suggested aid as value
     """
     type_weight_multipliers = {0: 1, 1: 6, 2: 3}
-    # 0 : click, 1: cart, 2: buy
-    # USE USER HISTORY AIDS AND TYPES
-    aids = df.aid.tolist()
-    types = df.type.tolist()
-    unique_aids = list(dict.fromkeys(aids[::-1]))
-    # RERANK CANDIDATES USING WEIGHTS
-    if len(unique_aids) >= 20:
-        weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
-        aids_temp = Counter()
-        # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
-        for aid, w, t in zip(aids, weights, types):
-            aids_temp[aid] += w * type_weight_multipliers[t]
-        sorted_aids = [k for k, v in aids_temp.most_common(n_candidate)]
-        return sorted_aids
-    # USE "CLICKS" CO-VISITATION MATRIX
-    aids2 = list(
-        itertools.chain(
-            *[covisit_click[aid] for aid in unique_aids if aid in covisit_click]
-        )
-    )
-    # RERANK CANDIDATES
-    top_aids2 = [
-        aid2
-        for aid2, cnt in Counter(aids2).most_common(n_candidate)
-        if aid2 not in unique_aids
-    ]
-    result = unique_aids + top_aids2[: n_candidate - len(unique_aids)]
-    # USE TOP20 TEST CLICKS
-    return result + list(top_clicks)[: n_candidate - len(result)]
+
+    sessions = []
+    candidates = []
+    for session, aids in tqdm(ses2aids.items()):
+        unique_aids = set(aids)
+        types = ses2types[session]
+
+        # RERANK CANDIDATES USING WEIGHTS
+        if len(unique_aids) >= 20:
+            weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
+            aids_temp = Counter()
+            # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
+            for aid, w, t in zip(aids, weights, types):
+                aids_temp[aid] += w * type_weight_multipliers[t]
+            candidate = [k for k, v in aids_temp.most_common(n_candidate)]
+
+        else:
+            # USE "CLICKS" CO-VISITATION MATRIX
+            aids2 = list(
+                itertools.chain(
+                    *[covisit_click[aid] for aid in unique_aids if aid in covisit_click]
+                )
+            )
+            # RERANK CANDIDATES
+            top_aids2 = [
+                aid2
+                for aid2, cnt in Counter(aids2).most_common(n_candidate)
+                if aid2 not in unique_aids
+            ]
+            result = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
+
+            # # USE TOP20 TEST CLICKS
+            # candidate = result + list(top_clicks)[: n_candidate - len(result)]
+            # USE TOP20 TEST CLICKS
+            candidate = result
+
+        # append to list result
+        sessions.append(session)
+        candidates.append(candidate)
+
+    # output series
+    result_series = pd.Series(candidates, index=sessions)
+    result_series.index.name = "session"
+
+    return result_series
 
 
 def suggest_carts(
-    df: pd.DataFrame,
     n_candidate: int,
+    ses2aids: dict,
+    ses2types: dict,
     top_carts: np.ndarray,
     covisit_click: dict,
     covisit_buys: dict,
 ):
-    # User history aids and types
-    aids = df.aid.tolist()
-    types = df.type.tolist()
+    """
+    covisit_click is dict of aid as key and list of suggested aid as value
+    """
+    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
 
-    # UNIQUE AIDS AND UNIQUE BUYS
-    unique_aids = list(dict.fromkeys(aids[::-1]))
-    df = df.loc[(df["type"] == 0) | (df["type"] == 1)]
-    unique_buys = list(dict.fromkeys(df.aid.tolist()[::-1]))
+    sessions = []
+    candidates = []
+    for session, aids in tqdm(ses2aids.items()):
+        unique_buys = []
+        unique_aids = set(aids)
+        types = ses2types[session]
+        for ix, aid in enumerate(aids):
+            curr_type = types[ix]
+            if (curr_type == 0) or (curr_type == 1):
+                unique_buys.append(aid)
 
-    # Rerank candidates using weights
-    if len(unique_aids) >= 20:
-        weights = np.logspace(0.5, 1, len(aids), base=2, endpoint=True) - 1
-        aids_temp = Counter()
+        unique_buys = set(unique_buys)
 
-        # Rerank based on repeat items and types of items
-        for aid, w, t in zip(aids, weights, types):
-            aids_temp[aid] += w * type_weight_multipliers[t]
+        # RERANK CANDIDATES USING WEIGHTS
+        if len(unique_aids) >= 20:
+            weights = np.logspace(0.5, 1, len(aids), base=2, endpoint=True) - 1
+            aids_temp = Counter()
 
-        # Rerank candidates using"top_20_carts" co-visitation matrix
-        aids2 = list(
-            itertools.chain(
-                *[covisit_buys[aid] for aid in unique_buys if aid in covisit_buys]
+            # Rerank based on repeat items and types of items
+            for aid, w, t in zip(aids, weights, types):
+                aids_temp[aid] += w * type_weight_multipliers[t]
+
+            # Rerank candidates using"top_20_carts" co-visitation matrix
+            aids2 = list(
+                itertools.chain(
+                    *[covisit_buys[aid] for aid in unique_buys if aid in covisit_buys]
+                )
             )
-        )
-        for aid in aids2:
-            aids_temp[aid] += 0.1
-        sorted_aids = [k for k, v in aids_temp.most_common(n_candidate)]
-        return sorted_aids
+            for aid in aids2:
+                aids_temp[aid] += 0.1
 
-    # Use "cart order" and "clicks" co-visitation matrices
-    aids1 = list(
-        itertools.chain(
-            *[covisit_click[aid] for aid in unique_aids if aid in covisit_click]
-        )
-    )
-    aids2 = list(
-        itertools.chain(
-            *[covisit_buys[aid] for aid in unique_aids if aid in covisit_buys]
-        )
-    )
+            candidate = [k for k, v in aids_temp.most_common(n_candidate)]
 
-    # RERANK CANDIDATES
-    top_aids2 = [
-        aid2
-        for aid2, cnt in Counter(aids1 + aids2).most_common(n_candidate)
-        if aid2 not in unique_aids
-    ]
-    result = unique_aids + top_aids2[: n_candidate - len(unique_aids)]
+        else:
+            # Use "cart order" and "clicks" co-visitation matrices
+            aids1 = list(
+                itertools.chain(
+                    *[covisit_click[aid] for aid in unique_aids if aid in covisit_click]
+                )
+            )
+            aids2 = list(
+                itertools.chain(
+                    *[covisit_buys[aid] for aid in unique_aids if aid in covisit_buys]
+                )
+            )
 
-    # USE TOP20 TEST ORDERS
-    return result + list(top_carts)[: n_candidate - len(result)]
+            # RERANK CANDIDATES
+            top_aids2 = [
+                aid2
+                for aid2, cnt in Counter(aids1 + aids2).most_common(n_candidate)
+                if aid2 not in unique_aids
+            ]
+            result = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
+
+            # USE TOP20 TEST ORDERS
+            # candidate = result + list(top_carts)[: n_candidate - len(result)]
+            candidate = result
+
+        # append to list result
+        sessions.append(session)
+        candidates.append(candidate)
+
+    # output series
+    result_series = pd.Series(candidates, index=sessions)
+    result_series.index.name = "session"
+
+    return result_series
 
 
 def suggest_buys(
-    df: pd.DataFrame,
     n_candidate: int,
+    ses2aids: dict,
+    ses2types: dict,
     top_orders: np.ndarray,
     covisit_buys: dict,
     covisit_buy2buy: dict,
@@ -157,98 +202,125 @@ def suggest_buys(
     covisit_click is dict of aid as key and list of suggested aid as value
     """
     type_weight_multipliers = {0: 1, 1: 6, 2: 3}
-    # 0 : click, 1: cart, 2: buy
-    # USE USER HISTORY AIDS AND TYPES
-    aids = df.aid.tolist()
-    types = df.type.tolist()
-    # UNIQUE AIDS AND UNIQUE BUYS
-    unique_aids = list(dict.fromkeys(aids[::-1]))
-    df = df.loc[(df["type"] == 1) | (df["type"] == 2)]
-    unique_buys = list(dict.fromkeys(df.aid.tolist()[::-1]))
-    # RERANK CANDIDATES USING WEIGHTS
-    if len(unique_aids) >= 20:
-        weights = np.logspace(0.5, 1, len(aids), base=2, endpoint=True) - 1
-        aids_temp = Counter()
-        # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
-        for aid, w, t in zip(aids, weights, types):
-            aids_temp[aid] += w * type_weight_multipliers[t]
-        # RERANK CANDIDATES USING "BUY2BUY" CO-VISITATION MATRIX
-        aids3 = list(
-            itertools.chain(
-                *[covisit_buy2buy[aid] for aid in unique_buys if aid in covisit_buy2buy]
+
+    sessions = []
+    candidates = []
+    for session, aids in tqdm(ses2aids.items()):
+        unique_buys = []
+        unique_aids = set(aids)
+        types = ses2types[session]
+        for ix, aid in enumerate(aids):
+            curr_type = types[ix]
+            if (curr_type == 1) or (curr_type == 2):
+                unique_buys.append(aid)
+
+        unique_buys = set(unique_buys)
+
+        # RERANK CANDIDATES USING WEIGHTS
+        if len(unique_aids) >= 20:
+            weights = np.logspace(0.5, 1, len(aids), base=2, endpoint=True) - 1
+            aids_temp = Counter()
+
+            # Rerank based on repeat items and types of items
+            for aid, w, t in zip(aids, weights, types):
+                aids_temp[aid] += w * type_weight_multipliers[t]
+
+            # RERANK CANDIDATES USING "BUY2BUY" CO-VISITATION MATRIX
+            aids3 = list(
+                itertools.chain(
+                    *[
+                        covisit_buy2buy[aid]
+                        for aid in unique_buys
+                        if aid in covisit_buy2buy
+                    ]
+                )
             )
-        )
 
-        for aid in aids3:
-            aids_temp[aid] += 0.1
+            for aid in aids3:
+                aids_temp[aid] += 0.1  # type: ignore
 
-        sorted_aids = [k for k, v in aids_temp.most_common(n_candidate)]
-        return sorted_aids
-    # USE "CART ORDER" CO-VISITATION MATRIX
-    aids2 = list(
-        itertools.chain(
-            *[covisit_buys[aid] for aid in unique_aids if aid in covisit_buys]
-        )
-    )
-    # USE "BUY2BUY" CO-VISITATION MATRIX
-    aids3 = list(
-        itertools.chain(
-            *[covisit_buy2buy[aid] for aid in unique_buys if aid in covisit_buy2buy]
-        )
-    )
-    # RERANK CANDIDATES
-    top_aids2 = [
-        aid2
-        for aid2, cnt in Counter(aids2 + aids3).most_common(n_candidate)
-        if aid2 not in unique_aids
-    ]
-    result = unique_aids + top_aids2[: n_candidate - len(unique_aids)]
-    # USE TOP20 TEST ORDERS
-    return result + list(top_orders)[: n_candidate - len(result)]
+            candidate = [k for k, v in aids_temp.most_common(n_candidate)]
+
+        else:
+            # USE "CART ORDER" CO-VISITATION MATRIX
+            aids2 = list(
+                itertools.chain(
+                    *[covisit_buys[aid] for aid in unique_aids if aid in covisit_buys]
+                )
+            )
+            # USE "BUY2BUY" CO-VISITATION MATRIX
+            aids3 = list(
+                itertools.chain(
+                    *[
+                        covisit_buy2buy[aid]
+                        for aid in unique_buys
+                        if aid in covisit_buy2buy
+                    ]
+                )
+            )
+            # RERANK CANDIDATES
+            top_aids2 = [
+                aid2
+                for aid2, cnt in Counter(aids2 + aids3).most_common(n_candidate)
+                if aid2 not in unique_aids
+            ]
+            result = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
+            # # USE TOP20 TEST ORDERS
+            # candidate = result + list(top_orders)[: n_candidate - len(result)]
+            candidate = result
+
+        # append to list result
+        sessions.append(session)
+        candidates.append(candidate)
+
+    # output series
+    result_series = pd.Series(candidates, index=sessions)
+    result_series.index.name = "session"
+
+    return result_series
 
 
 logging.info("start of suggesting clicks")
-pred_df_clicks = (
-    df_val.sort_values(["session", "ts"])
-    .groupby(["session"])
-    .apply(
-        lambda x: suggest_clicks(
-            df=x, n_candidate=50, top_clicks=top_clicks, covisit_click=top_20_clicks
-        )
-    )
+logging.info("sort session by ts ascendingly")
+df_val = df_val.sort_values(["session", "ts"])
+# create dict of session_id: list of aid/ts/type
+logging.info("create ses2aids")
+ses2aids = df_val.groupby("session")["aid"].apply(list).to_dict()
+logging.info("create ses2types")
+ses2types = df_val.groupby("session")["type"].apply(list).to_dict()
+
+logging.info("start of suggesting clicks")
+pred_df_clicks = suggest_clicks(
+    n_candidate=30,
+    ses2aids=ses2aids,
+    ses2types=ses2types,
+    top_clicks=top_clicks,
+    covisit_click=top_20_clicks,
 )
 logging.info("end of suggesting clicks")
 
 logging.info("start of suggesting carts")
-pred_df_carts = (
-    df_val.sort_values(["session", "ts"])
-    .groupby(["session"])
-    .apply(
-        lambda x: suggest_carts(
-            df=x,
-            n_candidate=50,
-            top_carts=top_carts,
-            covisit_click=top_20_clicks,
-            covisit_buys=top_15_buys,
-        )
-    )
+pred_df_carts = suggest_carts(
+    n_candidate=30,
+    ses2aids=ses2aids,
+    ses2types=ses2types,
+    top_carts=top_carts,
+    covisit_click=top_20_clicks,
+    covisit_buys=top_15_buys,
 )
+
 logging.info("end of suggesting carts")
 
 logging.info("start of suggesting buys")
-pred_df_buys = (
-    df_val.sort_values(["session", "ts"])
-    .groupby(["session"])
-    .apply(
-        lambda x: suggest_buys(
-            df=x,
-            n_candidate=50,
-            top_orders=top_orders,
-            covisit_buy2buy=top_15_buy2buy,
-            covisit_buys=top_15_buys,
-        )
-    )
+pred_df_buys = suggest_buys(
+    n_candidate=30,
+    ses2aids=ses2aids,
+    ses2types=ses2types,
+    top_orders=top_orders,
+    covisit_buy2buy=top_15_buy2buy,
+    covisit_buys=top_15_buys,
 )
+
 logging.info("end of suggesting buys")
 
 del df_val
@@ -287,30 +359,8 @@ pred_df.to_csv(filepath / "validation_preds.csv", index=False)
 logging.info("start computing metrics")
 # COMPUTE METRIC
 test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
-# K = 20
-for K in [20, 30, 40, 50]:
-    score = 0
-    weights = {"clicks": 0.10, "carts": 0.30, "orders": 0.60}
-    for t in ["clicks", "carts", "orders"]:
-        sub = pred_df.loc[pred_df.session_type.str.contains(t)].copy()
-        sub["session"] = sub.session_type.apply(lambda x: int(x.split("_")[0]))
-        sub.labels = sub.labels.apply(lambda x: [int(i) for i in x.split(" ")[:K]])
-        tmp_test_labels = test_labels.loc[test_labels["type"] == t]
-        tmp_test_labels = tmp_test_labels.merge(sub, how="left", on=["session"])
-        tmp_test_labels["hits"] = tmp_test_labels.apply(
-            lambda df: len(set(df.ground_truth).intersection(set(df.labels))), axis=1
-        )
-        tmp_test_labels["gt_count"] = tmp_test_labels.ground_truth.str.len().clip(0, K)
-        n_hits = tmp_test_labels["hits"].sum()
-        n_gt = tmp_test_labels["gt_count"].sum()
-        recall = tmp_test_labels["hits"].sum() / tmp_test_labels["gt_count"].sum()
-        score += weights[t] * recall
-        logging.info(f"{t} hits@{K} = {n_hits} / gt@{K} = {n_gt}")
-        logging.info(f"{t} recall@{K} = {recall}")
-
-    logging.info("=============")
-    logging.info(f"Overall Recall@{K} = {score}")
-    logging.info("=============")
+measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30])
+# measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30, 40])
 
 # recall @20 0.5646320148830121
 # recall @40
