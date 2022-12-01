@@ -93,9 +93,7 @@ def suggest_clicks(
             result = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
 
             # # USE TOP20 TEST CLICKS
-            # candidate = result + list(top_clicks)[: n_candidate - len(result)]
-            # USE TOP20 TEST CLICKS
-            candidate = result
+            candidate = result + list(top_clicks)[: n_candidate - len(result)]
 
         # append to list result
         sessions.append(session)
@@ -176,8 +174,7 @@ def suggest_carts(
             result = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
 
             # USE TOP20 TEST ORDERS
-            # candidate = result + list(top_carts)[: n_candidate - len(result)]
-            candidate = result
+            candidate = result + list(top_carts)[: n_candidate - len(result)]
 
         # append to list result
         sessions.append(session)
@@ -266,8 +263,7 @@ def suggest_buys(
             ]
             result = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
             # # USE TOP20 TEST ORDERS
-            # candidate = result + list(top_orders)[: n_candidate - len(result)]
-            candidate = result
+            candidate = result + list(top_orders)[: n_candidate - len(result)]
 
         # append to list result
         sessions.append(session)
@@ -362,36 +358,8 @@ test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
 measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30])
 # measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30, 40])
 
-# recall @20 0.5646320148830121
-# recall @40
-
-# recall @40 with n_cand 40
-# [2022-12-01 01:49:47,313] {covisit_retrieval.py:201} INFO - save validation prediction
-# [2022-12-01 01:50:15,764] {covisit_retrieval.py:205} INFO - start computing metrics
-# [2022-12-01 01:51:37,307] {covisit_retrieval.py:225} INFO - clicks hits = 922638 / gt = 1755534
-# [2022-12-01 01:51:37,311] {covisit_retrieval.py:226} INFO - clicks recall = 0.5255597442145808
-# [2022-12-01 01:52:42,917] {covisit_retrieval.py:225} INFO - carts hits = 235973 / gt = 580104
-# [2022-12-01 01:52:42,922] {covisit_retrieval.py:226} INFO - carts recall = 0.4067770606649842
-# [2022-12-01 01:53:02,044] {covisit_retrieval.py:225} INFO - orders hits = 203269 / gt = 314009
-# [2022-12-01 01:53:02,046] {covisit_retrieval.py:226} INFO - orders recall = 0.6473349489982771
-# [2022-12-01 01:53:02,046] {covisit_retrieval.py:228} INFO - =============
-# [2022-12-01 01:53:02,046] {covisit_retrieval.py:229} INFO - Overall Recall = 0.5629900620199196
-
-# Recall@20 with n_cand 20
-# [2022-12-01 07:31:45,508] {covisit_retrieval.py:201} INFO - save validation prediction
-# [2022-12-01 07:32:08,564] {covisit_retrieval.py:205} INFO - start computing metrics
-# [2022-12-01 07:33:24,129] {covisit_retrieval.py:225} INFO - clicks hits = 922638 / gt = 1755534
-# [2022-12-01 07:33:24,133] {covisit_retrieval.py:226} INFO - clicks recall = 0.5255597442145808
-# [2022-12-01 07:34:19,542] {covisit_retrieval.py:225} INFO - carts hits = 235973 / gt = 576482
-# [2022-12-01 07:34:19,544] {covisit_retrieval.py:226} INFO - carts recall = 0.4093328152483512
-# [2022-12-01 07:34:36,650] {covisit_retrieval.py:225} INFO - orders hits = 203269 / gt = 313303
-# [2022-12-01 07:34:36,654] {covisit_retrieval.py:226} INFO - orders recall = 0.6487936598117477
-# [2022-12-01 07:34:36,654] {covisit_retrieval.py:228} INFO - =============
-# [2022-12-01 07:34:36,655] {covisit_retrieval.py:229} INFO - Overall Recall = 0.5646320148830121
-# [2022-12-01 07:34:36,655] {covisit_retrieval.py:230} INFO - =============
-
-
 ## Add suggest Cart and see Recall@20/30/40/50
+# using co-visitation LB 565 & type_weight_multipliers = {0: 1, 1: 6, 2: 3}
 # [2022-12-01 10:00:36,791] {covisit_retrieval.py:287} INFO - start computing metrics
 # [2022-12-01 10:01:24,617] {covisit_retrieval.py:308} INFO - clicks hits@20 = 922665 / gt@20 = 1755534
 # [2022-12-01 10:01:24,623] {covisit_retrieval.py:309} INFO - clicks recall@20 = 0.5255751241502585
@@ -429,3 +397,45 @@ measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30])
 # [2022-12-01 10:35:27,225] {covisit_retrieval.py:311} INFO - =============
 # [2022-12-01 10:35:27,225] {covisit_retrieval.py:312} INFO - Overall Recall@50 = 0.5961478700385593
 # [2022-12-01 10:35:27,225] {covisit_retrieval.py:313} INFO - =============
+
+# using co-visitation LB 576 & type_weight_multipliers = {0: 1, 1: 5, 2: 4}
+# [2022-12-01 23:01:46,940] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5784456467376878
+# [2022-12-01 23:01:46,941] {submission_evaluation.py:84} INFO - clicks hits@20 = 1015481 / gt@20 = 1755534
+# [2022-12-01 23:01:46,987] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.5784456467376878
+# [2022-12-01 23:03:55,928] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.6165238205481992
+# [2022-12-01 23:03:55,973] {submission_evaluation.py:84} INFO - carts hits@20 = 271309 / gt@20 = 576482
+# [2022-12-01 23:03:55,973] {submission_evaluation.py:85} INFO - carts recall@20 = 0.47062874469627847
+# [2022-12-01 23:04:15,843] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.8165440654879669
+# [2022-12-01 23:04:15,845] {submission_evaluation.py:84} INFO - orders hits@20 = 228583 / gt@20 = 313303
+# [2022-12-01 23:04:15,845] {submission_evaluation.py:85} INFO - orders recall@20 = 0.7295908433688794
+# [2022-12-01 23:04:15,845] {submission_evaluation.py:87} INFO - =============
+# [2022-12-01 23:04:15,845] {submission_evaluation.py:88} INFO - Overall Recall@20 = 0.636787694103979
+
+
+# using co-visitation LB 565 & type_weight_multipliers = {0: 1, 1: 5, 2: 4}
+# [2022-12-01 23:18:50,550] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5150580962829544
+# [2022-12-01 23:18:50,555] {submission_evaluation.py:84} INFO - clicks hits@20 = 904202 / gt@20 = 1755534
+# [2022-12-01 23:18:50,555] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.5150580962829544
+# [2022-12-01 23:20:47,708] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.5451942191722331
+# [2022-12-01 23:20:47,712] {submission_evaluation.py:84} INFO - carts hits@20 = 233344 / gt@20 = 576482
+# [2022-12-01 23:20:47,713] {submission_evaluation.py:85} INFO - carts recall@20 = 0.4047723953219702
+# [2022-12-01 23:21:06,483] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.7296748095481295
+# [2022-12-01 23:21:06,488] {submission_evaluation.py:84} INFO - orders hits@20 = 202329 / gt@20 = 313303
+# [2022-12-01 23:21:06,488] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6457933693580974
+# [2022-12-01 23:21:06,488] {submission_evaluation.py:87} INFO - =============
+# [2022-12-01 23:21:06,488] {submission_evaluation.py:88} INFO - Overall Recall@20 = 0.5604135498397449
+
+# using co-visitation LB 575 & type_weight_multipliers = {0: 1, 1: 6, 2: 3}
+# [2022-12-01 23:37:06,869] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5784439378559458
+# [2022-12-01 23:37:06,873] {submission_evaluation.py:84} INFO - clicks hits@20 = 1015478 / gt@20 = 1755534
+# [2022-12-01 23:37:06,873] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.5784439378559458
+# [2022-12-01 23:39:04,591] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.6084399937475479
+# [2022-12-01 23:39:04,595] {submission_evaluation.py:84} INFO - carts hits@20 = 267314 / gt@20 = 576482
+# [2022-12-01 23:39:04,595] {submission_evaluation.py:85} INFO - carts recall@20 = 0.4636987798404807
+# [2022-12-01 23:39:23,173] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.7777221391635168
+# [2022-12-01 23:39:23,174] {submission_evaluation.py:84} INFO - orders hits@20 = 217243 / gt@20 = 313303
+# [2022-12-01 23:39:23,174] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6933958500237789
+# [2022-12-01 23:39:23,174] {submission_evaluation.py:87} INFO - =============
+# [2022-12-01 23:39:23,174] {submission_evaluation.py:88} INFO - Overall Recall@20 = 0.6129915377520061
+
+# 2022-12-01 -> decide using co-visitation LB 565 & type_weight_multipliers = {0: 1, 1: 6, 2: 3}

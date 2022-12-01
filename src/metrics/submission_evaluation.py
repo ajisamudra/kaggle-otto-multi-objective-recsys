@@ -9,7 +9,9 @@ from src.utils.constants import (
 )
 from src.utils.logger import get_logger
 from tqdm import tqdm
+
 logging = get_logger()
+
 
 def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20]):
     """
@@ -40,14 +42,14 @@ def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20
         score = 0
         weights = {"clicks": 0.10, "carts": 0.30, "orders": 0.60}
         for t in ["clicks", "carts", "orders"]:
-            logging.info(f"filter submission event {t}")
+            # logging.info(f"filter submission event {t}")
             sub_session = df_pred.loc[df_pred["type"] == t]["session"].values
             sub_labels = (
                 df_pred.loc[df_pred["type"] == t]["labels"]
                 .apply(lambda x: [int(i) for i in x.split(" ")[:K]])
                 .values
             )
-            logging.info(f"filter label event {t}")
+            # logging.info(f"filter label event {t}")
             label_session = df_truth.loc[df_truth["type"] == t]["session"].values
             label_truth = df_truth.loc[df_truth["type"] == t]["ground_truth"].values
 
@@ -56,7 +58,7 @@ def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20
 
             label_session = list(label_session)
             recall_scores, hit_scores, gt_counts = [], [], []
-            for session_id in tqdm(label_session):
+            for session_id in label_session:
                 targets = set(tmp_labels_dict[session_id])
                 preds = set(sub_dict[session_id])
 
