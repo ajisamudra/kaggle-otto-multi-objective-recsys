@@ -59,6 +59,20 @@ def get_processed_training_test_splitted_dir() -> Path:
     return path
 
 
+def get_processed_scoring_train_splitted_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_splitted"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_splitted_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_splitted"
+    check_directory(path)
+    return path
+
+
 ### Output & Artifacts Dir
 
 

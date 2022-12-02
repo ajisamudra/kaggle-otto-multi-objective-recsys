@@ -10,14 +10,14 @@ from src.utils.data import (
     get_top20_covisitation_click,
 )
 from src.utils.constants import (
-    get_small_local_validation_dir,
+    get_processed_local_validation_dir,
     check_directory,
     get_data_output_dir,
 )
 from src.metrics.submission_evaluation import measure_recall
 from src.utils.logger import get_logger
 
-DATA_DIR = get_small_local_validation_dir()
+DATA_DIR = get_processed_local_validation_dir()
 logging = get_logger()
 
 # logging.info("read train parquet")
