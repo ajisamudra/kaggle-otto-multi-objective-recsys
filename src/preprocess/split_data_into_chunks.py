@@ -24,8 +24,10 @@ def split_data_into_chunks(data: pd.DataFrame, name: str, output_path: Path):
     # split
     logging.info(f"start split data into {n} chunks")
     for ix, chunk_sessions in tqdm(enumerate(np.array_split(unique_sessions, n))):
-        logging.info(f"chunk {ix} have unqieu session {len(chunk_sessions)}")
-        logging.info(chunk_sessions)
+        logging.info(f"chunk {ix} have unique session {len(chunk_sessions)}")
+        logging.info(
+            f"assuming each sesssion will have 40 candidates: n_row {len(chunk_sessions)*40}"
+        )
         subset_of_data = data[data.session.isin(chunk_sessions)]
         filepath = output_path / f"{name}_{ix}.parquet"
         logging.info(f"save chunk {ix} to: {filepath}")

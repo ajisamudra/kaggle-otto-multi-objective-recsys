@@ -111,7 +111,7 @@ def main(mode: str):
         split_local_train_last_week(
             train=train,
             output_path=output_path,
-            frac=0.2,
+            frac=0.25,
         )
 
 

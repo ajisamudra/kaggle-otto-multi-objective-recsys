@@ -20,34 +20,7 @@ from src.utils.logger import get_logger
 DATA_DIR = get_processed_local_validation_dir()
 logging = get_logger()
 
-# logging.info("read train parquet")
-# df_train = pd.read_parquet(DATA_DIR / "train.parquet")
-logging.info("read val parquet")
-df_val = pd.read_parquet(DATA_DIR / "test.parquet")
-
-
-# candidate generation
-# get top 20 clicks & buys in validation set
-# TOP CLICKS AND ORDERS IN TEST
-logging.info("top clicks in validation set")
-top_clicks = df_val.loc[df_val["type"] == 0, "aid"].value_counts().index.values[:20]
-logging.info("top carts in validation set")
-top_carts = df_val.loc[df_val["type"] == 1, "aid"].value_counts().index.values[:20]
-logging.info("top orders in validation set")
-top_orders = df_val.loc[df_val["type"] == 2, "aid"].value_counts().index.values[:20]
-
-logging.info("read covisitation buys")
-top_15_buys = get_top15_covisitation_buys()
-logging.info("read covisitation buy2buy")
-top_15_buy2buy = get_top15_covisitation_buy2buy()
-logging.info("read covisitation click")
-top_20_clicks = get_top20_covisitation_click()
-
-
-logging.info("Here are size of our 3 co-visitation matrices:")
-logging.info(f"{len(top_20_clicks)}, {len(top_15_buy2buy)}, {len(top_15_buys)}")
-
-type_weight_multipliers = {0: 1, 1: 6, 2: 3}
+######### CANDIDATES GENERATION FUNCTION
 
 
 def suggest_clicks(
@@ -276,86 +249,110 @@ def suggest_buys(
     return result_series
 
 
-logging.info("start of suggesting clicks")
-logging.info("sort session by ts ascendingly")
-df_val = df_val.sort_values(["session", "ts"])
-# create dict of session_id: list of aid/ts/type
-logging.info("create ses2aids")
-ses2aids = df_val.groupby("session")["aid"].apply(list).to_dict()
-logging.info("create ses2types")
-ses2types = df_val.groupby("session")["type"].apply(list).to_dict()
+######### CANDIDATES GENERATION FUNCTION
 
-logging.info("start of suggesting clicks")
-pred_df_clicks = suggest_clicks(
-    n_candidate=30,
-    ses2aids=ses2aids,
-    ses2types=ses2types,
-    top_clicks=top_clicks,
-    covisit_click=top_20_clicks,
-)
-logging.info("end of suggesting clicks")
+if __name__ == "__main__":
 
-logging.info("start of suggesting carts")
-pred_df_carts = suggest_carts(
-    n_candidate=30,
-    ses2aids=ses2aids,
-    ses2types=ses2types,
-    top_carts=top_carts,
-    covisit_click=top_20_clicks,
-    covisit_buys=top_15_buys,
-)
+    logging.info("read val parquet")
+    df_val = pd.read_parquet(DATA_DIR / "test.parquet")
 
-logging.info("end of suggesting carts")
+    # candidate generation
+    # get top 20 clicks & buys in validation set
+    logging.info("top clicks in validation set")
+    top_clicks = df_val.loc[df_val["type"] == 0, "aid"].value_counts().index.values[:20]
+    logging.info("top carts in validation set")
+    top_carts = df_val.loc[df_val["type"] == 1, "aid"].value_counts().index.values[:20]
+    logging.info("top orders in validation set")
+    top_orders = df_val.loc[df_val["type"] == 2, "aid"].value_counts().index.values[:20]
 
-logging.info("start of suggesting buys")
-pred_df_buys = suggest_buys(
-    n_candidate=30,
-    ses2aids=ses2aids,
-    ses2types=ses2types,
-    top_orders=top_orders,
-    covisit_buy2buy=top_15_buy2buy,
-    covisit_buys=top_15_buys,
-)
+    logging.info("read covisitation buys")
+    top_15_buys = get_top15_covisitation_buys()
+    logging.info("read covisitation buy2buy")
+    top_15_buy2buy = get_top15_covisitation_buy2buy()
+    logging.info("read covisitation click")
+    top_20_clicks = get_top20_covisitation_click()
 
-logging.info("end of suggesting buys")
+    logging.info("Here are size of our 3 co-visitation matrices:")
+    logging.info(f"{len(top_20_clicks)}, {len(top_15_buy2buy)}, {len(top_15_buys)}")
 
-del df_val
-gc.collect()
+    logging.info("start of suggesting clicks")
+    logging.info("sort session by ts ascendingly")
+    df_val = df_val.sort_values(["session", "ts"])
+    # create dict of session_id: list of aid/ts/type
+    logging.info("create ses2aids")
+    ses2aids = df_val.groupby("session")["aid"].apply(list).to_dict()
+    logging.info("create ses2types")
+    ses2types = df_val.groupby("session")["type"].apply(list).to_dict()
 
-logging.info("create predicition df for click")
-clicks_pred_df = pd.DataFrame(
-    pred_df_clicks.add_suffix("_clicks"), columns=["labels"]
-).reset_index()
-logging.info("create predicition df for cart")
-carts_pred_df = pd.DataFrame(
-    pred_df_carts.add_suffix("_carts"), columns=["labels"]
-).reset_index()
-logging.info("create predicition df for order")
-orders_pred_df = pd.DataFrame(
-    pred_df_buys.add_suffix("_orders"), columns=["labels"]
-).reset_index()
+    logging.info("start of suggesting clicks")
+    pred_df_clicks = suggest_clicks(
+        n_candidate=30,
+        ses2aids=ses2aids,
+        ses2types=ses2types,
+        top_clicks=top_clicks,
+        covisit_click=top_20_clicks,
+    )
+    logging.info("end of suggesting clicks")
 
-del pred_df_clicks, pred_df_carts, pred_df_buys
-gc.collect()
+    logging.info("start of suggesting carts")
+    pred_df_carts = suggest_carts(
+        n_candidate=30,
+        ses2aids=ses2aids,
+        ses2types=ses2types,
+        top_carts=top_carts,
+        covisit_click=top_20_clicks,
+        covisit_buys=top_15_buys,
+    )
 
+    logging.info("end of suggesting carts")
 
-logging.info("concat all predicitions")
-pred_df = pd.concat([clicks_pred_df, orders_pred_df, carts_pred_df])
-pred_df.columns = ["session_type", "labels"]
-pred_df["labels"] = pred_df.labels.apply(lambda x: " ".join(map(str, x)))
-logging.info(pred_df.head())
+    logging.info("start of suggesting buys")
+    pred_df_buys = suggest_buys(
+        n_candidate=30,
+        ses2aids=ses2aids,
+        ses2types=ses2types,
+        top_orders=top_orders,
+        covisit_buy2buy=top_15_buy2buy,
+        covisit_buys=top_15_buys,
+    )
 
-OUTPUT_DIR = get_data_output_dir()
-filepath = OUTPUT_DIR / "covisit_retrieval"
-check_directory(filepath)
-logging.info("save validation prediction")
-pred_df.to_csv(filepath / "validation_preds.csv", index=False)
+    logging.info("end of suggesting buys")
 
+    del df_val
+    gc.collect()
 
-logging.info("start computing metrics")
-# COMPUTE METRIC
-test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
-measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30])
+    logging.info("create predicition df for click")
+    clicks_pred_df = pd.DataFrame(
+        pred_df_clicks.add_suffix("_clicks"), columns=["labels"]
+    ).reset_index()
+    logging.info("create predicition df for cart")
+    carts_pred_df = pd.DataFrame(
+        pred_df_carts.add_suffix("_carts"), columns=["labels"]
+    ).reset_index()
+    logging.info("create predicition df for order")
+    orders_pred_df = pd.DataFrame(
+        pred_df_buys.add_suffix("_orders"), columns=["labels"]
+    ).reset_index()
+
+    del pred_df_clicks, pred_df_carts, pred_df_buys
+    gc.collect()
+
+    logging.info("concat all predicitions")
+    pred_df = pd.concat([clicks_pred_df, orders_pred_df, carts_pred_df])
+    pred_df.columns = ["session_type", "labels"]
+    pred_df["labels"] = pred_df.labels.apply(lambda x: " ".join(map(str, x)))
+    logging.info(pred_df.head())
+
+    OUTPUT_DIR = get_data_output_dir()
+    filepath = OUTPUT_DIR / "covisit_retrieval"
+    check_directory(filepath)
+    logging.info("save validation prediction")
+    pred_df.to_csv(filepath / "validation_preds.csv", index=False)
+
+    logging.info("start computing metrics")
+    # COMPUTE METRIC
+    test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
+    measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30])
 # measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30, 40])
 
 ## Add suggest Cart and see Recall@20/30/40/50

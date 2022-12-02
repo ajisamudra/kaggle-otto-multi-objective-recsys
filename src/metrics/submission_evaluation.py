@@ -4,7 +4,7 @@ import pandas as pd
 import gc
 import numpy as np
 from src.utils.constants import (
-    get_small_local_validation_dir,
+    get_processed_local_validation_dir,
     get_data_output_dir,
 )
 from src.utils.logger import get_logger
@@ -95,7 +95,7 @@ def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20
 
 if __name__ == "__main__":
 
-    DATA_DIR = get_small_local_validation_dir()
+    DATA_DIR = get_processed_local_validation_dir()
     OUTPUT_DIR = get_data_output_dir()
     filepath = OUTPUT_DIR / "covisit_retrieval"
     logging.info("read prediction df")
