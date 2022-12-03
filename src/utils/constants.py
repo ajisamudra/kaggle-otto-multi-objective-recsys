@@ -101,6 +101,34 @@ def get_processed_scoring_test_candidates_dir() -> Path:
     return path
 
 
+def get_processed_training_train_sess_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "session_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_sess_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "session_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_sess_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "session_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_sess_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "session_features"
+    check_directory(path)
+    return path
+
+
 ### Output & Artifacts Dir
 
 
