@@ -30,14 +30,14 @@ def pivot_candidates_list_to_rows(
     session | labels
     123_clicks | [aid1, aid2, aid3]
     123_carts | [aid1, aid2, aid3]
-    123_buys | [aid1, aid2, aid3]
+    123_orders | [aid1, aid2, aid3]
     """
     # drop event in session
-    logging.info("create prediction session column")
+    # logging.info("create prediction session column")
     cand_df["session"] = cand_df["session"].apply(lambda x: int(x.split("_")[0]))
 
     # dict of session and labels
-    logging.info("create ses2candidates")
+    # logging.info("create ses2candidates")
     ses2candidates = dict(zip(cand_df["session"], cand_df["labels"]))
     unique_sessions = list(cand_df["session"].values)
 
@@ -45,13 +45,15 @@ def pivot_candidates_list_to_rows(
     candidates = []
     labels = []
 
+    logging.info(f"pivot in train_mode: {is_train}")
     for session in tqdm(unique_sessions):
         truths = set()
         if is_train:
             # get truths for specific session
             truths = set(ses2truth.get(session, []))
-            # drop training data that has high num truths
-            if len(truths) > 50:
+            # if there's no truth for specific event & session
+            # drop from training data
+            if len(truths) == 0:
                 continue
 
         # get candidates for specific session
@@ -100,18 +102,18 @@ def pivot_candidates(
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):
-        for event in ["clicks", "carts", "buys"]:
-            logging.info(f"chunk {ix}: read input")
+        for event in ["clicks", "carts", "orders"]:
+            # logging.info(f"chunk {ix}: read input")
             filepath = f"{input_path}/{name}_{ix}_{event}_list.parquet"
             df = pd.read_parquet(filepath)
             # input df as follow
             # session | labels
             # A_clicks | [aid1, aid2]
             # A_carts | [aid1, aid2]
-            # A_buys  | [aid1, aid2]
+            # A_orders  | [aid1, aid2]
             ses2truth = {}
             if is_train:
-                logging.info("create ses2truth")
+                # logging.info("create ses2truth")
                 label_session = df_truth.loc[df_truth["type"] == event][
                     "session"
                 ].values
@@ -120,13 +122,13 @@ def pivot_candidates(
                 ].values
                 ses2truth = dict(zip(label_session, label_truth))
 
-            logging.info(f"start pivoting candidate")
+            # logging.info(f"start pivoting candidate")
             df_output = pivot_candidates_list_to_rows(
                 cand_df=df, is_train=is_train, ses2truth=ses2truth
             )
 
             filepath = output_path / f"{name}_{ix}_{event}_rows.parquet"
-            logging.info(f"save chunk {ix} to: {filepath}")
+            logging.info(f"save chunk {ix}_{event} to: {filepath}")
             df_output.to_parquet(f"{filepath}")
             logging.info(f"output df shape {df_output.shape}")
 

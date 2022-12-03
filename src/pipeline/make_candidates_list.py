@@ -50,22 +50,25 @@ def generate_candidates_covisitation(name: str, input_path: Path, output_path: P
         # A     | 1234  | 1  | 0
         # A     | 123   | 2  | 0
         # A     | 1234  | 3  | 1
-        logging.info("top clicks in dataset")
+        # logging.info("top clicks in dataset")
         top_clicks = df.loc[df["type"] == 0, "aid"].value_counts().index.values[:20]
-        logging.info("top carts in dataset")
+        # logging.info("top carts in dataset")
         top_carts = df.loc[df["type"] == 1, "aid"].value_counts().index.values[:20]
-        logging.info("top orders in dataset")
+        # logging.info("top orders in dataset")
         top_orders = df.loc[df["type"] == 2, "aid"].value_counts().index.values[:20]
-        logging.info("create ses2aids")
+        # logging.info("create ses2aids")
         ses2aids = df.groupby("session")["aid"].apply(list).to_dict()
-        logging.info("create ses2types")
+        # logging.info("create ses2types")
         ses2types = df.groupby("session")["type"].apply(list).to_dict()
+
+        logging.info("input type class proportion")
+        logging.info(df["type"].value_counts(ascending=False))
 
         del df
         gc.collect()
 
         candidates_list = pd.Series()
-        for event in ["clicks", "carts", "buys"]:
+        for event in ["clicks", "carts", "orders"]:
             logging.info(f"start of suggesting {event}")
             if event == "clicks":
                 candidates_list = suggest_clicks(
@@ -84,7 +87,7 @@ def generate_candidates_covisitation(name: str, input_path: Path, output_path: P
                     covisit_click=top_20_clicks,
                     covisit_buys=top_15_buys,
                 )
-            elif event == "buys":
+            elif event == "orders":
                 candidates_list = suggest_buys(
                     n_candidate=40,
                     ses2aids=ses2aids,

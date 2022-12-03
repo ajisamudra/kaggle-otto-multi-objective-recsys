@@ -1,6 +1,7 @@
 import click
 import pandas as pd
 import numpy as np
+from random import shuffle
 from tqdm import tqdm
 import gc
 from pathlib import Path
@@ -17,18 +18,68 @@ from src.utils.logger import get_logger
 logging = get_logger()
 
 
+def stratified_sample_session(data: pd.DataFrame, n_splits: int):
+    # stratified sample based on following session type
+    # session has click + cart + buy ("3_3")
+    # session has click + cart / click + buy / cart + buy ("1_2", "2_2", "3_2")
+    # session has click only / cart only / buy only ( "0_1", "2_1", "1_1")
+
+    unique_session_type = data.groupby(["session", "type"])["aid"].count().reset_index()
+    unique_session_type = (
+        unique_session_type.groupby("session")
+        .agg({"type": [("type_sum", "sum"), ("type_dcount", "nunique")]})
+        .reset_index(["session"], col_fill=None)
+    )
+    unique_session_type.columns = unique_session_type.columns.get_level_values(1)
+    unique_session_type["stratified_col"] = (
+        unique_session_type["type_sum"].astype(str)
+        + "_"
+        + unique_session_type["type_dcount"].astype(str)
+    )
+    classes = ["3_3", "0_1", "1_2", "2_2", "2_1", "1_1", "3_2"]
+    # Get each of the classes into their own list of samples
+    class_split_list = {}
+    for curr_class in classes:
+        class_list = list(
+            set(
+                unique_session_type.iloc[
+                    unique_session_type.groupby(["stratified_col"]).groups[curr_class]
+                ]["session"].tolist()
+            )
+        )
+        shuffle(class_list)
+        class_split_list[curr_class] = np.array_split(
+            class_list, n_splits
+        )  # create a dict of split chunks
+
+    stratified_sample_chunks = []
+    for i in range(n_splits):
+        class_chunks = []
+        for curr_class in classes:
+            class_chunks.extend(
+                class_split_list[curr_class][i]
+            )  # get split from current class
+        stratified_sample_chunks.append(class_chunks)
+
+    return stratified_sample_chunks
+
+
 def split_data_into_chunks(data: pd.DataFrame, name: str, output_path: Path):
-    # get sessions
-    unique_sessions = data["session"].unique()
     n = 10
     # split
     logging.info(f"start split data into {n} chunks")
-    for ix, chunk_sessions in tqdm(enumerate(np.array_split(unique_sessions, n))):
+    for ix, chunk_sessions in tqdm(
+        enumerate(stratified_sample_session(data=data, n_splits=n))
+    ):
         logging.info(f"chunk {ix} have unique session {len(chunk_sessions)}")
         logging.info(
             f"assuming each sesssion will have 40 candidates: n_row {len(chunk_sessions)*40}"
         )
         subset_of_data = data[data.session.isin(chunk_sessions)]
+        logging.info(
+            subset_of_data["type"].value_counts(normalize=True, ascending=False)
+        )
+        logging.info(subset_of_data["type"].value_counts(ascending=False))
         filepath = output_path / f"{name}_{ix}.parquet"
         logging.info(f"save chunk {ix} to: {filepath}")
         subset_of_data.to_parquet(f"{filepath}")
