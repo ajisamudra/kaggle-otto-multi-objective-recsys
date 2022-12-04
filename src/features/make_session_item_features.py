@@ -102,7 +102,7 @@ def make_session_item_features(
             filepath = f"{input_path}/{name}_{ix}.parquet"
             df = pl.read_parquet(filepath)
 
-            logging.info(f"start creating session features")
+            logging.info(f"start creating sessionXaid features")
             df_output = gen_session_item_features(data=df)
 
             filepath = output_path / f"{name}_{ix}_session_item_feas.parquet"
