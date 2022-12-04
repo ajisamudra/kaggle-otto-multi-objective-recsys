@@ -48,6 +48,8 @@ def gen_user_features(data: pl.DataFrame):
     123 | 2 | 12345 | AID1
     """
 
+    # START: event data preprocess
+    oneday_cutoff = 1 * 60 * 60 * 24
     # sort session & ts ascendingly
     data = data.sort(["session", "ts"])
 
@@ -56,11 +58,25 @@ def gen_user_features(data: pl.DataFrame):
     data = data.with_columns(
         [(pl.col("ts") - pl.col("prev_ts")).fill_null(0).alias("duration_second")]
     )
+    data = data.with_columns(
+        [
+            pl.when(pl.col("duration_second") > oneday_cutoff)
+            .then(1)
+            .otherwise(0)
+            .alias("oneday_session"),
+            pl.when(pl.col("duration_second") > oneday_cutoff)
+            .then(0)  # start of real-session will always have 0 duration_second
+            .otherwise(pl.col("duration_second"))
+            .alias("duration_second"),
+        ]
+    )
+    # END: event data preprocess
 
     # agg per session
     data_agg = data.groupby("session").agg(
         [
             pl.col("aid").count().alias("sess_all_events_count"),
+            pl.col("oneday_session").sum().alias("sess_num_real_session"),
             pl.col("aid").n_unique().alias("sess_aid_dcount"),
             # num of event type
             (pl.col("type") == 0).sum().alias("sess_click_count"),
@@ -117,6 +133,7 @@ def gen_user_features(data: pl.DataFrame):
             pl.col("curr_ts")
             .apply(lambda x: get_weekday_from_ts(x))
             .alias("sess_weekday"),
+            (pl.col("sess_num_real_session") + 1).alias("sess_num_real_session"),
         ],
     )
 
