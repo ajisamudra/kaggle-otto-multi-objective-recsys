@@ -60,7 +60,7 @@ def scoring(artifact: str, event: str, week: str):
         selected_features = test_df.columns
         selected_features.remove("session")
         selected_features.remove("candidate_aid")
-        selected_features.remove("label")
+        selected_features.remove(TARGET)
 
         # select features
         X_test = test_df[selected_features].to_pandas()
@@ -80,12 +80,35 @@ def scoring(artifact: str, event: str, week: str):
             output_path = get_data_output_local_submission_dir(
                 event=EVENT, model=artifact
             )
+
         filepath = f"{output_path}/test_{IX}_{EVENT}_scores.parquet"
         test_df.write_parquet(f"{filepath}")
-        logging.info(f"save chunk to: {filepath}")
+        logging.info(f"save prediction scores to: {filepath}")
         logging.info(f"output df shape {test_df.shape}")
 
-        del X_test, test_df
+        logging.info(f"rank & select top 20")
+        # take top 20 candidate aid and save it as list
+        test_predictions = (
+            test_df.sort(["session", "score"], reverse=True)
+            .groupby("session")
+            .agg([pl.col("candidate_aid").limit(20).list().alias("labels")])
+        )
+
+        test_predictions = test_predictions.select([pl.col(["session", "labels"])])
+        test_predictions = test_predictions.with_columns(
+            [(pl.col(["session"]) + f"_{EVENT}").alias("session_type")]
+        )
+        test_predictions = test_predictions.select([pl.col(["session_type", "labels"])])
+        test_predictions = test_predictions.with_columns(
+            [pl.col("labels").apply(lambda x: " ".join(map(str, x))).alias("labels")]
+        )
+
+        filepath = f"{output_path}/test_{IX}_{EVENT}_submission.parquet"
+        test_predictions.write_parquet(f"{filepath}")
+        logging.info(f"save prediction submission to: {filepath}")
+        logging.info(f"output df shape {test_predictions.shape}")
+
+        del X_test, test_df, test_predictions
         gc.collect()
 
     logging.info(f"scoring complete for {EVENT.upper()}!")
