@@ -5,6 +5,7 @@ from tqdm import tqdm
 import gc
 from pathlib import Path
 from src.utils.constants import (
+    CFG,
     get_processed_training_train_splitted_dir,
     get_processed_training_test_splitted_dir,
     get_processed_scoring_train_splitted_dir,
@@ -31,7 +32,11 @@ logging = get_logger()
 
 
 def generate_candidates_covisitation(name: str, input_path: Path, output_path: Path):
-    n = 10
+    if name == "train":
+        n = CFG.N_train
+    else:
+        n = CFG.N_test
+
     logging.info("read covisitation buys")
     top_15_buys = get_top15_covisitation_buys()
     logging.info("read covisitation buy2buy")

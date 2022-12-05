@@ -13,6 +13,7 @@ import gc
 import joblib
 from pathlib import Path
 from src.utils.constants import (
+    CFG,
     get_processed_scoring_test_dataset_dir,
     get_processed_training_test_dataset_dir,
     get_data_output_local_submission_dir,  # scoring output dir
@@ -33,7 +34,7 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
     # read trained ensemble model
     # iterate 10 chunk of test data
     # for each N: read training data, predict, merge score to dataframe, save dataframe
-    N_test = 10
+    N_test = CFG.N_test
 
     input_path: Path
     if week_data == "w1":

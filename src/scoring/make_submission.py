@@ -11,6 +11,7 @@ import gc
 from tqdm import tqdm
 from pathlib import Path
 from src.utils.constants import (
+    CFG,
     get_data_output_local_submission_dir,  # scoring output dir
     get_data_output_submission_dir,
     ROOT_DIR,
@@ -35,7 +36,7 @@ def make_submission(
     # read trained ensemble model
     # iterate 10 chunk of test data
     # for each N: read training data, predict, merge score to dataframe, save dataframe
-    N_test = 10
+    N_test = CFG.N_test
     models = [click_model, cart_model, order_model]
     events = ["clicks", "carts", "orders"]
     df = pl.DataFrame()

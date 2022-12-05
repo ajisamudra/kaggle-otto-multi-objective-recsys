@@ -3,6 +3,7 @@ import polars as pl
 from tqdm import tqdm
 import gc
 from src.utils.constants import (
+    CFG,
     get_processed_training_train_candidates_dir,  # candidates dir
     get_processed_training_test_candidates_dir,
     get_processed_scoring_train_candidates_dir,
@@ -116,7 +117,24 @@ def fcombine_features(mode: str, event: str, ix: int):
     help="avaiable mode: training_train/training_test/scoring_train/scoring_test",
 )
 def main(mode: str):
-    n = 10
+    name = "train"
+    if mode == "training_train":
+        name = "train"
+
+    elif mode == "training_test":
+        name = "test"
+
+    elif mode == "scoring_train":
+        name = "train"
+
+    elif mode == "scoring_test":
+        name = "test"
+
+    if name == "train":
+        n = CFG.N_train
+    else:
+        n = CFG.N_test
+
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):

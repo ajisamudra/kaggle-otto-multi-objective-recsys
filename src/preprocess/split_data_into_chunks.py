@@ -1,11 +1,12 @@
 import click
 import pandas as pd
+import polars as pl
 import numpy as np
 from random import shuffle
 from tqdm import tqdm
-import gc
 from pathlib import Path
 from src.utils.constants import (
+    CFG,
     get_processed_local_validation_dir,
     get_processed_full_data_dir,
     get_processed_training_train_splitted_dir,
@@ -64,25 +65,25 @@ def stratified_sample_session(data: pd.DataFrame, n_splits: int):
     return stratified_sample_chunks
 
 
-def split_data_into_chunks(data: pd.DataFrame, name: str, output_path: Path):
-    n = 10
+def split_data_into_chunks(data: pl.DataFrame, name: str, output_path: Path):
+    if name == "train":
+        n = CFG.N_train
+    else:
+        n = CFG.N_test
     # split
     logging.info(f"start split data into {n} chunks")
     for ix, chunk_sessions in tqdm(
-        enumerate(stratified_sample_session(data=data, n_splits=n))
+        enumerate(stratified_sample_session(data=data.to_pandas(), n_splits=n))
     ):
         logging.info(f"chunk {ix} have unique session {len(chunk_sessions)}")
         logging.info(
             f"assuming each sesssion will have 40 candidates: n_row {len(chunk_sessions)*40}"
         )
-        subset_of_data = data[data.session.isin(chunk_sessions)]
-        logging.info(
-            subset_of_data["type"].value_counts(normalize=True, ascending=False)
-        )
-        logging.info(subset_of_data["type"].value_counts(ascending=False))
+        subset_of_data = data.filter(pl.col("session").is_in(chunk_sessions))
+        logging.info(subset_of_data["type"].value_counts(sort=True))
         filepath = output_path / f"{name}_{ix}.parquet"
         logging.info(f"save chunk {ix} to: {filepath}")
-        subset_of_data.to_parquet(f"{filepath}")
+        subset_of_data.write_parquet(f"{filepath}")
 
 
 @click.command()
@@ -96,7 +97,7 @@ def main(mode: str):
         output_path = get_processed_training_train_splitted_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        data = pd.read_parquet(input_path / "train.parquet")
+        data = pl.read_parquet(input_path / "train.parquet")
         split_data_into_chunks(data=data, name="train", output_path=output_path)
 
     elif mode == "training_test":
@@ -104,7 +105,7 @@ def main(mode: str):
         output_path = get_processed_training_test_splitted_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        data = pd.read_parquet(input_path / "test.parquet")
+        data = pl.read_parquet(input_path / "test.parquet")
         split_data_into_chunks(data=data, name="test", output_path=output_path)
 
     elif mode == "scoring_train":
@@ -112,7 +113,7 @@ def main(mode: str):
         output_path = get_processed_scoring_train_splitted_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        data = pd.read_parquet(input_path / "train.parquet")
+        data = pl.read_parquet(input_path / "train.parquet")
         split_data_into_chunks(data=data, name="train", output_path=output_path)
 
     elif mode == "scoring_test":
@@ -120,7 +121,7 @@ def main(mode: str):
         output_path = get_processed_scoring_test_splitted_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        data = pd.read_parquet(input_path / "test.parquet")
+        data = pl.read_parquet(input_path / "test.parquet")
         split_data_into_chunks(data=data, name="test", output_path=output_path)
 
 

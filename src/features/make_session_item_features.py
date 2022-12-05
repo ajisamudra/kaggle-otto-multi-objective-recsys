@@ -4,6 +4,7 @@ from tqdm import tqdm
 import gc
 from pathlib import Path
 from src.utils.constants import (
+    CFG,
     get_processed_training_train_splitted_dir,
     get_processed_training_test_splitted_dir,
     get_processed_scoring_train_splitted_dir,
@@ -93,7 +94,11 @@ def make_session_item_features(
     output_path: Path,
 ):
 
-    n = 10
+    if name == "train":
+        n = CFG.N_train
+    else:
+        n = CFG.N_test
+
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):

@@ -5,6 +5,7 @@ from tqdm import tqdm
 import gc
 from pathlib import Path
 from src.utils.constants import (
+    CFG,
     get_processed_training_train_candidates_dir,
     get_processed_training_test_candidates_dir,
     get_processed_scoring_train_candidates_dir,
@@ -23,7 +24,7 @@ logging = get_logger()
 
 
 def pivot_candidates_list_to_rows(
-    cand_df: pd.DataFrame, is_train: bool, ses2truth: dict = {}
+    cand_df: pd.DataFrame, is_train: bool, include_all_gt: bool, ses2truth: dict = {}
 ):
     """
     cand_df
@@ -59,7 +60,7 @@ def pivot_candidates_list_to_rows(
         # get candidates for specific session
         cands = set(ses2candidates[session])
 
-        if is_train:
+        if include_all_gt:
             # add all truths if it's training data
             cands = cands | truths
 
@@ -84,6 +85,8 @@ def pivot_candidates_list_to_rows(
 
 def pivot_candidates(
     name: str,
+    is_train: bool,
+    include_all_gt: bool,
     input_path: Path,
     output_path: Path,
     df_truth: pd.DataFrame = pd.DataFrame(),
@@ -95,10 +98,12 @@ def pivot_candidates(
     123 | carts | [AID1]
     123 | orders | [AID1]
     """
-    n = 10
-    is_train = False
+
     if name == "train":
-        is_train = True
+        n = CFG.N_train
+    else:
+        n = CFG.N_test
+
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):
@@ -124,7 +129,10 @@ def pivot_candidates(
 
             # logging.info(f"start pivoting candidate")
             df_output = pivot_candidates_list_to_rows(
-                cand_df=df, is_train=is_train, ses2truth=ses2truth
+                cand_df=df,
+                is_train=is_train,
+                include_all_gt=include_all_gt,
+                ses2truth=ses2truth,
             )
 
             filepath = output_path / f"{name}_{ix}_{event}_rows.parquet"
@@ -152,6 +160,8 @@ def main(mode: str):
         df_truth = pd.read_parquet(truth)
         pivot_candidates(
             name="train",
+            is_train=True,
+            include_all_gt=True,
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
@@ -161,10 +171,17 @@ def main(mode: str):
         input_path = get_processed_training_test_candidates_dir()
         output_path = get_processed_training_test_candidates_dir()
         logging.info(f"will read input from & save output to: {input_path}")
+        truth = get_processed_local_validation_dir()
+        truth = f"{truth}/test_labels.parquet"
+        logging.info(f"read ses2truth from: {truth}")
+        df_truth = pd.read_parquet(truth)
         pivot_candidates(
             name="test",
+            is_train=True,
+            include_all_gt=False,
             input_path=input_path,
             output_path=output_path,
+            df_truth=df_truth,
         )
 
     elif mode == "scoring_train":
@@ -177,6 +194,8 @@ def main(mode: str):
         df_truth = pd.read_parquet(truth)
         pivot_candidates(
             name="train",
+            is_train=True,
+            include_all_gt=True,
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
@@ -188,6 +207,8 @@ def main(mode: str):
         logging.info(f"will read input from & save output to: {input_path}")
         pivot_candidates(
             name="test",
+            is_train=False,
+            include_all_gt=False,
             input_path=input_path,
             output_path=output_path,
         )

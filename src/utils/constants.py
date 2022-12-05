@@ -5,6 +5,11 @@ import os
 ROOT_DIR = Path(__file__).parent.parent.parent
 
 
+class CFG:
+    N_test = 20
+    N_train = 10
+
+
 ### Create directory
 
 
