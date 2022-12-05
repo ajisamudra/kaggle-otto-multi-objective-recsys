@@ -119,21 +119,20 @@ def make_session_features(
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):
-        for event in ["clicks", "carts", "orders"]:
-            # logging.info(f"chunk {ix}: read input")
-            filepath = f"{input_path}/{name}_{ix}.parquet"
-            df = pl.read_parquet(filepath)
+        # logging.info(f"chunk {ix}: read input")
+        filepath = f"{input_path}/{name}_{ix}.parquet"
+        df = pl.read_parquet(filepath)
 
-            logging.info(f"start creating session features")
-            df_output = gen_user_features(data=df)
+        logging.info(f"start creating session features")
+        df_output = gen_user_features(data=df)
 
-            filepath = output_path / f"{name}_{ix}_session_feas.parquet"
-            logging.info(f"save chunk to: {filepath}")
-            df_output.write_parquet(f"{filepath}")
-            logging.info(f"output df shape {df_output.shape}")
+        filepath = output_path / f"{name}_{ix}_session_feas.parquet"
+        logging.info(f"save chunk to: {filepath}")
+        df_output.write_parquet(f"{filepath}")
+        logging.info(f"output df shape {df_output.shape}")
 
-            del df, df_output
-            gc.collect()
+        del df, df_output
+        gc.collect()
 
 
 @click.command()

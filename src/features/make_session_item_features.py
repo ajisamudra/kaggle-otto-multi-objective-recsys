@@ -71,6 +71,9 @@ def gen_session_item_features(data: pl.DataFrame):
             .alias("sesXaid_avg_order_dur_sec"),
             # event type
             pl.col("type").n_unique().alias("sesXaid_type_dcount"),
+            # sum of log_recency_score & type_weighted_log_recency_score
+            pl.col("log_recency_score").sum().alias("sesXaid_log_recency_score"),
+            pl.col("type_weighted_log_recency_score").sum().alias("sesXaid_type_weighted_log_recency_score"),
         ]
     )
 
@@ -102,21 +105,20 @@ def make_session_item_features(
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):
-        for event in ["clicks", "carts", "orders"]:
-            # logging.info(f"chunk {ix}: read input")
-            filepath = f"{input_path}/{name}_{ix}.parquet"
-            df = pl.read_parquet(filepath)
+        # logging.info(f"chunk {ix}: read input")
+        filepath = f"{input_path}/{name}_{ix}.parquet"
+        df = pl.read_parquet(filepath)
 
-            logging.info(f"start creating sessionXaid features")
-            df_output = gen_session_item_features(data=df)
+        logging.info(f"start creating sessionXaid features")
+        df_output = gen_session_item_features(data=df)
 
-            filepath = output_path / f"{name}_{ix}_session_item_feas.parquet"
-            logging.info(f"save chunk to: {filepath}")
-            df_output.write_parquet(f"{filepath}")
-            logging.info(f"output df shape {df_output.shape}")
+        filepath = output_path / f"{name}_{ix}_session_item_feas.parquet"
+        logging.info(f"save chunk to: {filepath}")
+        df_output.write_parquet(f"{filepath}")
+        logging.info(f"output df shape {df_output.shape}")
 
-            del df, df_output
-            gc.collect()
+        del df, df_output
+        gc.collect()
 
 
 @click.command()

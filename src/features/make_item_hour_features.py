@@ -9,10 +9,10 @@ from src.utils.constants import (
     get_processed_training_test_splitted_dir,
     get_processed_scoring_train_splitted_dir,
     get_processed_scoring_test_splitted_dir,
-    get_processed_training_train_item_features_dir,
-    get_processed_training_test_item_features_dir,
-    get_processed_scoring_train_item_features_dir,
-    get_processed_scoring_test_item_features_dir,
+    get_processed_training_train_item_hour_features_dir,
+    get_processed_training_test_item_hour_features_dir,
+    get_processed_scoring_train_item_hour_features_dir,
+    get_processed_scoring_test_item_hour_features_dir,
 )
 from src.features.preprocess_events import preprocess_events
 from src.utils.logger import get_logger
@@ -20,7 +20,7 @@ from src.utils.logger import get_logger
 logging = get_logger()
 
 
-def gen_item_features(data: pl.DataFrame):
+def gen_item_hour_features(data: pl.DataFrame):
     """
     df input
     session | type | ts | aid
@@ -34,25 +34,25 @@ def gen_item_features(data: pl.DataFrame):
     # END: event data preprocess
 
     # agg per aid
-    data_agg = data.groupby("aid").agg(
+    data_agg = data.groupby(["aid", "hour"]).agg(
         [
-            pl.col("type").count().alias("item_all_events_count"),
+            pl.col("type").count().alias("itemXhour_all_events_count"),
             # num of event type
-            (pl.col("type") == 0).sum().alias("item_click_count"),
-            (pl.col("type") == 1).sum().alias("item_cart_count"),
-            (pl.col("type") == 2).sum().alias("item_order_count"),
+            (pl.col("type") == 0).sum().alias("itemXhour_click_count"),
+            (pl.col("type") == 1).sum().alias("itemXhour_cart_count"),
+            (pl.col("type") == 2).sum().alias("itemXhour_order_count"),
         ]
     )
 
     # conversion rate per event
     data_agg = data_agg.with_columns(
         [
-            (pl.col("item_cart_count") / pl.col("item_click_count"))
+            (pl.col("itemXhour_cart_count") / pl.col("itemXhour_click_count"))
             .fill_nan(0)
-            .alias("item_click_to_cart_cvr"),
-            (pl.col("item_order_count") / pl.col("item_cart_count"))
+            .alias("itemXhour_click_to_cart_cvr"),
+            (pl.col("itemXhour_order_count") / pl.col("itemXhour_cart_count"))
             .fill_nan(0)
-            .alias("item_cart_to_order_cvr"),
+            .alias("itemXhour_cart_to_order_cvr"),
         ],
     )
 
@@ -78,9 +78,9 @@ def make_session_features(
         df = pl.read_parquet(filepath)
 
         logging.info(f"start creating item features")
-        df_output = gen_item_features(data=df)
+        df_output = gen_item_hour_features(data=df)
 
-        filepath = output_path / f"{name}_{ix}_item_feas.parquet"
+        filepath = output_path / f"{name}_{ix}_item_hour_feas.parquet"
         logging.info(f"save chunk to: {filepath}")
         df_output.write_parquet(f"{filepath}")
         logging.info(f"output df shape {df_output.shape}")
@@ -97,7 +97,7 @@ def make_session_features(
 def main(mode: str):
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()
-        output_path = get_processed_training_train_item_features_dir()
+        output_path = get_processed_training_train_item_hour_features_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(
@@ -108,7 +108,7 @@ def main(mode: str):
 
     elif mode == "training_test":
         input_path = get_processed_training_test_splitted_dir()
-        output_path = get_processed_training_test_item_features_dir()
+        output_path = get_processed_training_test_item_hour_features_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(
@@ -119,7 +119,7 @@ def main(mode: str):
 
     elif mode == "scoring_train":
         input_path = get_processed_scoring_train_splitted_dir()
-        output_path = get_processed_scoring_train_item_features_dir()
+        output_path = get_processed_scoring_train_item_hour_features_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(
@@ -130,7 +130,7 @@ def main(mode: str):
 
     elif mode == "scoring_test":
         input_path = get_processed_scoring_test_splitted_dir()
-        output_path = get_processed_scoring_test_item_features_dir()
+        output_path = get_processed_scoring_test_item_hour_features_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(

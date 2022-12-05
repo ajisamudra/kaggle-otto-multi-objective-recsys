@@ -174,6 +174,7 @@ def main(mode: str):
         truth = f"{truth}/test_labels.parquet"
         logging.info(f"read ses2truth from: {truth}")
         df_truth = pd.read_parquet(truth)
+        logging.info(f"df_truth shape: {df_truth.shape}")
         pivot_candidates(
             name="test",
             is_train=True,

@@ -16,6 +16,18 @@ from src.utils.constants import (
     get_processed_training_test_sess_item_features_dir,
     get_processed_scoring_train_sess_item_features_dir,
     get_processed_scoring_test_sess_item_features_dir,
+    get_processed_training_train_item_features_dir,  # item features dir
+    get_processed_training_test_item_features_dir,
+    get_processed_scoring_train_item_features_dir,
+    get_processed_scoring_test_item_features_dir,
+    get_processed_training_train_item_hour_features_dir,  # itemXhour features dir
+    get_processed_training_test_item_hour_features_dir,
+    get_processed_scoring_train_item_hour_features_dir,
+    get_processed_scoring_test_item_hour_features_dir,
+    get_processed_training_train_item_weekday_features_dir,  # itemXweekday features dir
+    get_processed_training_test_item_weekday_features_dir,
+    get_processed_scoring_train_item_weekday_features_dir,
+    get_processed_scoring_test_item_weekday_features_dir,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_training_test_dataset_dir,
     get_processed_scoring_train_dataset_dir,
@@ -31,6 +43,9 @@ def fcombine_features(mode: str, event: str, ix: int):
     candidate_path = ""
     session_fea_path = ""
     sessionXaid_fea_path = ""
+    item_fea_path = ""
+    itemXhour_fea_path = ""
+    itemXweekday_fea_path = ""
     output_path = ""
     name = ""
 
@@ -38,6 +53,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         candidate_path = get_processed_training_train_candidates_dir()
         session_fea_path = get_processed_training_train_sess_features_dir()
         sessionXaid_fea_path = get_processed_training_train_sess_item_features_dir()
+        item_fea_path = get_processed_training_train_item_features_dir()
+        itemXhour_fea_path = get_processed_training_train_item_hour_features_dir()
+        itemXweekday_fea_path = get_processed_training_train_item_weekday_features_dir()
         output_path = get_processed_training_train_dataset_dir()
         name = "train"
 
@@ -45,6 +63,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         candidate_path = get_processed_training_test_candidates_dir()
         session_fea_path = get_processed_training_test_sess_features_dir()
         sessionXaid_fea_path = get_processed_training_test_sess_item_features_dir()
+        item_fea_path = get_processed_training_test_item_features_dir()
+        itemXhour_fea_path = get_processed_training_test_item_hour_features_dir()
+        itemXweekday_fea_path = get_processed_training_test_item_weekday_features_dir()
         output_path = get_processed_training_test_dataset_dir()
         name = "test"
 
@@ -52,6 +73,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         candidate_path = get_processed_scoring_train_candidates_dir()
         session_fea_path = get_processed_scoring_train_sess_features_dir()
         sessionXaid_fea_path = get_processed_scoring_train_sess_item_features_dir()
+        item_fea_path = get_processed_scoring_train_item_features_dir()
+        itemXhour_fea_path = get_processed_scoring_train_item_hour_features_dir()
+        itemXweekday_fea_path = get_processed_scoring_train_item_weekday_features_dir()
         output_path = get_processed_scoring_train_dataset_dir()
         name = "train"
 
@@ -59,6 +83,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         candidate_path = get_processed_scoring_test_candidates_dir()
         session_fea_path = get_processed_scoring_test_sess_features_dir()
         sessionXaid_fea_path = get_processed_scoring_test_sess_item_features_dir()
+        item_fea_path = get_processed_scoring_test_item_features_dir()
+        itemXhour_fea_path = get_processed_scoring_test_item_hour_features_dir()
+        itemXweekday_fea_path = get_processed_scoring_test_item_weekday_features_dir()
         output_path = get_processed_scoring_test_dataset_dir()
         name = "test"
 
@@ -68,6 +95,9 @@ def fcombine_features(mode: str, event: str, ix: int):
     c_path = f"{candidate_path}/{name}_{ix}_{event}_rows.parquet"
     sfea_path = f"{session_fea_path}/{name}_{ix}_session_feas.parquet"
     sfeaXaid_path = f"{sessionXaid_fea_path}/{name}_{ix}_session_item_feas.parquet"
+    item_path = f"{item_fea_path}/{name}_{ix}_item_feas.parquet"
+    itemXhour_path = f"{itemXhour_fea_path}/{name}_{ix}_item_hour_feas.parquet"
+    itemXweekday_path = f"{itemXweekday_fea_path}/{name}_{ix}_item_weekday_feas.parquet"
 
     cand_df = pl.read_parquet(c_path)
     # make sure to cast session id & candidate_aid to int32
@@ -88,7 +118,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     del ses_agg
     gc.collect()
 
-    # read session features
+    # read session-item features
     ses_aid_agg = pl.read_parquet(sfeaXaid_path)
     logging.info(f"read sessionXaid features with shape {ses_aid_agg.shape}")
     cand_df = cand_df.join(
@@ -100,6 +130,48 @@ def fcombine_features(mode: str, event: str, ix: int):
     logging.info(f"joined with sessionXaid features! shape {cand_df.shape}")
 
     del ses_aid_agg
+    gc.collect()
+
+    # read item features
+    item_agg = pl.read_parquet(item_path)
+    logging.info(f"read item features with shape {item_agg.shape}")
+    cand_df = cand_df.join(
+        item_agg,
+        how="left",
+        left_on=["aid"],
+        right_on=["aid"],
+    ).fill_null(0)
+    logging.info(f"joined with item features! shape {cand_df.shape}")
+
+    del item_agg
+    gc.collect()
+
+    # read item-hour features
+    item_hour_agg = pl.read_parquet(itemXhour_path)
+    logging.info(f"read item-hour features with shape {item_hour_agg.shape}")
+    cand_df = cand_df.join(
+        item_hour_agg,
+        how="left",
+        left_on=["aid", "sess_hour"],
+        right_on=["aid", "hour"],
+    ).fill_null(0)
+    logging.info(f"joined with item-hour features! shape {cand_df.shape}")
+
+    del item_hour_agg
+    gc.collect()
+
+    # read item-weekday features
+    item_weekday_agg = pl.read_parquet(itemXweekday_path)
+    logging.info(f"read item-weekday features with shape {item_weekday_agg.shape}")
+    cand_df = cand_df.join(
+        item_weekday_agg,
+        how="left",
+        left_on=["aid", "sess_weekday"],
+        right_on=["aid", "weekday"],
+    ).fill_null(0)
+    logging.info(f"joined with item-weekday features! shape {cand_df.shape}")
+
+    del item_weekday_agg
     gc.collect()
 
     filepath = f"{output_path}/{name}_{ix}_{event}_combined.parquet"

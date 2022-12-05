@@ -123,6 +123,8 @@ def get_processed_scoring_test_candidates_dir() -> Path:
 
 ### Data/Processed Dir: FEATURES
 
+### Data/Processed Dir: SESSION FEATURES
+
 
 def get_processed_training_train_sess_features_dir() -> Path:
     path = get_processed_local_validation_dir()
@@ -152,6 +154,9 @@ def get_processed_scoring_test_sess_features_dir() -> Path:
     return path
 
 
+### Data/Processed Dir: SESSION-ITEM FEATURES
+
+
 def get_processed_training_train_sess_item_features_dir() -> Path:
     path = get_processed_local_validation_dir()
     path = path / "training" / "train_features" / "session_item_features"
@@ -176,6 +181,99 @@ def get_processed_scoring_train_sess_item_features_dir() -> Path:
 def get_processed_scoring_test_sess_item_features_dir() -> Path:
     path = get_processed_full_data_dir()
     path = path / "scoring" / "test_features" / "session_item_features"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: ITEM FEATURES
+
+
+def get_processed_training_train_item_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "item_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_item_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "item_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_item_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "item_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_item_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "item_features"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: ITEM-HOUR FEATURES
+
+
+def get_processed_training_train_item_hour_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "item_hour_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_item_hour_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "item_hour_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_item_hour_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "item_hour_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_item_hour_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "item_hour_features"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: ITEM-WEEKDAY FEATURES
+
+
+def get_processed_training_train_item_weekday_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "item_weekday_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_item_weekday_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "item_weekday_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_item_weekday_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "item_weekday_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_item_weekday_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "item_weekday_features"
     check_directory(path)
     return path
 
