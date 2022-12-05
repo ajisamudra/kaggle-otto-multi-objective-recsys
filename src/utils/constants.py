@@ -1,13 +1,26 @@
 from pathlib import Path
+import json
 import os
 
 ROOT_DIR = Path(__file__).parent.parent.parent
+
+
+### Create directory
 
 
 def check_directory(path: Path) -> None:
     # if the directory does not exist, create it
     if not os.path.exists(path):  # pragma: no cover
         os.makedirs(path)
+
+
+### Create JSON file
+
+
+def write_json(filepath: str, data: dict) -> None:
+    with open(filepath, "w") as file:
+        json.dump(data, file, indent=4, sort_keys=True)
+        file.close()
 
 
 ### Data/Raw Dir
@@ -204,5 +217,15 @@ def get_data_output_dir() -> Path:
 
 def get_artifacts_dir() -> Path:
     path = ROOT_DIR / "artifacts"
+    check_directory(path)
+    return path
+
+
+def get_artifacts_training_dir(week: str, event: str) -> Path:
+    path = ROOT_DIR
+    if week == "w1":
+        path = ROOT_DIR / "artifacts" / "scoring" / event
+    elif week == "w2":
+        path = ROOT_DIR / "artifacts" / "training" / event
     check_directory(path)
     return path
