@@ -215,14 +215,16 @@ def get_data_output_dir() -> Path:
     return path
 
 
-def get_data_output_local_submission_dir(event: str, model: str) -> Path:
-    path = ROOT_DIR / "data" / "output" / "training" / event / model
+def get_data_output_local_submission_dir(
+    event: str, model: str, week_model: str
+) -> Path:
+    path = ROOT_DIR / "data" / "output" / "training" / event / week_model / model
     check_directory(path)
     return path
 
 
-def get_data_output_submission_dir(event: str, model: str) -> Path:
-    path = ROOT_DIR / "data" / "output" / "scoring" / event / model
+def get_data_output_submission_dir(event: str, model: str, week_model: str) -> Path:
+    path = ROOT_DIR / "data" / "output" / "scoring" / event / week_model / model
     check_directory(path)
     return path
 
@@ -237,10 +239,6 @@ def get_artifacts_dir() -> Path:
 
 
 def get_artifacts_training_dir(week: str, event: str) -> Path:
-    path = ROOT_DIR
-    if week == "w1":
-        path = ROOT_DIR / "artifacts" / "scoring" / event
-    elif week == "w2":
-        path = ROOT_DIR / "artifacts" / "training" / event
+    path = ROOT_DIR / "artifacts" / week / event
     check_directory(path)
     return path

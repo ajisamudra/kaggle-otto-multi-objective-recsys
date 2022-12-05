@@ -28,7 +28,7 @@ logging = get_logger()
 TARGET = "label"
 
 
-def scoring(artifact: str, event: str, week: str):
+def scoring(artifact: str, event: str, week_data: str, week_model: str):
     # for each event
     # read trained ensemble model
     # iterate 10 chunk of test data
@@ -36,15 +36,15 @@ def scoring(artifact: str, event: str, week: str):
     N_test = 10
 
     input_path: Path
-    if week == "w1":
+    if week_data == "w1":
         input_path = get_processed_scoring_test_dataset_dir()
-    elif week == "w2":
+    elif week_data == "w2":
         input_path = get_processed_training_test_dataset_dir()
     else:
         raise NotImplementedError("week not implemented! (w1/w2)")
 
     EVENT = event
-    artifact_path = get_artifacts_training_dir(event=EVENT, week=week)
+    artifact_path = get_artifacts_training_dir(event=EVENT, week=week_model)
     model_path = f"{artifact_path}/{artifact}/model.pkl"
     model = joblib.load(model_path)
     logging.info(f"ensemble model for event {EVENT.upper()} loaded!")
@@ -74,11 +74,13 @@ def scoring(artifact: str, event: str, week: str):
         test_df = test_df.with_columns([pl.Series(name="score", values=scores)])
 
         # save to parquet
-        if week == "w1":
-            output_path = get_data_output_submission_dir(event=EVENT, model=artifact)
-        elif week == "w2":
+        if week_data == "w1":
+            output_path = get_data_output_submission_dir(
+                event=EVENT, model=artifact, week_model=week_model
+            )
+        elif week_data == "w2":
             output_path = get_data_output_local_submission_dir(
-                event=EVENT, model=artifact
+                event=EVENT, model=artifact, week_model=week_model
             )
 
         filepath = f"{output_path}/test_{IX}_{EVENT}_scores.parquet"
@@ -126,15 +128,25 @@ def scoring(artifact: str, event: str, week: str):
     help="avaiable event: clicks/carts/orders/all",
 )
 @click.option(
-    "--week",
+    "--week_data",
     default="w2",
     help="subset of test data, w1/w2; w1:scoring dir, w2:training dir",
 )
-def main(event: str = "all", artifact: str = "lgbm", week: str = "w2", n: int = 1):
+@click.option(
+    "--week_model",
+    default="w2",
+    help="on which training data the model was trained, w1/w2; w1:scoring dir, w2:training dir",
+)
+def main(
+    event: str = "all",
+    artifact: str = "lgbm",
+    week_data: str = "w2",
+    week_model: str = "w2",
+):
     if event not in ["clicks", "carts", "orders"]:
         raise ValueError("available event: clicks, carts, orders")
 
-    scoring(artifact=artifact, event=event, week=week)
+    scoring(artifact=artifact, event=event, week_data=week_data, week_model=week_model)
 
 
 if __name__ == "__main__":
