@@ -8,53 +8,107 @@
 # python src/preprocess/split_data_into_chunks.py --mode training_train
 # python src/preprocess/split_data_into_chunks.py --mode training_test
 
-# generate candidates from retrieval
-# python src/pipeline/make_candidates_list.py --mode scoring_train
-# python src/pipeline/make_candidates_list.py --mode scoring_test
-# python src/pipeline/make_candidates_list.py --mode training_train
+# # generate candidates from retrieval
+# # python src/pipeline/make_candidates_list.py --mode scoring_train
+# # python src/pipeline/make_candidates_list.py --mode scoring_test
+# # python src/pipeline/make_candidates_list.py --mode training_train
 # python src/pipeline/make_candidates_list.py --mode training_test
 
-# pivot candidate list to candidate rows
-# python src/pipeline/make_candidates_rows.py --mode scoring_train
+# # pivot candidate list to candidate rows
+# # python src/pipeline/make_candidates_rows.py --mode scoring_train
 # python src/pipeline/make_candidates_rows.py --mode scoring_test
 # python src/pipeline/make_candidates_rows.py --mode training_test
-# python src/pipeline/make_candidates_rows.py --mode training_train
+# # python src/pipeline/make_candidates_rows.py --mode training_train
 
-# session_features
-# python src/features/make_session_features.py --mode training_train
+# # session_features
+# # python src/features/make_session_features.py --mode training_train
 # python src/features/make_session_features.py --mode training_test
 # python src/features/make_session_features.py --mode scoring_test
-# python src/features/make_session_features.py --mode scoring_train
+# # python src/features/make_session_features.py --mode scoring_train
 
-# interaction between session & item features
-# python src/features/make_session_item_features.py --mode training_train
+# # interaction between session & item features
+# # python src/features/make_session_item_features.py --mode training_train
 # python src/features/make_session_item_features.py --mode training_test
 # python src/features/make_session_item_features.py --mode scoring_test
-# python src/features/make_session_item_features.py --mode scoring_train
+# # python src/features/make_session_item_features.py --mode scoring_train
 
-# combine features
-# python src/pipeline/make_combine_features.py --mode training_train
+# # combine features
+# # python src/pipeline/make_combine_features.py --mode training_train
 # python src/pipeline/make_combine_features.py --mode training_test
 # python src/pipeline/make_combine_features.py --mode scoring_test
-# python src/pipeline/make_combine_features.py --mode scoring_train
+# # python src/pipeline/make_combine_features.py --mode scoring_train
 
 # perform training
 # python src/training/train.py --event orders
-# python src/training/train.py --event orders --n 1 --algo catboost --week w2
+python src/training/train.py --event all --n 10 --algo catboost --week w2
 
-# perform scoring
-# week_data w2 means local validation
-# week_data w1 means real test submission
-# python src/scoring/score.py --event orders --week_data w2 --week_model w2 --artifact 2022-12-05_orders_lgbm_44683_82685
-# python src/scoring/score.py --event carts --week_data w2 --week_model w2 --artifact 2022-12-05_carts_lgbm_22488_72684
-# python src/scoring/score.py --event clicks --week_data w2 --week_model w2 --artifact 2022-12-05_clicks_lgbm_36860_73857
+CLICK_MODEL="2022-12-05_clicks_lgbm_36860_73857"
+CART_MODEL="2022-12-05_carts_lgbm_22488_72684"
+ORDER_MODEL="2022-12-05_orders_lgbm_44683_82685"
+# # perform scoring
+# # week_data w2 means local validation
+# # week_data w1 means real test submission
+# python src/scoring/score.py --event orders --week_data w2 --week_model w2 --artifact $ORDER_MODEL
+# python src/scoring/score.py --event carts --week_data w2 --week_model w2 --artifact $CART_MODEL
+# python src/scoring/score.py --event clicks --week_data w2 --week_model w2 --artifact $CLICK_MODEL
 
 # # make submission
-# python src/scoring/make_submission.py --click_model 2022-12-05_clicks_lgbm_36860_73857 --cart_model 2022-12-05_carts_lgbm_22488_72684 --order_model 2022-12-05_orders_lgbm_44683_82685 --week_data w2 --week_model w2
+# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data w2 --week_model w2
 
-# eval submission, only for week_data & week_model w2
-python src/scoring/eval_submission.py --click_model 2022-12-05_clicks_lgbm_36860_73857 --cart_model 2022-12-05_carts_lgbm_22488_72684 --order_model 2022-12-05_orders_lgbm_44683_82685
+# # eval submission, only for week_data & week_model w2
+# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
 
 # idea: item & day/hour popularity features
 # idea: word2vec for click / cart / order separately -> to recommend separately
+
+
+# N 10 LGBM
+# CLICK_MODEL="2022-12-05_clicks_lgbm_37238_73833"
+# CART_MODEL="2022-12-05_carts_lgbm_22652_73159"
+# ORDER_MODEL="2022-12-05_orders_lgbm_45132_83005"
+# [2022-12-05 20:01:59,291] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.42058256917838105
+# [2022-12-05 20:01:59,294] {submission_evaluation.py:84} INFO - clicks hits@20 = 738347 / gt@20 = 1755534
+# [2022-12-05 20:01:59,294] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.42058256917838105
+# [2022-12-05 20:02:03,773] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.47881529589379823
+# [2022-12-05 20:02:03,773] {submission_evaluation.py:84} INFO - carts hits@20 = 197914 / gt@20 = 576482
+# [2022-12-05 20:02:03,773] {submission_evaluation.py:85} INFO - carts recall@20 = 0.3433134078774359
+# [2022-12-05 20:02:05,524] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.6915284696114344
+# [2022-12-05 20:02:05,524] {submission_evaluation.py:84} INFO - orders hits@20 = 191752 / gt@20 = 313303
+# [2022-12-05 20:02:05,524] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6120337181578217
+# [2022-12-05 20:02:05,524] {submission_evaluation.py:87} INFO - =============
+# [2022-12-05 20:02:05,524] {submission_evaluation.py:88} INFO - Overall Recall@20 = 0.5122725101757619
+
+# N 1 LGBM the same as N 10 LGBM
+# CLICK_MODEL="2022-12-05_clicks_lgbm_36860_73857"
+# CART_MODEL="2022-12-05_carts_lgbm_22488_72684"
+# ORDER_MODEL="2022-12-05_orders_lgbm_44683_82685"
+# [2022-12-05 21:24:12,629] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.41965407676524635
+# [2022-12-05 21:24:12,631] {submission_evaluation.py:84} INFO - clicks hits@20 = 736717 / gt@20 = 1755534
+# [2022-12-05 21:24:12,631] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.41965407676524635
+# [2022-12-05 21:24:17,879] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.4765887268409194
+# [2022-12-05 21:24:17,879] {submission_evaluation.py:84} INFO - carts hits@20 = 196783 / gt@20 = 576482
+# [2022-12-05 21:24:17,879] {submission_evaluation.py:85} INFO - carts recall@20 = 0.3413515079395367
+# [2022-12-05 21:24:19,641] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.6893471409414995
+# [2022-12-05 21:24:19,641] {submission_evaluation.py:84} INFO - orders hits@20 = 190936 / gt@20 = 313303
+# [2022-12-05 21:24:19,642] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6094292107001849
+# [2022-12-05 21:24:19,642] {submission_evaluation.py:87} INFO - =============
+# [2022-12-05 21:24:19,642] {submission_evaluation.py:88} INFO - Overall Recall@20 = 0.5100283864784966
+
+
+# N 1 CATBOOST
+# CLICK_MODEL="2022-12-05_clicks_catboost_39780_75037"
+# CART_MODEL="2022-12-05_carts_catboost_23530_73139"
+# ORDER_MODEL="2022-12-05_orders_catboost_46313_82997
+# 022-12-05 21:01:03,182] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.4200704742830387
+# [2022-12-05 21:01:03,183] {submission_evaluation.py:84} INFO - clicks hits@20 = 737448 / gt@20 = 1755534
+# [2022-12-05 21:01:03,183] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.4200704742830387
+# [2022-12-05 21:01:08,031] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.4751405723864572
+# [2022-12-05 21:01:08,031] {submission_evaluation.py:84} INFO - carts hits@20 = 196100 / gt@20 = 576482
+# [2022-12-05 21:01:08,031] {submission_evaluation.py:85} INFO - carts recall@20 = 0.34016673547482834
+# [2022-12-05 21:01:09,920] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.6888830242976132
+# [2022-12-05 21:01:09,920] {submission_evaluation.py:84} INFO - orders hits@20 = 190833 / gt@20 = 313303
+# [2022-12-05 21:01:09,920] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6091004554696252
+# [2022-12-05 21:01:09,920] {submission_evaluation.py:87} INFO - =============
+# [2022-12-05 21:01:09,920] {submission_evaluation.py:88} INFO - Overall Recall@20 = 0.5095173413525275
+# [2022-12-05 21:01:09,920] {submission_evaluation.py:89} INFO - =============

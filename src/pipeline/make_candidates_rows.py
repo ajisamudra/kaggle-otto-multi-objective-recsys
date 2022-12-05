@@ -1,6 +1,5 @@
 import click
 import pandas as pd
-import numpy as np
 from tqdm import tqdm
 import gc
 from pathlib import Path
@@ -46,7 +45,7 @@ def pivot_candidates_list_to_rows(
     candidates = []
     labels = []
 
-    logging.info(f"pivot in train_mode: {is_train}")
+    logging.info(f"pivot in train_mode: {is_train} | include_all_gt: {include_all_gt}")
     for session in tqdm(unique_sessions):
         truths = set()
         if is_train:
