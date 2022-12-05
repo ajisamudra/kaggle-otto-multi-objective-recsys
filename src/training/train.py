@@ -3,7 +3,6 @@ import polars as pl
 import pandas as pd
 from tqdm import tqdm
 import numpy as np
-import json
 import gc
 import joblib
 import datetime
@@ -147,7 +146,7 @@ def train(algo: str, events: list, week: str, n: int):
         mean_val_roc_auc = int(mean_val_roc_auc * 100000)
         mean_val_pr_auc = int(mean_val_pr_auc * 100000)
         unique_model_name = (
-            f"{current_date}_{algo}_{mean_val_pr_auc}_{mean_val_roc_auc}"
+            f"{current_date}_{EVENT}_{algo}_{mean_val_pr_auc}_{mean_val_roc_auc}"
         )
         artifact_path = get_artifacts_training_dir(event=EVENT, week=week)
         # create artifact dir
@@ -170,15 +169,6 @@ def train(algo: str, events: list, week: str, n: int):
         # output performance metrics
         perf_path = f"{filepath}/performance_metric.json"
         write_json(filepath=perf_path, data=performance)
-
-        # # score validation and measure performance
-        # logging.info(f"SCORE VALIDATION RECALL@20")
-        # for i in range(10):
-        #     # read chunk
-        #     path = get_processed_training_test_dataset_dir()
-        #     filename = f"{path}/test_{i}_{EVENT}_combined.parquet"
-        #     val_df = pd.read_parquet(filename)
-        #     X = val_df[selected_features]
 
     logging.info("complete training models!")
     logging.info("=========== SUMMARY ===========")

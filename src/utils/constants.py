@@ -206,13 +206,28 @@ def get_processed_scoring_test_dataset_dir() -> Path:
     return path
 
 
-### Output & Artifacts Dir
+### Output Dir: for scoring & submission
 
 
 def get_data_output_dir() -> Path:
     path = ROOT_DIR / "data" / "output"
     check_directory(path)
     return path
+
+
+def get_data_output_local_submission_dir(event: str, model: str) -> Path:
+    path = ROOT_DIR / "data" / "output" / "training" / event / model
+    check_directory(path)
+    return path
+
+
+def get_data_output_submission_dir(event: str, model: str) -> Path:
+    path = ROOT_DIR / "data" / "output" / "scoring" / event / model
+    check_directory(path)
+    return path
+
+
+### Artifacts Dir: For training artifacts
 
 
 def get_artifacts_dir() -> Path:
