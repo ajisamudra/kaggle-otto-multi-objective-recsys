@@ -138,7 +138,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     cand_df = cand_df.join(
         item_agg,
         how="left",
-        left_on=["aid"],
+        left_on=["candidate_aid"],
         right_on=["aid"],
     ).fill_null(0)
     logging.info(f"joined with item features! shape {cand_df.shape}")
@@ -152,7 +152,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     cand_df = cand_df.join(
         item_hour_agg,
         how="left",
-        left_on=["aid", "sess_hour"],
+        left_on=["candidate_aid", "sess_hour"],
         right_on=["aid", "hour"],
     ).fill_null(0)
     logging.info(f"joined with item-hour features! shape {cand_df.shape}")
@@ -166,7 +166,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     cand_df = cand_df.join(
         item_weekday_agg,
         how="left",
-        left_on=["aid", "sess_weekday"],
+        left_on=["candidate_aid", "sess_weekday"],
         right_on=["aid", "weekday"],
     ).fill_null(0)
     logging.info(f"joined with item-weekday features! shape {cand_df.shape}")
