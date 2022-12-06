@@ -195,6 +195,9 @@ class LGBRanker(RankingModel):
     def predict(self, X_test):
         return self._model.predict(X_test, num_iteration=self._model.best_iteration_)
 
+    def get_params(self):
+        return self.hyperprams
+
 
 class CATRanker(RankingModel):
     def __init__(self, **kwargs):
@@ -202,9 +205,9 @@ class CATRanker(RankingModel):
         self._verbose = kwargs.pop("verbose", 100)
 
         kwargs["custom_metric"] = ["MAP:top=20", "NDCG:top=20"]
-        kwargs[
-            "loss_function"
-        ] = "QueryCrossEntropy"  # YetiRank, StochasticFilter, StochasticRank,
+        # kwargs[
+        #     "loss_function"
+        # ] = "QueryCrossEntropy"  # YetiRank, StochasticFilter, StochasticRank,
 
         self.feature_importances_ = []
         self.best_score_ = 0
@@ -242,6 +245,9 @@ class CATRanker(RankingModel):
 
     def predict(self, X_test):
         return self._model.predict(X_test)
+
+    def get_params(self):
+        return self.hyperprams
 
 
 #### ENSEMBLE MODEL

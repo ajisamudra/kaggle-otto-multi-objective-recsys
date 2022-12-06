@@ -86,7 +86,7 @@ def train(algo: str, events: list, week: str, n: int):
             logging.info(train_df.shape)
 
             # sort data based on session & label
-            train_df = train_df.sort(by=["session", "ts"], reverse=[True, True])
+            train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
 
             selected_features = train_df.columns
             selected_features.remove("session")
@@ -102,17 +102,25 @@ def train(algo: str, events: list, week: str, n: int):
             # X_train, X_val, y_train, y_val = train_test_split(
             #     X, y, test_size=0.2, stratify=y, random_state=745
             # )
-            skgfold = StratifiedGroupKFold(n_splits=2, random_state=745)
-            train_idx, val_idx = skgfold.split(X, y, groups=group)[0]
+            skgfold = StratifiedGroupKFold(n_splits=2, shuffle=True, random_state=745)
+            train_idx, val_idx = [], []
 
-            X_train, X_val = X[train_idx], X[val_idx]
+            for tidx, vidx in skgfold.split(X, y, groups=group):
+                train_idx, val_idx = tidx, vidx
+
+            X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
             y_train, y_val = y[train_idx], y[val_idx]
             group_train, group_val = group[train_idx], group[val_idx]
 
             # calculate num samples per group
             logging.info("calculate num samples per group")
-            n_group_train = list(group_train.groupby("session").count())
-            n_group_val = list(group_val.groupby("session").count())
+            n_group_train = list(group_train.value_counts())
+            n_group_val = list(group_val.value_counts())
+
+            logging.info("distribution of n_candidate in train")
+            logging.info(group_train.value_counts().value_counts())
+            logging.info("distribution of n_candidate in val")
+            logging.info(group_val.value_counts().value_counts())
 
             logging.info(f"train shape {X_train.shape} sum groups {sum(n_group_train)}")
             logging.info(f"val shape {X_val.shape} sum groups {sum(n_group_val)}")

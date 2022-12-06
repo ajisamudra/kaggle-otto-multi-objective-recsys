@@ -72,11 +72,11 @@ def split_data_into_chunks(data: pl.DataFrame, name: str, output_path: Path):
         n = CFG.N_test
     # split
     df = data.to_pandas()
-    unique_session = list(df["session"].values)
+    # unique_session = list(df["session"].values)
     logging.info(f"start split data into {n} chunks")
     for ix, chunk_sessions in tqdm(
-        # enumerate(stratified_sample_session(data=data.to_pandas(), n_splits=n))
-        enumerate(np.array_split(unique_session, n))
+        enumerate(stratified_sample_session(data=data.to_pandas(), n_splits=n))
+        # enumerate(np.array_split(unique_session, n))
     ):
         logging.info(f"chunk {ix} have unique session {len(chunk_sessions)}")
         logging.info(
