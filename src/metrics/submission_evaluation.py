@@ -31,7 +31,7 @@ def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20
 
     """
     # competition eval metrics
-    recall_20 = None
+    dict_metrics = {}
 
     logging.info("create prediction session column")
     df_pred["session"] = df_pred.session_type.apply(lambda x: int(x.split("_")[0]))
@@ -84,13 +84,16 @@ def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20
             logging.info(f"{t} hits@{K} = {n_hits} / gt@{K} = {n_gt}")
             logging.info(f"{t} recall@{K} = {recall}")
 
+            dict_metrics[f"{t}_hits@{K}"] = str(n_hits)
+            dict_metrics[f"{t}_gt@{K}"] = str(n_gt)
+            dict_metrics[f"{t}_recall@{K}"] = str(recall)
+
         logging.info("=============")
         logging.info(f"Overall Recall@{K} = {score}")
         logging.info("=============")
-        if K == 20:
-            recall_20 = score
+        dict_metrics[f"overall_recall@{K}"] = str(score)
 
-    return recall_20
+    return dict_metrics
 
 
 if __name__ == "__main__":

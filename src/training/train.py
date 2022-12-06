@@ -28,6 +28,12 @@ from src.metrics.model_evaluation import (
     summarise_feature_importance,
     plot_and_save_feature_importance,
 )
+
+# for enabling training + scoring
+from src.scoring.score import scoring
+from src.scoring.make_submission import make_submission
+from src.scoring.eval_submission import eval_submission
+
 from src.utils.constants import get_artifacts_training_dir, check_directory
 
 from src.utils.logger import get_logger
@@ -37,7 +43,7 @@ logging = get_logger()
 TARGET = "label"
 
 
-def train(algo: str, events: list, week: str, n: int):
+def train(algo: str, events: list, week: str, n: int, eval: int):
     # for each event
     # initiate ensemble model
     # iterate N
@@ -47,10 +53,13 @@ def train(algo: str, events: list, week: str, n: int):
     # score validation on particular event
     # measure recall@20 in that event
     # continue on next event
+    # if eval == 1 -> perform scoring in validation & eval submission
 
     input_path: Path
     if week == "w1":
         input_path = get_processed_scoring_train_dataset_dir()
+        if eval == 1:
+            raise ValueError("Can't eval submission for training with data w1")
     elif week == "w2":
         input_path = get_processed_training_train_dataset_dir()
     else:
@@ -58,6 +67,7 @@ def train(algo: str, events: list, week: str, n: int):
 
     event_train_roc_aucs, event_val_roc_aucs = [], []
     event_train_pr_aucs, event_val_pr_aucs = [], []
+    unique_model_names = []
     for EVENT in events:
         performance, hyperparams = {}, {}
         logging.info(f"init ensemble for event {EVENT.upper()}")
@@ -102,7 +112,7 @@ def train(algo: str, events: list, week: str, n: int):
             # X_train, X_val, y_train, y_val = train_test_split(
             #     X, y, test_size=0.2, stratify=y, random_state=745
             # )
-            skgfold = StratifiedGroupKFold(n_splits=2, shuffle=True, random_state=745)
+            skgfold = StratifiedGroupKFold(n_splits=2)
             train_idx, val_idx = [], []
 
             for tidx, vidx in skgfold.split(X, y, groups=group):
@@ -228,6 +238,25 @@ def train(algo: str, events: list, week: str, n: int):
         perf_path = f"{filepath}/performance_metric.json"
         write_json(filepath=perf_path, data=performance)
 
+        if eval == 1:
+            # perform scoring
+            scoring(
+                artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
+            )
+            # append unique_model_names for make & eval submission
+            unique_model_names.append(unique_model_name)
+
+    if eval == 1:
+        # make submission
+        # append unique_model_names for make & eval submission
+        make_submission(
+            click_model=unique_model_names[0],
+            cart_model=unique_model_names[1],
+            order_model=unique_model_names[2],
+            week_data="w2",
+            week_model="w2",
+        )
+
     logging.info("complete training models!")
     logging.info("=========== SUMMARY ===========")
     for ix, EVENT in enumerate(events):
@@ -239,6 +268,17 @@ def train(algo: str, events: list, week: str, n: int):
             f"VAL MEAN ROC AUC {event_val_roc_aucs[ix]} | PR AUC {event_val_pr_aucs[ix]}"
         )
     logging.info("============= END =============")
+
+    if eval == 1:
+        # eval submission
+        logging.info("start eval submission")
+        eval_submission(
+            click_model=unique_model_names[0],
+            cart_model=unique_model_names[1],
+            order_model=unique_model_names[2],
+            week_data="w2",
+            week_model="w2",
+        )
 
 
 @click.command()
@@ -262,11 +302,20 @@ def train(algo: str, events: list, week: str, n: int):
     default=1,
     help="number of chunk for training; between 1-10",
 )
-def main(event: str = "all", algo: str = "lgbm", week: str = "w2", n: int = 1):
+@click.option(
+    "--eval",
+    default=1,
+    help="number of chunk for training; between 1-10",
+)
+def main(
+    event: str = "all", algo: str = "lgbm", week: str = "w2", n: int = 1, eval: int = 1
+):
     events = ["clicks", "carts", "orders"]
     if event != "all":
         events = [event]
-    train(algo=algo, events=events, week=week, n=n)
+        if eval == 1:
+            raise ValueError("Can't eval if not all events trained on")
+    train(algo=algo, events=events, week=week, n=n, eval=eval)
 
 
 if __name__ == "__main__":

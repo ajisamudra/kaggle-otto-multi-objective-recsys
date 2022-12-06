@@ -13,6 +13,7 @@ from src.utils.constants import (
     get_data_output_local_submission_dir,  # scoring output dir
     get_processed_local_validation_dir,
     ROOT_DIR,
+    write_json,
 )
 from src.metrics.submission_evaluation import measure_recall
 
@@ -50,7 +51,14 @@ def eval_submission(
     df_truth = pl.read_parquet(f"{ground_truth_path}/test_labels.parquet")
     logging.info(f"ground truth shape {df_truth.shape}")
     # compute metrics
-    measure_recall(df_pred=df_pred.to_pandas(), df_truth=df_truth.to_pandas(), Ks=[20])
+    dict_metrics = measure_recall(
+        df_pred=df_pred.to_pandas(), df_truth=df_truth.to_pandas(), Ks=[20]
+    )
+    # save metrics
+    logging.info(dict_metrics)
+    filepath = f"{output_path}/eval_metrics.json"
+    logging.info(f"save eval_metrics to: {filepath}")
+    write_json(filepath=filepath, data=dict_metrics)
 
 
 @click.command()
