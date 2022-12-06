@@ -6,20 +6,23 @@ import numpy as np
 import gc
 import joblib
 import datetime
+from typing import Union
 from pathlib import Path
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedGroupKFold
 from sklearn.metrics import roc_auc_score, average_precision_score
 from src.utils.constants import (
     write_json,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_scoring_train_dataset_dir,
-    get_processed_training_test_dataset_dir,
 )
 from src.model.model import (
-    EnsembleClassifierModels,
+    EnsembleModels,
+    CatClassifier,
+    CATRanker,
     ClassifierModel,
     LGBClassifier,
-    CatClassifier,
+    LGBRanker,
+    RankingModel,
 )
 from src.metrics.model_evaluation import (
     summarise_feature_importance,
@@ -58,18 +61,22 @@ def train(algo: str, events: list, week: str, n: int):
     for EVENT in events:
         performance, hyperparams = {}, {}
         logging.info(f"init ensemble for event {EVENT.upper()}")
-        ensemble_model = EnsembleClassifierModels()
+        ensemble_model = EnsembleModels()
         train_roc_aucs, train_pr_aucs = [], []
         val_roc_aucs, val_pr_aucs = [], []
         feature_importances = []
         for IX in tqdm(range(n)):
-            model: ClassifierModel
+            model: Union[ClassifierModel, RankingModel]
             # hyperparams click
 
-            if algo == "lgbm":
+            if algo == "lgbm_classifier":
                 model = LGBClassifier()
-            elif algo == "catboost":
+            elif algo == "cat_classifier":
                 model = CatClassifier()
+            elif algo == "lgbm_ranker":
+                model = LGBRanker()
+            elif algo == "cat_ranker":
+                model = CATRanker()
             else:
                 raise NotImplementedError("algorithm not implemented! (lgbm/catboost)")
 
@@ -78,20 +85,63 @@ def train(algo: str, events: list, week: str, n: int):
             train_df = pl.read_parquet(filepath)
             logging.info(train_df.shape)
 
+            # sort data based on session & label
+            train_df = train_df.sort(by=["session", "ts"], reverse=[True, True])
+
             selected_features = train_df.columns
             selected_features.remove("session")
             selected_features.remove("candidate_aid")
             selected_features.remove(TARGET)
 
+            # select X & y per train & val
             X = train_df[selected_features].to_pandas()
+            group = train_df["session"].to_pandas()
             y = train_df[TARGET].to_pandas()
 
-            # split train and validation
-            X_train, X_val, y_train, y_val = train_test_split(
-                X, y, test_size=0.2, stratify=y, random_state=745
-            )
+            # split train and validation using StratifiedGroupKFold
+            # X_train, X_val, y_train, y_val = train_test_split(
+            #     X, y, test_size=0.2, stratify=y, random_state=745
+            # )
+            skgfold = StratifiedGroupKFold(n_splits=2, random_state=745)
+            train_idx, val_idx = skgfold.split(X, y, groups=group)[0]
+
+            X_train, X_val = X[train_idx], X[val_idx]
+            y_train, y_val = y[train_idx], y[val_idx]
+            group_train, group_val = group[train_idx], group[val_idx]
+
+            # calculate num samples per group
+            logging.info("calculate num samples per group")
+            n_group_train = list(group_train.groupby("session").count())
+            n_group_val = list(group_val.groupby("session").count())
+
+            logging.info(f"train shape {X_train.shape} sum groups {sum(n_group_train)}")
+            logging.info(f"val shape {X_val.shape} sum groups {sum(n_group_val)}")
             logging.info(f"y_train {np.mean(y_train)} | y_val {np.mean(y_val)}")
-            model.fit(X_train=X_train, X_val=X_val, y_train=y_train, y_val=y_val)
+
+            if algo == "lgbm_classifier":
+                model.fit(X_train=X_train, X_val=X_val, y_train=y_train, y_val=y_val)
+            elif algo == "cat_classifier":
+                model.fit(X_train=X_train, X_val=X_val, y_train=y_train, y_val=y_val)
+            elif algo == "lgbm_ranker":
+                model.fit(
+                    X_train=X_train,
+                    X_val=X_val,
+                    y_train=y_train,
+                    y_val=y_val,
+                    group_train=n_group_train,
+                    group_val=n_group_val,
+                    eval_at=20,
+                )
+            elif algo == "cat_ranker":
+                model.fit(
+                    X_train=X_train,
+                    X_val=X_val,
+                    y_train=y_train,
+                    y_val=y_val,
+                    group_train=group_train,
+                    group_val=group_val,
+                )
+
             hyperparams = model.get_params()
             ensemble_model.append(model)
             # predict train
@@ -192,7 +242,7 @@ def train(algo: str, events: list, week: str, n: int):
 @click.option(
     "--algo",
     default="lgbm",
-    help="algorithm for training; lgbm/catboost",
+    help="algorithm for training; lgbm_classifier/lgbm_ranker/cat_classifier/cat_ranker",
 )
 @click.option(
     "--week",

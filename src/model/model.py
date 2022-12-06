@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Union
 import pandas as pd
 from lightgbm import LGBMRanker, LGBMClassifier, log_evaluation, early_stopping
 from catboost import CatBoostClassifier, CatBoostRanker, Pool
@@ -13,10 +14,6 @@ class ClassifierModel(ABC):
 
     @abstractmethod
     def predict(self, X_test):
-        pass
-
-    @abstractmethod
-    def predict_proba(self, X_test):
         pass
 
     @abstractmethod
@@ -35,7 +32,7 @@ class LGBClassifier(ClassifierModel):
         kwargs["importance_type"] = "gain"
 
         # self._model = LGBMClassifier(**kwargs)
-        self._model = LGBMClassifier(class_weight="balanced", **kwargs)
+        self._model = LGBMClassifier(**kwargs)
         self.hyperprams = {}
 
     def fit(self, X_train, X_val, y_train, y_val):
@@ -75,11 +72,6 @@ class LGBClassifier(ClassifierModel):
         )
         return result[:, 1]
 
-    def predict_proba(self, X_test):
-        return self._model.predict_proba(
-            X_test, num_iteration=self._model.best_iteration_
-        )
-
     def get_params(self):
         return self.hyperprams
 
@@ -93,7 +85,7 @@ class CatClassifier(ClassifierModel):
         self.best_score_ = 0
         self.best_iteration = 0
 
-        self._model = CatBoostClassifier(auto_class_weights="SqrtBalanced", **kwargs)
+        self._model = CatBoostClassifier(**kwargs)
         self.hyperprams = {}
 
     def fit(self, X_train, X_val, y_train, y_val):
@@ -125,47 +117,8 @@ class CatClassifier(ClassifierModel):
         result = self._model.predict_proba(X_test, ntree_end=self.best_iteration)
         return result[:, 1]
 
-    def predict_proba(self, X_test):
-        return self._model.predict_proba(X_test, ntree_end=self.best_iteration)
-
     def get_params(self):
         return self.hyperprams
-
-class EnsembleClassifierModels:
-    """Wrapper for Ensemble Classifier Models
-    It has list of trained models with different set of training data
-
-    The final prediction score will be average of scores from the list of trained models
-    """
-
-    def __init__(self):
-        self.list_models = []
-
-    def append(self, model: ClassifierModel):
-        self.list_models.append(model)
-        return self
-
-    def predict(self, X):
-        # average of score from list_models
-        y_preds = pd.DataFrame()
-        for ix, model in enumerate(self.list_models):
-            y_pred = model.predict(X)
-            # convert np ndarray to pd Series
-            y_pred = pd.Series(y_pred, name=f"y_pred_{ix}")
-            y_preds = pd.concat([y_preds, y_pred], axis=1)
-        y_preds = y_preds.mean(axis=1)
-        return y_preds
-
-    def predict_proba(self, X):
-        # average of score from list_models
-        y_preds = pd.DataFrame()
-        for ix, model in enumerate(self.list_models):
-            y_pred = model.predict_proba(X)
-            # convert np ndarray to pd Series
-            y_pred = pd.Series(y_pred, name=f"y_pred_{ix}")
-            y_preds = pd.concat([y_preds, y_pred], axis=1)
-        y_preds = y_preds.mean(axis=1)
-        return y_preds
 
 
 #### RANKER MODEL
@@ -180,6 +133,10 @@ class RankingModel(ABC):
     def predict(self, X_test):
         pass
 
+    @abstractmethod
+    def get_params(self):
+        pass
+
 
 class LGBRanker(RankingModel):
     def __init__(self, **kwargs):
@@ -187,9 +144,10 @@ class LGBRanker(RankingModel):
         self._verbose = kwargs.pop("verbose", 100)
 
         self.feature_importances_ = None
-        self.best_score_ = None
+        self.best_score_ = 0
         self.best_iteration_ = None
         self.objective_ = None
+        self.hyperprams = {}
 
         kwargs["importance_type"] = "gain"
         kwargs["objective"] = "rank_xendcg"
@@ -207,7 +165,7 @@ class LGBRanker(RankingModel):
             eval_set=[(X_val, y_val)],
             eval_group=[group_val],
             eval_at=eval_at,
-            eval_metric=["map"],
+            eval_metric=["map", "ndcg"],
             callbacks=[
                 early_stopping(
                     stopping_rounds=self._early_stopping_rounds, verbose=self._verbose
@@ -230,6 +188,7 @@ class LGBRanker(RankingModel):
         )
         self.best_iteration_ = self._model.best_iteration_
         self.objective_ = self._model.objective_
+        self.hyperprams = self._model.get_params()
 
         return self
 
@@ -237,15 +196,19 @@ class LGBRanker(RankingModel):
         return self._model.predict(X_test, num_iteration=self._model.best_iteration_)
 
 
-class CATBRanker(RankingModel):
+class CATRanker(RankingModel):
     def __init__(self, **kwargs):
         self._early_stopping_rounds = kwargs.pop("early_stopping_rounds", 50)
         self._verbose = kwargs.pop("verbose", 100)
 
-        kwargs["custom_metric"] = ["MAP:top=12", "NDCG:top=12"]
+        kwargs["custom_metric"] = ["MAP:top=20", "NDCG:top=20"]
+        kwargs[
+            "loss_function"
+        ] = "QueryCrossEntropy"  # YetiRank, StochasticFilter, StochasticRank,
 
-        self.feature_importances_ = None
-        self.best_score_ = None
+        self.feature_importances_ = []
+        self.best_score_ = 0
+        self.hyperprams = {}
 
         self._model = CatBoostRanker(**kwargs)
 
@@ -273,8 +236,36 @@ class CATBRanker(RankingModel):
 
         # best_score as float
         self.best_score_ = self._model.get_best_score()
+        self.hyperprams = self._model.get_all_params()
 
         return self
 
     def predict(self, X_test):
         return self._model.predict(X_test)
+
+
+#### ENSEMBLE MODEL
+class EnsembleModels:
+    """Wrapper for Ensemble Models
+    It has list of trained models with different set of training data
+
+    The final prediction score will be average of scores from the list of trained models
+    """
+
+    def __init__(self):
+        self.list_models = []
+
+    def append(self, model: Union[ClassifierModel, RankingModel]):
+        self.list_models.append(model)
+        return self
+
+    def predict(self, X):
+        # average of score from list_models
+        y_preds = pd.DataFrame()
+        for ix, model in enumerate(self.list_models):
+            y_pred = model.predict(X)
+            # convert np ndarray to pd Series
+            y_pred = pd.Series(y_pred, name=f"y_pred_{ix}")
+            y_preds = pd.concat([y_preds, y_pred], axis=1)
+        y_preds = y_preds.mean(axis=1)
+        return y_preds
