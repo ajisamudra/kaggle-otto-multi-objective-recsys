@@ -101,6 +101,26 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             selected_features = train_df.columns
             selected_features.remove("session")
             selected_features.remove("candidate_aid")
+            # # remove item features
+            # selected_features.remove("item_all_events_count")
+            # selected_features.remove("item_click_count")
+            # selected_features.remove("item_cart_count")
+            # selected_features.remove("item_order_count")
+            # selected_features.remove("item_click_to_cart_cvr")
+            # selected_features.remove("item_cart_to_order_cvr")
+            # selected_features.remove("itemXhour_all_events_count")
+            # selected_features.remove("itemXhour_click_count")
+            # selected_features.remove("itemXhour_cart_count")
+            # selected_features.remove("itemXhour_order_count")
+            # selected_features.remove("itemXhour_click_to_cart_cvr")
+            # selected_features.remove("itemXhour_cart_to_order_cvr")
+            # selected_features.remove("itemXweekday_all_events_count")
+            # selected_features.remove("itemXweekday_click_count")
+            # selected_features.remove("itemXweekday_cart_count")
+            # selected_features.remove("itemXweekday_order_count")
+            # selected_features.remove("itemXweekday_click_to_cart_cvr")
+            # selected_features.remove("itemXweekday_cart_to_order_cvr")
+
             selected_features.remove(TARGET)
 
             # select X & y per train & val
@@ -109,10 +129,11 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             y = train_df[TARGET].to_pandas()
 
             # split train and validation using StratifiedGroupKFold
-            # X_train, X_val, y_train, y_val = train_test_split(
-            #     X, y, test_size=0.2, stratify=y, random_state=745
+            # X_train, X_val, y_train, y_val, group_train, group_val = train_test_split(
+            #     X, y, group, test_size=0.2, stratify=y, random_state=745
             # )
-            skgfold = StratifiedGroupKFold(n_splits=2)
+
+            skgfold = StratifiedGroupKFold(n_splits=5)
             train_idx, val_idx = [], []
 
             for tidx, vidx in skgfold.split(X, y, groups=group):

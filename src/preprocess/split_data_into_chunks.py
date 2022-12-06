@@ -71,7 +71,7 @@ def split_data_into_chunks(data: pl.DataFrame, name: str, output_path: Path):
     else:
         n = CFG.N_test
     # split
-    df = data.to_pandas()
+    # df = data.to_pandas()
     # unique_session = list(df["session"].values)
     logging.info(f"start split data into {n} chunks")
     for ix, chunk_sessions in tqdm(

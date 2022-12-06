@@ -32,7 +32,7 @@ class LGBClassifier(ClassifierModel):
         kwargs["importance_type"] = "gain"
 
         # self._model = LGBMClassifier(**kwargs)
-        self._model = LGBMClassifier(**kwargs)
+        self._model = LGBMClassifier(class_weight="balanced", **kwargs)
         self.hyperprams = {}
 
     def fit(self, X_train, X_val, y_train, y_val):
@@ -85,7 +85,7 @@ class CatClassifier(ClassifierModel):
         self.best_score_ = 0
         self.best_iteration = 0
 
-        self._model = CatBoostClassifier(**kwargs)
+        self._model = CatBoostClassifier(auto_class_weights="SqrtBalanced", **kwargs)
         self.hyperprams = {}
 
     def fit(self, X_train, X_val, y_train, y_val):
