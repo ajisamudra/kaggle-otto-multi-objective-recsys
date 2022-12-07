@@ -92,17 +92,6 @@ def preprocess_events(data: pl.DataFrame):
             pl.col("ts").apply(lambda x: get_weekday_from_ts(x)).alias("weekday"),
         ],
     )
-    # add second_duration & recency score
-    data = data.with_columns(
-        [
-            (
-                pl.col("type_weighted_log_recency_score") * pl.col("duration_second")
-            ).alias("type_weighted_log_duration_second"),
-            (pl.col("log_recency_score") * pl.col("duration_second")).alias(
-                "log_duration_second"
-            ),
-        ]
-    )
 
     # drop cols
     data = data.drop(

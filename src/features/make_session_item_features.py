@@ -74,11 +74,7 @@ def gen_session_item_features(data: pl.DataFrame):
             pl.col("log_recency_score").sum().alias("sesXaid_log_recency_score"),
             pl.col("type_weighted_log_recency_score")
             .sum()
-            .alias("sesXaid_type_weighted_log_recency_score"),
-            pl.col("log_duration_second").sum().alias("sesXaid_log_duration_second"),
-            pl.col("type_weighted_log_duration_second")
-            .sum()
-            .alias("sesXaid_type_weighted_log_duration_second"),
+            .alias("sesXaid_type_weighted_log_recency_score")
         ]
     )
 
