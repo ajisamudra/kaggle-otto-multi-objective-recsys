@@ -44,7 +44,6 @@ def gen_session_item_features(data: pl.DataFrame):
     data_agg = data.groupby(["session", "aid"]).agg(
         [
             pl.col("aid").count().alias("sesXaid_events_count"),
-            (pl.col("prev_ts") == None).sum().alias("sesXaid_is_first_event"),
             (pl.col("curr_ts") - pl.col("ts"))
             .mean()
             .fill_null(0)
@@ -73,7 +72,13 @@ def gen_session_item_features(data: pl.DataFrame):
             pl.col("type").n_unique().alias("sesXaid_type_dcount"),
             # sum of log_recency_score & type_weighted_log_recency_score
             pl.col("log_recency_score").sum().alias("sesXaid_log_recency_score"),
-            pl.col("type_weighted_log_recency_score").sum().alias("sesXaid_type_weighted_log_recency_score"),
+            pl.col("type_weighted_log_recency_score")
+            .sum()
+            .alias("sesXaid_type_weighted_log_recency_score"),
+            pl.col("log_duration_second").sum().alias("sesXaid_log_duration_second"),
+            pl.col("type_weighted_log_duration_second")
+            .sum()
+            .alias("sesXaid_type_weighted_log_duration_second"),
         ]
     )
 

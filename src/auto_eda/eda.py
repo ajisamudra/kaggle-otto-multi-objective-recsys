@@ -46,7 +46,7 @@ def biserial_correlation(data: pd.DataFrame, target_variable: str):
     numeric_features = get_numeric_features(data=data, target_variable=target_variable)
 
     df = pd.DataFrame()
-    for feature in numeric_features:
+    for feature in tqdm(numeric_features):
         r, p = pointbiserialr(data[target_variable], data[feature])
         df_temp = pd.DataFrame({"feature": [feature], "R": [r], "p-value": [p]})
         df = df.append(df_temp, ignore_index=True)
@@ -95,56 +95,56 @@ def perform_eda(events: list, n: int, mode: str):
     for EVENT in events:
         logging.info(f"perform EDA for event {EVENT.upper()}")
         artifact_path = get_artifacts_eda_dir(event=EVENT, week=week)
-        if mode in ["all", "across_dataset"]:
-            logging.info("read feature distribution across train/val/test")
-            IX = 0
-            df = pd.DataFrame()
-            logging.info(f"read training data for chunk: {IX}")
-            filepath = f"{input_path}/train_{IX}_{EVENT}_combined.parquet"
-            train_df = pd.read_parquet(filepath)
-            train_df.loc[:, "dataset"] = "train"
-            logging.info(train_df.shape)
+        # if mode in ["all", "across_dataset"]:
+        #     logging.info("read feature distribution across train/val/test")
+        #     IX = 0
+        #     df = pd.DataFrame()
+        #     logging.info(f"read training data for chunk: {IX}")
+        #     filepath = f"{input_path}/train_{IX}_{EVENT}_combined.parquet"
+        #     train_df = pd.read_parquet(filepath)
+        #     train_df.loc[:, "dataset"] = "train"
+        #     logging.info(train_df.shape)
 
-            logging.info(f"read validation data for chunk: {IX}")
-            filepath = f"{val_input_path}/test_{IX}_{EVENT}_combined.parquet"
-            val_df = pd.read_parquet(filepath)
-            val_df.loc[:, "dataset"] = "validation"
-            logging.info(val_df.shape)
+        #     logging.info(f"read validation data for chunk: {IX}")
+        #     filepath = f"{val_input_path}/test_{IX}_{EVENT}_combined.parquet"
+        #     val_df = pd.read_parquet(filepath)
+        #     val_df.loc[:, "dataset"] = "validation"
+        #     logging.info(val_df.shape)
 
-            logging.info(f"read test data for chunk: {IX}")
-            filepath = f"{scoring_input_path}/test_{IX}_{EVENT}_combined.parquet"
-            test_df = pd.read_parquet(filepath)
-            test_df.loc[:, "dataset"] = "test"
-            logging.info(test_df.shape)
+        #     logging.info(f"read test data for chunk: {IX}")
+        #     filepath = f"{scoring_input_path}/test_{IX}_{EVENT}_combined.parquet"
+        #     test_df = pd.read_parquet(filepath)
+        #     test_df.loc[:, "dataset"] = "test"
+        #     logging.info(test_df.shape)
 
-            logging.info("concat to all chunks")
-            df = pd.concat([df, train_df, val_df, test_df], ignore_index=True)
-            logging.info(df.shape)
+        #     logging.info("concat to all chunks")
+        #     df = pd.concat([df, train_df, val_df, test_df], ignore_index=True)
+        #     logging.info(df.shape)
 
-            del train_df, val_df, test_df
-            gc.collect()
+        #     del train_df, val_df, test_df
+        #     gc.collect()
 
-            logging.info("start plot feature distribution across dataset")
-            # create artifact dir
-            filepath = artifact_path / "dist_across_dataset"
-            check_directory(filepath)
-            for feature in tqdm(df.select_dtypes(include=["number"]).columns):
-                if feature == TARGET:
-                    continue
-                plt.figure(figsize=(6, 4))
-                plt.title(f"{feature} distribution across dataset")
-                sns.histplot(
-                    x=df[feature],
-                    hue=df["dataset"],
-                    element="step",
-                    stat="density",
-                    common_norm=False,
-                    bins=50,
-                )
-                plt.savefig(
-                    f"{filepath}/{feature}_across_dataset.png", bbox_inches="tight"
-                )
-                plt.close()
+        #     logging.info("start plot feature distribution across dataset")
+        #     # create artifact dir
+        #     filepath = artifact_path / "dist_across_dataset"
+        #     check_directory(filepath)
+        #     for feature in tqdm(df.select_dtypes(include=["number"]).columns):
+        #         if feature == TARGET:
+        #             continue
+        #         plt.figure(figsize=(6, 4))
+        #         plt.title(f"{feature} distribution across dataset")
+        #         sns.histplot(
+        #             x=df[feature],
+        #             hue=df["dataset"],
+        #             element="step",
+        #             stat="density",
+        #             common_norm=False,
+        #             bins=50,
+        #         )
+        #         plt.savefig(
+        #             f"{filepath}/{feature}_across_dataset.png", bbox_inches="tight"
+        #         )
+        #         plt.close()
 
         logging.info(f"reading feature from {n} chunks")
         df = pd.DataFrame()
@@ -197,11 +197,11 @@ def perform_eda(events: list, n: int, mode: str):
                 plt.savefig(f"{filepath}/{feature}_log2.png", bbox_inches="tight")
                 plt.close()
 
-        if mode in ["all", "biserial"]:
-            logging.info("start calculating biserial correlaction")
-            report_biserial_correlation(
-                data=df, target_variable=TARGET, filepath=f"{artifact_path}"
-            )
+        # if mode in ["all", "biserial"]:
+        #     logging.info("start calculating biserial correlaction")
+        #     report_biserial_correlation(
+        #         data=df.dropna(), target_variable=TARGET, filepath=f"{artifact_path}"
+        #     )
 
         if mode in ["all", "chunk_dist"]:
             logging.info("start plot feature distribution per class")

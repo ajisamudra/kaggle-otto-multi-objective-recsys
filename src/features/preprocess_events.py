@@ -20,7 +20,7 @@ def preprocess_events(data: pl.DataFrame):
     # num reversed chrono + session_len
     data = data.with_columns(
         [
-            pl.col("ts").shift().over("session").alias("prev_ts"),
+            pl.col("ts").shift(periods=-1).over("session").alias("next_ts"),
             pl.col("session")
             .cumcount()
             .reverse()
@@ -29,16 +29,39 @@ def preprocess_events(data: pl.DataFrame):
             pl.col("session").count().over("session").alias("session_len"),
         ]
     )
+    data = data.with_columns(
+        [
+            (pl.col("action_num_reverse_chrono") + 1).alias(
+                "action_num_reverse_chrono"
+            ),
+        ]
+    )
     # add log_recency_score
     linear_interpolation = 0.1 + ((1 - 0.1) / (data["session_len"] - 1)) * (
-        data["session_len"] - data["action_num_reverse_chrono"] - 1
+        data["session_len"] - data["action_num_reverse_chrono"]
     )
     data = data.with_columns(
         [
-            (pl.col("ts") - pl.col("prev_ts")).fill_null(0).alias("duration_second"),
+            (pl.col("next_ts") - pl.col("ts")).alias("duration_second"),
             pl.Series(2**linear_interpolation - 1)
             .alias("log_recency_score")
             .fill_nan(1),
+        ]
+    )
+    data = data.with_columns(
+        [
+            pl.col("duration_second")
+            .over("session")
+            .shift()
+            .alias("shifted_duration_second"),
+        ]
+    )
+    data = data.with_columns(
+        [
+            # end of session will have duration second as the same as last 2 event
+            pl.col("duration_second")
+            .fill_null(pl.col("shifted_duration_second"))
+            .alias("duration_second")
         ]
     )
     data = data.with_columns(
@@ -51,6 +74,7 @@ def preprocess_events(data: pl.DataFrame):
             .then(0)  # start of real-session will always have 0 duration_second
             .otherwise(pl.col("duration_second"))
             .alias("duration_second"),
+            pl.col("duration_second").fill_null(0).alias("duration_second"),
         ]
     )
     # add type_weighted_log_recency_score
@@ -68,6 +92,28 @@ def preprocess_events(data: pl.DataFrame):
             pl.col("ts").apply(lambda x: get_weekday_from_ts(x)).alias("weekday"),
         ],
     )
+    # add second_duration & recency score
+    data = data.with_columns(
+        [
+            (
+                pl.col("type_weighted_log_recency_score") * pl.col("duration_second")
+            ).alias("type_weighted_log_duration_second"),
+            (pl.col("log_recency_score") * pl.col("duration_second")).alias(
+                "log_duration_second"
+            ),
+        ]
+    )
+
+    # drop cols
+    data = data.drop(
+        columns=[
+            "shifted_duration_second",
+            "next_ts",
+            "action_num_reverse_chrono",
+            "session_len",
+        ]
+    )
+
     # END: event data preprocess
 
     return data
