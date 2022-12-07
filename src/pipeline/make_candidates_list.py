@@ -31,18 +31,18 @@ logging = get_logger()
 # save 40 candidates clickc, carts, buys in different files
 
 
-def generate_candidates_covisitation(name: str, input_path: Path, output_path: Path):
+def generate_candidates_covisitation(
+    name: str,
+    input_path: Path,
+    output_path: Path,
+    top_15_buys: dict,
+    top_15_buy2buy: dict,
+    top_20_clicks: dict,
+):
     if name == "train":
         n = CFG.N_train
     else:
         n = CFG.N_test
-
-    logging.info("read covisitation buys")
-    top_15_buys = get_top15_covisitation_buys()
-    logging.info("read covisitation buy2buy")
-    top_15_buy2buy = get_top15_covisitation_buy2buy()
-    logging.info("read covisitation click")
-    top_20_clicks = get_top20_covisitation_click()
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
@@ -122,13 +122,25 @@ def generate_candidates_covisitation(name: str, input_path: Path, output_path: P
     help="avaiable mode: training_train/training_test/scoring_train/scoring_test",
 )
 def main(mode: str):
+    logging.info("read covisitation buys")
+    top_15_buys = get_top15_covisitation_buys()
+    logging.info("read covisitation buy2buy")
+    top_15_buy2buy = get_top15_covisitation_buy2buy()
+    logging.info("read covisitation click")
+    top_20_clicks = get_top20_covisitation_click()
+
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()
         output_path = get_processed_training_train_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
-            name="train", input_path=input_path, output_path=output_path
+            name="train",
+            input_path=input_path,
+            output_path=output_path,
+            top_15_buys=top_15_buys,
+            top_15_buy2buy=top_15_buy2buy,
+            top_20_clicks=top_20_clicks,
         )
 
     elif mode == "training_test":
@@ -137,7 +149,12 @@ def main(mode: str):
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
-            name="test", input_path=input_path, output_path=output_path
+            name="test",
+            input_path=input_path,
+            output_path=output_path,
+            top_15_buys=top_15_buys,
+            top_15_buy2buy=top_15_buy2buy,
+            top_20_clicks=top_20_clicks,
         )
 
     elif mode == "scoring_train":
@@ -146,7 +163,12 @@ def main(mode: str):
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
-            name="train", input_path=input_path, output_path=output_path
+            name="train",
+            input_path=input_path,
+            output_path=output_path,
+            top_15_buys=top_15_buys,
+            top_15_buy2buy=top_15_buy2buy,
+            top_20_clicks=top_20_clicks,
         )
 
     elif mode == "scoring_test":
@@ -155,7 +177,12 @@ def main(mode: str):
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
-            name="test", input_path=input_path, output_path=output_path
+            name="test",
+            input_path=input_path,
+            output_path=output_path,
+            top_15_buys=top_15_buys,
+            top_15_buy2buy=top_15_buy2buy,
+            top_20_clicks=top_20_clicks,
         )
 
 

@@ -345,3 +345,9 @@ def get_artifacts_training_dir(week: str, event: str) -> Path:
     path = ROOT_DIR / "artifacts" / week / event
     check_directory(path)
     return path
+
+
+def get_artifacts_eda_dir(week: str, event: str) -> Path:
+    path = ROOT_DIR / "artifacts" / "eda" / week / event
+    check_directory(path)
+    return path

@@ -1,8 +1,27 @@
 from pathlib import Path
-from typing import Tuple
+from typing import Tuple, List
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+
+
+def plot_and_save_score_distribution(
+    dfs: List[pd.DataFrame], filepath: Path, dataset: str
+):
+    for i, df in enumerate(dfs):
+        plt.figure(figsize=(6, 4))
+        plt.title(f"score distribution per class")
+        sns.histplot(
+            x=df["y_hat"],
+            hue=df["y"],
+            element="step",
+            stat="density",
+            common_norm=False,
+            bins=50,
+        )
+        plt.savefig(
+            f"{filepath}/{dataset}_score_dist_per_class_{i}.png", bbox_inches="tight"
+        )
 
 
 def plot_and_save_feature_importance(

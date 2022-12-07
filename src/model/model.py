@@ -209,7 +209,7 @@ class CATRanker(RankingModel):
         #     "loss_function"
         # ] = "QueryCrossEntropy"  # YetiRank, StochasticFilter, StochasticRank,
 
-        self.feature_importances_ = []
+        self.feature_importances_ = None
         self.best_score_ = 0
         self.hyperprams = {}
 

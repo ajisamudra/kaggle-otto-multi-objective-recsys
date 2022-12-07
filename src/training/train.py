@@ -27,6 +27,7 @@ from src.model.model import (
 from src.metrics.model_evaluation import (
     summarise_feature_importance,
     plot_and_save_feature_importance,
+    plot_and_save_score_distribution,
 )
 
 # for enabling training + scoring
@@ -75,6 +76,8 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         train_roc_aucs, train_pr_aucs = [], []
         val_roc_aucs, val_pr_aucs = [], []
         feature_importances = []
+        train_score_dists = []
+        val_score_dists = []
         for IX in tqdm(range(n)):
             model: Union[ClassifierModel, RankingModel]
             # hyperparams click
@@ -192,6 +195,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             logging.info(
                 f"TRAIN {EVENT.upper()}:{IX} ROC AUC {roc_auc} | PR AUC {pr_auc}"
             )
+            train_score = {"y": y_train, "y_hat": y_proba}
+            train_score = pd.DataFrame(train_score)
+            train_score_dists.append(train_score)
             # predict val
             y_proba = model.predict(X_val)
             roc_auc = roc_auc_score(y_true=y_val, y_score=y_proba)
@@ -203,6 +209,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             )
             # save feature importance
             feature_importances.append(model.feature_importances_)
+            val_score = {"y": y_val, "y_hat": y_proba}
+            val_score = pd.DataFrame(val_score)
+            val_score_dists.append(val_score)
 
             del train_df, X, y, X_train, X_val, y_train, y_val
             gc.collect()
@@ -245,6 +254,13 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         summary_feature_importance = summarise_feature_importance(feature_importances)
         plot_and_save_feature_importance(
             summary_feature_importance, filepath, metric="median_importance"
+        )
+        # plot score distribution per target variable
+        plot_and_save_score_distribution(
+            dfs=train_score_dists, filepath=filepath, dataset="train"
+        )
+        plot_and_save_score_distribution(
+            dfs=val_score_dists, filepath=filepath, dataset="val"
         )
 
         # pickle the model
