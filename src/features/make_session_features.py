@@ -63,9 +63,6 @@ def gen_user_features(data: pl.DataFrame):
             ((pl.col("ts").max() - pl.col("ts").min()) / 60).alias(
                 "sess_duration_mins"
             ),
-            ((pl.col("ts").max() - pl.col("ts").min()) / 60 / 60).alias(
-                "sess_duration_hour"
-            ),
             # duration per event type
             pl.col("duration_second")
             .filter(pl.col("type") == 0)

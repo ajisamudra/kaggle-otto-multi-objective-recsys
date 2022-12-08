@@ -1,5 +1,6 @@
 import click
 import polars as pl
+import numpy as np
 from tqdm import tqdm
 import gc
 from src.utils.constants import (
@@ -126,8 +127,20 @@ def fcombine_features(mode: str, event: str, ix: int):
         how="left",
         left_on=["session", "candidate_aid"],
         right_on=["session", "aid"],
-    ).fill_null(-99)
+    )
     logging.info(f"joined with sessionXaid features! shape {cand_df.shape}")
+
+    cand_df = cand_df.with_columns(
+        [
+            pl.col("sesXaid_type_weighted_log_recency_score")
+            .fill_null(0)
+            .alias("sesXaid_type_weighted_log_recency_score"),
+            pl.col("sesXaid_mins_from_last_event")
+            .fill_null(9999.0)
+            .alias("sesXaid_mins_from_last_event"),
+        ]
+    )
+    cand_df = cand_df.fill_null(-99)
 
     del ses_aid_agg
     gc.collect()
@@ -140,11 +153,41 @@ def fcombine_features(mode: str, event: str, ix: int):
         how="left",
         left_on=["candidate_aid"],
         right_on=["aid"],
-    ).fill_null(0)
+    )
     logging.info(f"joined with item features! shape {cand_df.shape}")
 
     del item_agg
     gc.collect()
+
+    cand_df = cand_df.with_columns(
+        [
+            np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_click"))
+            .cast(pl.Int32)
+            .fill_null(99)
+            .alias("sessXitem_abs_diff_avg_hour_click"),
+            np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_cart"))
+            .cast(pl.Int32)
+            .fill_null(99)
+            .alias("sessXitem_abs_diff_avg_hour_cart"),
+            np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_order"))
+            .cast(pl.Int32)
+            .fill_null(99)
+            .alias("sessXitem_abs_diff_avg_hour_order"),
+            np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_click"))
+            .cast(pl.Int32)
+            .fill_null(99)
+            .alias("sessXitem_abs_diff_avg_weekday_click"),
+            np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_cart"))
+            .cast(pl.Int32)
+            .fill_null(99)
+            .alias("sessXitem_abs_diff_avg_weekday_cart"),
+            np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_order"))
+            .cast(pl.Int32)
+            .fill_null(99)
+            .alias("sessXitem_abs_diff_avg_weekday_order"),
+        ]
+    )
+    cand_df = cand_df.fill_null(-99)
 
     # read item-hour features
     item_hour_agg = pl.read_parquet(itemXhour_path)
@@ -154,7 +197,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         how="left",
         left_on=["candidate_aid", "sess_hour"],
         right_on=["aid", "hour"],
-    ).fill_null(0)
+    ).fill_null(-99)
     logging.info(f"joined with item-hour features! shape {cand_df.shape}")
 
     del item_hour_agg
@@ -168,7 +211,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         how="left",
         left_on=["candidate_aid", "sess_weekday"],
         right_on=["aid", "weekday"],
-    ).fill_null(0)
+    ).fill_null(-99)
     logging.info(f"joined with item-weekday features! shape {cand_df.shape}")
 
     del item_weekday_agg

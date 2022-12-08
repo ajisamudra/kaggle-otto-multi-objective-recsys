@@ -93,12 +93,23 @@ def preprocess_events(data: pl.DataFrame):
         ],
     )
 
+    # add second_duration & recency score
+    data = data.with_columns(
+        [
+            (
+                pl.col("type_weighted_log_recency_score") * pl.col("duration_second")
+            ).alias("type_weighted_log_duration_second"),
+            (pl.col("log_recency_score") * pl.col("duration_second")).alias(
+                "log_duration_second"
+            ),
+        ]
+    )
+
     # drop cols
     data = data.drop(
         columns=[
             "shifted_duration_second",
             "next_ts",
-            "action_num_reverse_chrono",
             "session_len",
         ]
     )

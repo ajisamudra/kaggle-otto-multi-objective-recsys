@@ -32,6 +32,24 @@ def gen_item_features(data: pl.DataFrame):
     # START: event data preprocess
     data = preprocess_events(data)
     # END: event data preprocess
+    data = data.with_columns(
+        [
+            pl.when(pl.col("type") == 0).then(1).otherwise(None).alias("dummy_click"),
+            pl.when(pl.col("type") == 1).then(1).otherwise(None).alias("dummy_cart"),
+            pl.when(pl.col("type") == 2).then(1).otherwise(None).alias("dummy_order"),
+        ],
+    )
+
+    data = data.with_columns(
+        [
+            (pl.col("dummy_click") * pl.col("hour")).alias("hour_click"),
+            (pl.col("dummy_cart") * pl.col("hour")).alias("hour_cart"),
+            (pl.col("dummy_order") * pl.col("hour")).alias("hour_order"),
+            (pl.col("dummy_click") * pl.col("weekday")).alias("weekday_click"),
+            (pl.col("dummy_cart") * pl.col("weekday")).alias("weekday_cart"),
+            (pl.col("dummy_order") * pl.col("weekday")).alias("weekday_order"),
+        ],
+    )
 
     # agg per aid
     data_agg = data.groupby("aid").agg(
@@ -41,6 +59,13 @@ def gen_item_features(data: pl.DataFrame):
             (pl.col("type") == 0).sum().alias("item_click_count"),
             (pl.col("type") == 1).sum().alias("item_cart_count"),
             (pl.col("type") == 2).sum().alias("item_order_count"),
+            # avg hour & weekday of click/cart/order
+            pl.col("hour_click").mean().alias("item_avg_hour_click"),
+            pl.col("hour_cart").mean().alias("item_avg_hour_cart"),
+            pl.col("hour_order").mean().alias("item_avg_hour_order"),
+            pl.col("weekday_click").mean().alias("item_avg_weekday_click"),
+            pl.col("weekday_cart").mean().alias("item_avg_weekday_cart"),
+            pl.col("weekday_order").mean().alias("item_avg_weekday_order"),
         ]
     )
 

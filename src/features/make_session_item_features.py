@@ -1,5 +1,6 @@
 import click
 import polars as pl
+import numpy as np
 from tqdm import tqdm
 import gc
 from pathlib import Path
@@ -74,7 +75,14 @@ def gen_session_item_features(data: pl.DataFrame):
             pl.col("log_recency_score").sum().alias("sesXaid_log_recency_score"),
             pl.col("type_weighted_log_recency_score")
             .sum()
-            .alias("sesXaid_type_weighted_log_recency_score")
+            .alias("sesXaid_type_weighted_log_recency_score"),
+            pl.col("log_duration_second").sum().alias("sesXaid_log_duration_second"),
+            pl.col("type_weighted_log_duration_second")
+            .sum()
+            .alias("sesXaid_type_weighted_log_duration_second"),
+            pl.col("action_num_reverse_chrono")
+            .min()
+            .alias("sesXaid_action_num_reverse_chrono"),
         ]
     )
 
@@ -83,11 +91,31 @@ def gen_session_item_features(data: pl.DataFrame):
             (pl.col("sesXaid_sec_from_last_event") / 60).alias(
                 "sesXaid_mins_from_last_event"
             ),
+            (np.log2(1 + pl.col("sesXaid_log_duration_second"))).alias(
+                "sesXaid_log_duration_second_log2p1"
+            ),
+            (np.log2(1 + pl.col("sesXaid_type_weighted_log_duration_second"))).alias(
+                "sesXaid_type_weighted_log_duration_second_log2p1"
+            ),
+        ],
+    )
+
+    data_agg = data_agg.with_columns(
+        [
+            (np.log1p(pl.col("sesXaid_mins_from_last_event"))).alias(
+                "sesXaid_mins_from_last_event_log1p"
+            ),
         ],
     )
 
     # drop cols
-    data_agg = data_agg.drop(columns=["sesXaid_sec_from_last_event"])
+    data_agg = data_agg.drop(
+        columns=[
+            "sesXaid_sec_from_last_event",
+            "sesXaid_log_duration_second",
+            "sesXaid_type_weighted_log_duration_second",
+        ]
+    )
 
     return data_agg
 
