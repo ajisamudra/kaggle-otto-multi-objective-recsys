@@ -29,6 +29,10 @@ from src.utils.constants import (
     get_processed_training_test_item_weekday_features_dir,
     get_processed_scoring_train_item_weekday_features_dir,
     get_processed_scoring_test_item_weekday_features_dir,
+    get_processed_training_train_item_covisitation_features_dir,  # iemCovisitation feature dir
+    get_processed_training_test_item_covisitation_features_dir,
+    get_processed_scoring_train_item_covisitation_features_dir,
+    get_processed_scoring_test_item_covisitation_features_dir,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_training_test_dataset_dir,
     get_processed_scoring_train_dataset_dir,
@@ -47,6 +51,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     item_fea_path = ""
     itemXhour_fea_path = ""
     itemXweekday_fea_path = ""
+    itemXcovisit_fea_path = ""
     output_path = ""
     name = ""
 
@@ -57,6 +62,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         item_fea_path = get_processed_training_train_item_features_dir()
         itemXhour_fea_path = get_processed_training_train_item_hour_features_dir()
         itemXweekday_fea_path = get_processed_training_train_item_weekday_features_dir()
+        itemXcovisit_fea_path = (
+            get_processed_training_train_item_covisitation_features_dir()
+        )
         output_path = get_processed_training_train_dataset_dir()
         name = "train"
 
@@ -67,6 +75,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         item_fea_path = get_processed_training_test_item_features_dir()
         itemXhour_fea_path = get_processed_training_test_item_hour_features_dir()
         itemXweekday_fea_path = get_processed_training_test_item_weekday_features_dir()
+        itemXcovisit_fea_path = (
+            get_processed_training_test_item_covisitation_features_dir()
+        )
         output_path = get_processed_training_test_dataset_dir()
         name = "test"
 
@@ -77,6 +88,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         item_fea_path = get_processed_scoring_train_item_features_dir()
         itemXhour_fea_path = get_processed_scoring_train_item_hour_features_dir()
         itemXweekday_fea_path = get_processed_scoring_train_item_weekday_features_dir()
+        itemXcovisit_fea_path = (
+            get_processed_scoring_train_item_covisitation_features_dir()
+        )
         output_path = get_processed_scoring_train_dataset_dir()
         name = "train"
 
@@ -87,6 +101,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         item_fea_path = get_processed_scoring_test_item_features_dir()
         itemXhour_fea_path = get_processed_scoring_test_item_hour_features_dir()
         itemXweekday_fea_path = get_processed_scoring_test_item_weekday_features_dir()
+        itemXcovisit_fea_path = (
+            get_processed_scoring_test_item_covisitation_features_dir()
+        )
         output_path = get_processed_scoring_test_dataset_dir()
         name = "test"
 
@@ -99,6 +116,9 @@ def fcombine_features(mode: str, event: str, ix: int):
     item_path = f"{item_fea_path}/{name}_{ix}_item_feas.parquet"
     itemXhour_path = f"{itemXhour_fea_path}/{name}_{ix}_item_hour_feas.parquet"
     itemXweekday_path = f"{itemXweekday_fea_path}/{name}_{ix}_item_weekday_feas.parquet"
+    itemXcovisit_path = (
+        f"{itemXcovisit_fea_path}/{name}_{ix}_{event}_item_covisitation_feas.parquet"
+    )
 
     cand_df = pl.read_parquet(c_path)
     # make sure to cast session id & candidate_aid to int32
@@ -118,6 +138,24 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     del ses_agg
     gc.collect()
+
+    # read item-covisitation features
+    item_covisit_agg = pl.read_parquet(itemXcovisit_path)
+    logging.info(
+        f"read sessionXcovisitation features with shape {item_covisit_agg.shape}"
+    )
+    cand_df = cand_df.join(
+        item_covisit_agg,
+        how="left",
+        left_on=["session", "candidate_aid"],
+        right_on=["session", "candidate_aid"],
+    ).fill_null(0)
+    logging.info(f"joined with sessionXcovisitation features! shape {cand_df.shape}")
+
+    del item_covisit_agg
+    gc.collect()
+
+    cand_df = cand_df.fill_null(0)
 
     # read session-item features
     ses_aid_agg = pl.read_parquet(sfeaXaid_path)

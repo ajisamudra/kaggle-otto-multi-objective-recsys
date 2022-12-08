@@ -277,6 +277,36 @@ def get_processed_scoring_test_item_weekday_features_dir() -> Path:
     check_directory(path)
     return path
 
+### Data/Processed Dir: ITEM-COVISITATION FEATURES
+
+
+def get_processed_training_train_item_covisitation_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "item_covisitation_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_item_covisitation_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "item_covisitation_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_item_covisitation_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "item_covisitation_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_item_covisitation_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "item_covisitation_features"
+    check_directory(path)
+    return path
+
 
 ### Data/Processed Dir: FINAL DATASET FEATURES
 
