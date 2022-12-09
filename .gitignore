@@ -131,4 +131,7 @@ dmypy.json
 # output
 /data
 /artifacts
+/notebooks
+.vscode/
+/catboost_info
 .DS_Store
