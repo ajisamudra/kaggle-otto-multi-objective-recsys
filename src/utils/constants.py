@@ -277,6 +277,7 @@ def get_processed_scoring_test_item_weekday_features_dir() -> Path:
     check_directory(path)
     return path
 
+
 ### Data/Processed Dir: ITEM-COVISITATION FEATURES
 
 
@@ -373,6 +374,12 @@ def get_artifacts_dir() -> Path:
 
 def get_artifacts_training_dir(week: str, event: str) -> Path:
     path = ROOT_DIR / "artifacts" / week / event
+    check_directory(path)
+    return path
+
+
+def get_artifacts_tuning_dir(week: str, event: str) -> Path:
+    path = ROOT_DIR / "artifacts" / "tuning" / week / event
     check_directory(path)
     return path
 

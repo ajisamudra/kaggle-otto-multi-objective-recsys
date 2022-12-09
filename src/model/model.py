@@ -31,6 +31,10 @@ class LGBClassifier(ClassifierModel):
 
         kwargs["importance_type"] = "gain"
         kwargs["n_estimators"] = 500
+        # kwargs["feature_fraction"] = 0.75
+        # kwargs["bagging_fraction"] = 0.7
+        # kwargs["bagging_freq"] = 10
+        # kwargs["learning_rate"] = 0.005
 
         # self._model = LGBMClassifier(**kwargs)
         self._model = LGBMClassifier(class_weight="balanced", **kwargs)

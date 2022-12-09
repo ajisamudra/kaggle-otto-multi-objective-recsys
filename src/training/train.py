@@ -138,7 +138,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             logging.info(
                 "downsample training data so negative class 20:1 positive class"
             )
-            desired_ratio = 10
+            desired_ratio = 20
             positive_class = train_df[train_df[TARGET] == 1]
             negative_class = train_df[train_df[TARGET] == 0]
             negative_downsample = resample(

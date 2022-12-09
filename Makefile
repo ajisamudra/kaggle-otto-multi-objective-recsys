@@ -40,15 +40,25 @@ remake_item_features: item_features combine_features
 remake_item_hour_features: item_hour_features combine_features
 remake_item_weekday_features: item_weekday_features combine_features
 
+# eda command
 EDA_MODE="biserial" # across_dataset/class_dist/chunk_dist/biserial/all
 eda:
 	python src/auto_eda/eda.py --n 2 --mode $(EDA_MODE)
 
+# train command
 ALGO="lgbm_classifier" # cat_classifier / lgbm_ranker / cat_ranker
 train:
 	python src/training/train.py --event all --n 1 --algo $(ALGO) --week w2 --eval 1
 
+# tune command
+ALGO="lgbm_classifier" # cat_classifier / lgbm_ranker / cat_ranker
+EVENT="orders"
+K=2
+TRIAL=50
+tune:
+	python src/training/tune.py --event $(EVENT) --k $(K) --algo $(ALGO) --n_trial $(TRIAL)
 
+# scoring command
 CLICK_MODEL="2022-12-09_clicks_lgbm_classifier_12209_69509"
 CART_MODEL="2022-12-09_carts_lgbm_classifier_8886_64070"
 ORDER_MODEL="2022-12-09_orders_lgbm_classifier_10050_64507"
