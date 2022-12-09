@@ -8,11 +8,13 @@ import joblib
 import datetime
 from typing import Union
 from pathlib import Path
+from sklearn.utils import resample
 from sklearn.model_selection import train_test_split, StratifiedGroupKFold
 from sklearn.metrics import roc_auc_score, average_precision_score
 from src.utils.constants import (
     write_json,
     get_processed_training_train_dataset_dir,  # final dataset dir
+    get_processed_training_test_dataset_dir,
     get_processed_scoring_train_dataset_dir,
 )
 from src.model.model import (
@@ -57,12 +59,14 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     # if eval == 1 -> perform scoring in validation & eval submission
 
     input_path: Path
+    val_path: Path
     if week == "w1":
         input_path = get_processed_scoring_train_dataset_dir()
         if eval == 1:
             raise ValueError("Can't eval submission for training with data w1")
     elif week == "w2":
         input_path = get_processed_training_train_dataset_dir()
+        val_path = get_processed_training_test_dataset_dir()
     else:
         raise NotImplementedError("week not implemented! (w1/w2)")
 
@@ -98,10 +102,19 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             train_df = pl.read_parquet(filepath)
             logging.info(train_df.shape)
 
+            logging.info(f"read validation data for chunk: {IX}")
+            filepath = f"{val_path}/test_{IX}_{EVENT}_combined.parquet"
+            val_df = pl.read_parquet(filepath)
+            logging.info(val_df.shape)
+
             # sort data based on session & label
             train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
+            val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
 
-            selected_features = train_df.columns
+            train_df = train_df.to_pandas()
+            val_df = val_df.to_pandas()
+
+            selected_features = list(train_df.columns)
             selected_features.remove("session")
             selected_features.remove("candidate_aid")
             # # remove item features
@@ -122,25 +135,61 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
             selected_features.remove(TARGET)
 
+            logging.info(
+                "downsample training data so negative class 20:1 positive class"
+            )
+            desired_ratio = 20
+            positive_class = train_df[train_df[TARGET] == 1]
+            negative_class = train_df[train_df[TARGET] == 0]
+            negative_downsample = resample(
+                negative_class,
+                replace=False,
+                n_samples=len(positive_class) * desired_ratio,
+                random_state=777,
+            )
+
+            train_df = pd.concat(
+                [positive_class, negative_downsample], ignore_index=True
+            )
+            train_df = train_df.sort_values(
+                by=["session", TARGET], ascending=[True, True]
+            )
+            logging.info(train_df.shape)
+
+            del positive_class, negative_class, negative_downsample
+            gc.collect()
+
+            # X = train_df[selected_features].to_pandas()
+            # group = train_df["session"].to_pandas()
+            # y = train_df[TARGET].to_pandas()
+
+            X_train = train_df[selected_features]
+            group_train = train_df["session"]
+            y_train = train_df[TARGET]
+
             # select X & y per train & val
-            X = train_df[selected_features].to_pandas()
-            group = train_df["session"].to_pandas()
-            y = train_df[TARGET].to_pandas()
+            # X_train = train_df[selected_features].to_pandas()
+            # group_train = train_df["session"].to_pandas()
+            # y_train = train_df[TARGET].to_pandas()
+
+            X_val = val_df[selected_features]
+            group_val = val_df["session"]
+            y_val = val_df[TARGET]
 
             # split train and validation using StratifiedGroupKFold
             # X_train, X_val, y_train, y_val, group_train, group_val = train_test_split(
             #     X, y, group, test_size=0.2, stratify=y, random_state=745
             # )
 
-            skgfold = StratifiedGroupKFold(n_splits=5)
-            train_idx, val_idx = [], []
+            # skgfold = StratifiedGroupKFold(n_splits=5)
+            # train_idx, val_idx = [], []
 
-            for tidx, vidx in skgfold.split(X, y, groups=group):
-                train_idx, val_idx = tidx, vidx
+            # for tidx, vidx in skgfold.split(X, y, groups=group):
+            #     train_idx, val_idx = tidx, vidx
 
-            X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
-            y_train, y_val = y[train_idx], y[val_idx]
-            group_train, group_val = group[train_idx], group[val_idx]
+            # X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
+            # y_train, y_val = y[train_idx], y[val_idx]
+            # group_train, group_val = group[train_idx], group[val_idx]
 
             # calculate num samples per group
             logging.info("calculate num samples per group")
@@ -209,7 +258,8 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             val_score = pd.DataFrame(val_score)
             val_score_dists.append(val_score)
 
-            del train_df, X, y, X_train, X_val, y_train, y_val
+            del train_df, X_train, X_val, y_train, y_val
+            # del X, y, group
             gc.collect()
 
         # save to dict per event
@@ -283,9 +333,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         # make submission
         # append unique_model_names for make & eval submission
         make_submission(
-            click_model=unique_model_names[0],
+            click_model=unique_model_names[2],
             cart_model=unique_model_names[1],
-            order_model=unique_model_names[2],
+            order_model=unique_model_names[0],
             week_data="w2",
             week_model="w2",
         )
@@ -306,9 +356,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         # eval submission
         logging.info("start eval submission")
         eval_submission(
-            click_model=unique_model_names[0],
+            click_model=unique_model_names[2],
             cart_model=unique_model_names[1],
-            order_model=unique_model_names[2],
+            order_model=unique_model_names[0],
             week_data="w2",
             week_model="w2",
         )
@@ -343,7 +393,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 def main(
     event: str = "all", algo: str = "lgbm", week: str = "w2", n: int = 1, eval: int = 1
 ):
-    events = ["clicks", "carts", "orders"]
+    events = ["orders", "carts", "clicks"]
     if event != "all":
         events = [event]
         if eval == 1:

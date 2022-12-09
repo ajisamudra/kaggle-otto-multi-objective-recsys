@@ -23,13 +23,14 @@ class ClassifierModel(ABC):
 
 class LGBClassifier(ClassifierModel):
     def __init__(self, **kwargs):
-        self._early_stopping_rounds = kwargs.get("early_stopping_rounds", 50)
+        self._early_stopping_rounds = kwargs.get("early_stopping_rounds", 200)
         self._verbose = int(kwargs.pop("verbose", 100))
 
         self.feature_importances_ = 0
         self.best_score_ = 0
 
         kwargs["importance_type"] = "gain"
+        kwargs["n_estimators"] = 500
 
         # self._model = LGBMClassifier(**kwargs)
         self._model = LGBMClassifier(class_weight="balanced", **kwargs)
@@ -78,7 +79,7 @@ class LGBClassifier(ClassifierModel):
 
 class CatClassifier(ClassifierModel):
     def __init__(self, **kwargs):
-        self._early_stopping_rounds = kwargs.get("early_stopping_rounds", 50)
+        self._early_stopping_rounds = kwargs.get("early_stopping_rounds", 200)
         self._verbose = kwargs.pop("verbose", 100)
 
         self.feature_importances_ = None
@@ -140,7 +141,7 @@ class RankingModel(ABC):
 
 class LGBRanker(RankingModel):
     def __init__(self, **kwargs):
-        self._early_stopping_rounds = kwargs.pop("early_stopping_rounds", 50)
+        self._early_stopping_rounds = kwargs.pop("early_stopping_rounds", 200)
         self._verbose = kwargs.pop("verbose", 100)
 
         self.feature_importances_ = None
@@ -151,9 +152,9 @@ class LGBRanker(RankingModel):
 
         kwargs["importance_type"] = "gain"
         kwargs["objective"] = "rank_xendcg"
+        kwargs["n_estimators"] = 500
 
         self._model = LGBMRanker(**kwargs)
-        # if self._apply_class_weight:
         # self._model = LGBMRanker(class_weight="balanced", **kwargs)
 
     def fit(self, X_train, X_val, y_train, y_val, group_train, group_val, eval_at):
@@ -170,7 +171,7 @@ class LGBRanker(RankingModel):
                 early_stopping(
                     stopping_rounds=self._early_stopping_rounds, verbose=self._verbose
                 ),
-                log_evaluation(10),
+                log_evaluation(100),
             ],
         )
 
@@ -201,7 +202,7 @@ class LGBRanker(RankingModel):
 
 class CATRanker(RankingModel):
     def __init__(self, **kwargs):
-        self._early_stopping_rounds = kwargs.pop("early_stopping_rounds", 50)
+        self._early_stopping_rounds = kwargs.pop("early_stopping_rounds", 200)
         self._verbose = kwargs.pop("verbose", 100)
 
         kwargs["custom_metric"] = ["MAP:top=20", "NDCG:top=20"]

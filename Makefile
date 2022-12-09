@@ -49,9 +49,9 @@ train:
 	python src/training/train.py --event all --n 1 --algo $(ALGO) --week w2 --eval 1
 
 
-CLICK_MODEL="2022-12-06_clicks_lgbm_classifier_19168_70003"
-CART_MODEL="2022-12-06_carts_lgbm_classifier_9301_66562"
-ORDER_MODEL="2022-12-06_orders_lgbm_classifier_9822_65496"
+CLICK_MODEL="2022-12-09_clicks_lgbm_classifier_12209_69509"
+CART_MODEL="2022-12-09_carts_lgbm_classifier_8886_64070"
+ORDER_MODEL="2022-12-09_orders_lgbm_classifier_10050_64507"
 WEEK_DATA="w2" # w2 for validation / w1 for scoring
 score:
 	python src/scoring/score.py --event orders --week_data $(WEEK_DATA) --week_model w2 --artifact $(ORDER_MODEL)
@@ -63,3 +63,5 @@ submission:
 
 eval_submission:
 	python src/scoring/eval_submission.py --click_model $(CLICK_MODEL) --cart_model $(CART_MODEL) --order_model $(ORDER_MODEL)
+
+score_and_eval: submission eval_submission

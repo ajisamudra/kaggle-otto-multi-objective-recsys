@@ -160,7 +160,7 @@ def main(mode: str):
         pivot_candidates(
             name="train",
             is_train=True,
-            include_all_gt=True,
+            include_all_gt=False,
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
@@ -195,7 +195,7 @@ def main(mode: str):
         pivot_candidates(
             name="train",
             is_train=True,
-            include_all_gt=True,
+            include_all_gt=False,
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
