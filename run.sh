@@ -6,7 +6,6 @@
 # make item_weekday_features MODE=training_train
 # make item_covisitation_features MODE=training_train
 
-
 # # make item_features MODE=training_test
 # # make session_features MODE=training_test
 # # make session_item_features MODE=training_test
@@ -14,12 +13,12 @@
 # # make item_covisitation_features MODE=training_train
 # # make item_covisitation_features MODE=training_test
 
-# make combine_features  MODE=training_train
+make combine_features  MODE=training_train
 # # make combine_features  MODE=training_test
 
 # make eda EDA_MODE=class_dist
 
-make score_and_eval
+# make score_and_eval
 make train ALGO=lgbm_classifier
 # make train ALGO=lgbm_ranker
 # make train ALGO=cat_classifier

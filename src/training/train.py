@@ -138,7 +138,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             logging.info(
                 "downsample training data so negative class 20:1 positive class"
             )
-            desired_ratio = 20
+            desired_ratio = 10
             positive_class = train_df[train_df[TARGET] == 1]
             negative_class = train_df[train_df[TARGET] == 0]
             negative_downsample = resample(
@@ -258,7 +258,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             val_score = pd.DataFrame(val_score)
             val_score_dists.append(val_score)
 
-            del train_df, X_train, X_val, y_train, y_val
+            del train_df, val_df, X_train, X_val, y_train, y_val
             # del X, y, group
             gc.collect()
 

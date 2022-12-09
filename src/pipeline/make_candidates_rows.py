@@ -23,7 +23,11 @@ logging = get_logger()
 
 
 def pivot_candidates_list_to_rows(
-    cand_df: pd.DataFrame, is_train: bool, include_all_gt: bool, ses2truth: dict = {}
+    cand_df: pd.DataFrame,
+    is_train: bool,
+    include_all_gt: bool,
+    drop_zero_positive_sample: bool,
+    ses2truth: dict = {},
 ):
     """
     cand_df
@@ -45,16 +49,20 @@ def pivot_candidates_list_to_rows(
     candidates = []
     labels = []
 
-    logging.info(f"pivot in train_mode: {is_train} | include_all_gt: {include_all_gt}")
+    logging.info(
+        f"pivot in train_mode: {is_train} | include_all_gt: {include_all_gt} | drop_zero_positive_sample: {drop_zero_positive_sample}"
+    )
     for session in tqdm(unique_sessions):
         truths = set()
         if is_train:
             # get truths for specific session
             truths = set(ses2truth.get(session, []))
-            # if there's no truth for specific event & session
-            # drop from training data
-            if len(truths) == 0:
-                continue
+
+            if drop_zero_positive_sample:
+                # if there's no truth for specific event & session
+                # drop from training data
+                if len(truths) == 0:
+                    continue
 
         # get candidates for specific session
         cands = set(ses2candidates[session])
@@ -86,6 +94,7 @@ def pivot_candidates(
     name: str,
     is_train: bool,
     include_all_gt: bool,
+    drop_zero_positive_sample: bool,
     input_path: Path,
     output_path: Path,
     df_truth: pd.DataFrame = pd.DataFrame(),
@@ -131,6 +140,7 @@ def pivot_candidates(
                 cand_df=df,
                 is_train=is_train,
                 include_all_gt=include_all_gt,
+                drop_zero_positive_sample=drop_zero_positive_sample,
                 ses2truth=ses2truth,
             )
 
@@ -161,6 +171,7 @@ def main(mode: str):
             name="train",
             is_train=True,
             include_all_gt=False,
+            drop_zero_positive_sample=True,
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
@@ -179,6 +190,7 @@ def main(mode: str):
             name="test",
             is_train=True,
             include_all_gt=False,
+            drop_zero_positive_sample=True,
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
@@ -196,6 +208,7 @@ def main(mode: str):
             name="train",
             is_train=True,
             include_all_gt=False,
+            drop_zero_positive_sample=True,
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
@@ -209,6 +222,7 @@ def main(mode: str):
             name="test",
             is_train=False,
             include_all_gt=False,
+            drop_zero_positive_sample=False,
             input_path=input_path,
             output_path=output_path,
         )
