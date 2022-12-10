@@ -199,7 +199,6 @@ def perform_tuning(algo: str, events: list, k: int, n_estimators: int, n_trial: 
         filepath = artifact_path / unique_model_name
         check_directory(filepath)
         logging.info(f"saving artifacts to: {filepath}")
-
         hyper_path = f"{filepath}/tuned_hyperparams.json"
         write_json(filepath=hyper_path, data=best_hyperparams)
 

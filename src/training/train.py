@@ -86,20 +86,76 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             model: Union[ClassifierModel, RankingModel]
             # hyperparams click
 
+            hyperparams = {}
             if algo == "lgbm_classifier":
-                model = LGBClassifier()
-            elif algo == "cat_classifier":
-                model = CatClassifier()
+                if EVENT == "orders":
+                    hyperparams = {
+                        "n_estimators": 500,
+                        "learning_rate": 0.05479523964757477,
+                        "max_depth": 7,
+                        "num_leaves": 40,
+                        "min_data_in_leaf": 560,
+                        "feature_fraction": 0.849801842682232,
+                        "bagging_fraction": 0.8599407686777631,
+                    }
+                elif EVENT == "carts":
+                    hyperparams = {
+                        "n_estimators": 500,
+                        "learning_rate": 0.023284940416743508,
+                        "max_depth": 2,
+                        "num_leaves": 39,
+                        "min_data_in_leaf": 435,
+                        "feature_fraction": 0.7118135289194919,
+                        "bagging_fraction": 0.8703404040978261,
+                    }
+                elif EVENT == "clicks":
+                    hyperparams = {
+                        "n_estimators": 500,
+                        "learning_rate": 0.03165988766745295,
+                        "max_depth": 5,
+                        "num_leaves": 102,
+                        "min_data_in_leaf": 416,
+                        "feature_fraction": 0.7231413635494773,
+                        "bagging_fraction": 0.7577740460272675,
+                    }
             elif algo == "lgbm_ranker":
-                model = LGBRanker()
+                if EVENT == "orders":
+                    hyperparams = {}
+                elif EVENT == "carts":
+                    hyperparams = {}
+                elif EVENT == "clicks":
+                    hyperparams = {}
+
+            if algo == "lgbm_classifier":
+                model = LGBClassifier(**hyperparams)
+            elif algo == "cat_classifier":
+                model = CatClassifier(**hyperparams)
+            elif algo == "lgbm_ranker":
+                model = LGBRanker(**hyperparams)
             elif algo == "cat_ranker":
-                model = CATRanker()
+                model = CATRanker(**hyperparams)
             else:
                 raise NotImplementedError("algorithm not implemented! (lgbm/catboost)")
 
             logging.info(f"read training data for chunk: {IX}")
-            filepath = f"{input_path}/train_{IX}_{EVENT}_combined.parquet"
-            train_df = pl.read_parquet(filepath)
+
+            if EVENT == "orders":
+                train_df = pl.DataFrame()
+                for i in range(10):
+                    filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    train_df = pl.concat([train_df, df_chunk])
+
+            elif EVENT == "carts":
+                train_df = pl.DataFrame()
+                for i in range(10):
+                    filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    train_df = pl.concat([train_df, df_chunk])
+            else:
+                filepath = f"{input_path}/train_{IX}_{EVENT}_combined.parquet"
+                train_df = pl.read_parquet(filepath)
+
             logging.info(train_df.shape)
 
             logging.info(f"read validation data for chunk: {IX}")
@@ -159,18 +215,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             del positive_class, negative_class, negative_downsample
             gc.collect()
 
-            # X = train_df[selected_features].to_pandas()
-            # group = train_df["session"].to_pandas()
-            # y = train_df[TARGET].to_pandas()
-
             X_train = train_df[selected_features]
             group_train = train_df["session"]
             y_train = train_df[TARGET]
-
-            # select X & y per train & val
-            # X_train = train_df[selected_features].to_pandas()
-            # group_train = train_df["session"].to_pandas()
-            # y_train = train_df[TARGET].to_pandas()
 
             X_val = val_df[selected_features]
             group_val = val_df["session"]
@@ -180,6 +227,10 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             # X_train, X_val, y_train, y_val, group_train, group_val = train_test_split(
             #     X, y, group, test_size=0.2, stratify=y, random_state=745
             # )
+
+            # X = train_df[selected_features]
+            # group = train_df["session"]
+            # y = train_df[TARGET]
 
             # skgfold = StratifiedGroupKFold(n_splits=5)
             # train_idx, val_idx = [], []
@@ -258,8 +309,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             val_score = pd.DataFrame(val_score)
             val_score_dists.append(val_score)
 
-            del train_df, val_df, X_train, X_val, y_train, y_val
+            del train_df, X_train, X_val, y_train, y_val
             # del X, y, group
+            del val_df
             gc.collect()
 
         # save to dict per event

@@ -173,6 +173,12 @@ def fcombine_features(mode: str, event: str, ix: int):
             pl.col("sesXaid_type_weighted_log_recency_score")
             .fill_null(0)
             .alias("sesXaid_type_weighted_log_recency_score"),
+            pl.col("sesXaid_log_recency_score")
+            .fill_null(0)
+            .alias("sesXaid_log_recency_score"),
+            pl.col("sesXaid_action_num_reverse_chrono")
+            .fill_null(500)
+            .alias("sesXaid_action_num_reverse_chrono"),
             pl.col("sesXaid_mins_from_last_event")
             .fill_null(9999.0)
             .alias("sesXaid_mins_from_last_event"),
