@@ -16,6 +16,7 @@ from src.utils.constants import (
     get_processed_scoring_test_sess_item_features_dir,
 )
 from src.features.preprocess_events import preprocess_events
+from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -140,6 +141,7 @@ def make_session_item_features(
 
         logging.info(f"start creating sessionXaid features")
         df_output = gen_session_item_features(data=df)
+        df_output = freemem(df_output)
 
         filepath = output_path / f"{name}_{ix}_session_item_feas.parquet"
         logging.info(f"save chunk to: {filepath}")

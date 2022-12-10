@@ -38,7 +38,7 @@ from src.utils.constants import (
     get_processed_scoring_train_dataset_dir,
     get_processed_scoring_test_dataset_dir,
 )
-
+from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -168,20 +168,54 @@ def fcombine_features(mode: str, event: str, ix: int):
     )
     logging.info(f"joined with sessionXaid features! shape {cand_df.shape}")
 
+    # get ratio of sesXaid_mins_from_last_event with sess_durations
     cand_df = cand_df.with_columns(
         [
+            (pl.col("sesXaid_mins_from_last_event") / pl.col("sess_duration_mins"))
+            .fill_null(99999)
+            .alias("sesXaid_frac_mins_from_last_event_to_sess_duration")
+        ]
+    )
+
+    cand_df = cand_df.with_columns(
+        [
+            # the higher the better, fill_null with 0
             pl.col("sesXaid_type_weighted_log_recency_score")
             .fill_null(0)
             .alias("sesXaid_type_weighted_log_recency_score"),
             pl.col("sesXaid_log_recency_score")
             .fill_null(0)
             .alias("sesXaid_log_recency_score"),
+            pl.col("sesXaid_events_count").fill_null(0).alias("sesXaid_events_count"),
+            pl.col("sesXaid_click_count").fill_null(0).alias("sesXaid_click_count"),
+            pl.col("sesXaid_cart_count").fill_null(0).alias("sesXaid_cart_count"),
+            pl.col("sesXaid_order_count").fill_null(0).alias("sesXaid_order_count"),
+            pl.col("sesXaid_avg_click_dur_sec")
+            .fill_null(0)
+            .alias("sesXaid_avg_click_dur_sec"),
+            pl.col("sesXaid_avg_cart_dur_sec")
+            .fill_null(0)
+            .alias("sesXaid_avg_cart_dur_sec"),
+            pl.col("sesXaid_avg_order_dur_sec")
+            .fill_null(0)
+            .alias("sesXaid_avg_order_dur_sec"),
+            pl.col("sesXaid_type_dcount").fill_null(0).alias("sesXaid_type_dcount"),
+            pl.col("sesXaid_log_duration_second_log2p1")
+            .fill_null(0)
+            .alias("sesXaid_log_duration_second_log2p1"),
+            pl.col("sesXaid_type_weighted_log_duration_second_log2p1")
+            .fill_null(0)
+            .alias("sesXaid_type_weighted_log_duration_second_log2p1"),
+            # the lower the better, fill_null with high number
             pl.col("sesXaid_action_num_reverse_chrono")
             .fill_null(500)
             .alias("sesXaid_action_num_reverse_chrono"),
             pl.col("sesXaid_mins_from_last_event")
             .fill_null(9999.0)
             .alias("sesXaid_mins_from_last_event"),
+            pl.col("sesXaid_mins_from_last_event_log1p")
+            .fill_null(99.0)
+            .alias("sesXaid_mins_from_last_event_log1p"),
         ]
     )
     cand_df = cand_df.fill_null(-99)
@@ -231,7 +265,7 @@ def fcombine_features(mode: str, event: str, ix: int):
             .alias("sessXitem_abs_diff_avg_weekday_order"),
         ]
     )
-    cand_df = cand_df.fill_null(-99)
+    cand_df = cand_df.fill_null(0)
 
     # read item-hour features
     item_hour_agg = pl.read_parquet(itemXhour_path)
@@ -241,7 +275,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         how="left",
         left_on=["candidate_aid", "sess_hour"],
         right_on=["aid", "hour"],
-    ).fill_null(-99)
+    ).fill_null(0)
     logging.info(f"joined with item-hour features! shape {cand_df.shape}")
 
     del item_hour_agg
@@ -255,7 +289,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         how="left",
         left_on=["candidate_aid", "sess_weekday"],
         right_on=["aid", "weekday"],
-    ).fill_null(-99)
+    ).fill_null(0)
     logging.info(f"joined with item-weekday features! shape {cand_df.shape}")
 
     del item_weekday_agg
@@ -263,6 +297,7 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     filepath = f"{output_path}/{name}_{ix}_{event}_combined.parquet"
     logging.info(f"save chunk to: {filepath}")
+    cand_df = freemem(cand_df)
     cand_df.write_parquet(f"{filepath}")
     logging.info(f"output df shape {cand_df.shape}")
 

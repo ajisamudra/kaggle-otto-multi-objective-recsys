@@ -15,6 +15,7 @@ from src.utils.constants import (
     get_processed_scoring_test_item_features_dir,
 )
 from src.features.preprocess_events import preprocess_events
+from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -73,13 +74,15 @@ def gen_item_features(data: pl.DataFrame):
     data_agg = data_agg.with_columns(
         [
             (pl.col("item_cart_count") / pl.col("item_click_count"))
-            .fill_nan(0)
+            .fill_null(0)
             .alias("item_click_to_cart_cvr"),
             (pl.col("item_order_count") / pl.col("item_cart_count"))
-            .fill_nan(0)
+            .fill_null(0)
             .alias("item_cart_to_order_cvr"),
         ],
     )
+
+    data_agg = data_agg.fill_nan(0)
 
     return data_agg
 
@@ -104,6 +107,7 @@ def make_session_features(
 
         logging.info(f"start creating item features")
         df_output = gen_item_features(data=df)
+        df_output = freemem(df_output)
 
         filepath = output_path / f"{name}_{ix}_item_feas.parquet"
         logging.info(f"save chunk to: {filepath}")

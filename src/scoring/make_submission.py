@@ -16,7 +16,7 @@ from src.utils.constants import (
     get_data_output_submission_dir,
     ROOT_DIR,
 )
-
+from src.utils.memory import freemem
 
 from src.utils.logger import get_logger
 
@@ -76,6 +76,7 @@ def make_submission(
             event="submission", model=model_name, week_model=week_model
         )
     filepath = f"{output_path}/submission.csv"
+    df = freemem(df)
     df.write_csv(f"{filepath}")
     logging.info(f"save prediction submission to: {filepath}")
     logging.info(f"output df shape {df.shape}")

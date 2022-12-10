@@ -24,6 +24,7 @@ from src.utils.data import (
     get_top20_covisitation_click_df,
 )
 from src.features.preprocess_events import preprocess_events
+from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -338,6 +339,7 @@ def gen_item_covisitation_features(
         # save item covisitation features
         filepath = output_path / f"{name}_{ix}_{event}_item_covisitation_feas.parquet"
         logging.info(f"save chunk to: {filepath}")
+        cand_df = freemem(cand_df)
         cand_df.write_parquet(f"{filepath}")
         logging.info(f"output df shape {cand_df.shape}")
 

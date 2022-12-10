@@ -14,6 +14,7 @@ from src.utils.constants import (
     get_processed_scoring_train_splitted_dir,
     get_processed_scoring_test_splitted_dir,
 )
+from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -86,6 +87,7 @@ def split_data_into_chunks(data: pl.DataFrame, name: str, output_path: Path):
         logging.info(subset_of_data["type"].value_counts(sort=True))
         filepath = output_path / f"{name}_{ix}.parquet"
         logging.info(f"save chunk {ix} to: {filepath}")
+        subset_of_data = freemem(subset_of_data)
         subset_of_data.write_parquet(f"{filepath}")
 
 

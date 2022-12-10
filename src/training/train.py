@@ -158,16 +158,15 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
             logging.info(train_df.shape)
 
+            # sort data based on session & label
+            train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
+            train_df = train_df.to_pandas()
+
             logging.info(f"read validation data for chunk: {IX}")
             filepath = f"{val_path}/test_{IX}_{EVENT}_combined.parquet"
             val_df = pl.read_parquet(filepath)
             logging.info(val_df.shape)
-
-            # sort data based on session & label
-            train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
             val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
-
-            train_df = train_df.to_pandas()
             val_df = val_df.to_pandas()
 
             selected_features = list(train_df.columns)
@@ -191,29 +190,29 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
             selected_features.remove(TARGET)
 
-            logging.info(
-                "downsample training data so negative class 20:1 positive class"
-            )
-            desired_ratio = 20
-            positive_class = train_df[train_df[TARGET] == 1]
-            negative_class = train_df[train_df[TARGET] == 0]
-            negative_downsample = resample(
-                negative_class,
-                replace=False,
-                n_samples=len(positive_class) * desired_ratio,
-                random_state=777,
-            )
+            # logging.info(
+            #     "downsample training data so negative class 20:1 positive class"
+            # )
+            # desired_ratio = 20
+            # positive_class = train_df[train_df[TARGET] == 1]
+            # negative_class = train_df[train_df[TARGET] == 0]
+            # negative_downsample = resample(
+            #     negative_class,
+            #     replace=False,
+            #     n_samples=len(positive_class) * desired_ratio,
+            #     random_state=777,
+            # )
 
-            train_df = pd.concat(
-                [positive_class, negative_downsample], ignore_index=True
-            )
-            train_df = train_df.sort_values(
-                by=["session", TARGET], ascending=[True, True]
-            )
-            logging.info(train_df.shape)
+            # train_df = pd.concat(
+            #     [positive_class, negative_downsample], ignore_index=True
+            # )
+            # train_df = train_df.sort_values(
+            #     by=["session", TARGET], ascending=[True, True]
+            # )
+            # logging.info(train_df.shape)
 
-            del positive_class, negative_class, negative_downsample
-            gc.collect()
+            # del positive_class, negative_class, negative_downsample
+            # gc.collect()
 
             X_train = train_df[selected_features]
             group_train = train_df["session"]

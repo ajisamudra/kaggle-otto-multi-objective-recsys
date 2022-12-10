@@ -15,6 +15,7 @@ from src.utils.constants import (
     get_processed_scoring_test_item_hour_features_dir,
 )
 from src.features.preprocess_events import preprocess_events
+from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -47,6 +48,18 @@ def gen_item_hour_features(data: pl.DataFrame):
     # conversion rate per event
     data_agg = data_agg.with_columns(
         [
+            pl.col("itemXhour_click_count")
+            .sum()
+            .over("aid")
+            .alias("itemXhour_all_click_count"),
+            pl.col("itemXhour_cart_count")
+            .sum()
+            .over("aid")
+            .alias("itemXhour_all_cart_count"),
+            pl.col("itemXhour_order_count")
+            .sum()
+            .over("aid")
+            .alias("itemXhour_all_order_count"),
             (pl.col("itemXhour_cart_count") / pl.col("itemXhour_click_count"))
             .fill_nan(0)
             .alias("itemXhour_click_to_cart_cvr"),
@@ -54,6 +67,30 @@ def gen_item_hour_features(data: pl.DataFrame):
             .fill_nan(0)
             .alias("itemXhour_cart_to_order_cvr"),
         ],
+    )
+
+    # frac event per hour
+    data_agg = data_agg.with_columns(
+        [
+            (pl.col("itemXhour_click_count") / pl.col("itemXhour_all_click_count"))
+            .fill_nan(0)
+            .alias("itemXhour_frac_click_all_click_count"),
+            (pl.col("itemXhour_cart_count") / pl.col("itemXhour_all_cart_count"))
+            .fill_nan(0)
+            .alias("itemXhour_frac_cart_all_cart_count"),
+            (pl.col("itemXhour_order_count") / pl.col("itemXhour_all_order_count"))
+            .fill_nan(0)
+            .alias("itemXhour_frac_order_all_order_count"),
+        ],
+    )
+
+    # drop cols
+    data_agg = data_agg.drop(
+        columns=[
+            "itemXhour_all_click_count",
+            "itemXhour_all_cart_count",
+            "itemXhour_all_order_count",
+        ]
     )
 
     return data_agg
@@ -79,6 +116,7 @@ def make_session_features(
 
         logging.info(f"start creating item features")
         df_output = gen_item_hour_features(data=df)
+        df_output = freemem(df_output)
 
         filepath = output_path / f"{name}_{ix}_item_hour_feas.parquet"
         logging.info(f"save chunk to: {filepath}")
