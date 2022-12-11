@@ -218,7 +218,7 @@ def fcombine_features(mode: str, event: str, ix: int):
             .alias("sesXaid_mins_from_last_event_log1p"),
         ]
     )
-    cand_df = cand_df.fill_null(-99)
+    cand_df = cand_df.fill_null(0)
 
     del ses_aid_agg
     gc.collect()

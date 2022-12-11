@@ -54,7 +54,7 @@ def gen_session_item_features(data: pl.DataFrame):
             (pl.col("type") == 0).sum().alias("sesXaid_click_count"),
             (pl.col("type") == 1).sum().alias("sesXaid_cart_count"),
             (pl.col("type") == 2).sum().alias("sesXaid_order_count"),
-            # duration per event type
+            # avg duration per event type
             pl.col("duration_second")
             .filter(pl.col("type") == 0)
             .mean()
@@ -70,6 +70,24 @@ def gen_session_item_features(data: pl.DataFrame):
             .mean()
             .fill_null(0)
             .alias("sesXaid_avg_order_dur_sec"),
+            # sum duration per event type
+            pl.col("duration_second")
+            .filter(pl.col("type") == 0)
+            .sum()
+            .fill_null(0)
+            .alias("sesXaid_sum_click_dur_sec"),
+            pl.col("duration_second")
+            .filter(pl.col("type") == 1)
+            .sum()
+            .fill_null(0)
+            .alias("sesXaid_sum_cart_dur_sec"),
+            pl.col("duration_second")
+            .filter(pl.col("type") == 2)
+            .sum()
+            .fill_null(0)
+            .alias("sesXaid_sum_order_dur_sec"),
+            # total duration
+            pl.col("duration_second").sum().fill_null(0).alias("sesXaid_sum_dur_sec"),
             # event type
             pl.col("type").n_unique().alias("sesXaid_type_dcount"),
             # sum of log_recency_score & type_weighted_log_recency_score
@@ -112,7 +130,7 @@ def gen_session_item_features(data: pl.DataFrame):
     # fraction of event to all event in session
     data_agg = data_agg.with_columns(
         [
-            # window session
+            # window event count session
             pl.col("sesXaid_click_count")
             .sum()
             .over("session")
@@ -125,6 +143,40 @@ def gen_session_item_features(data: pl.DataFrame):
             .sum()
             .over("session")
             .alias("sesXaid_all_order_count"),
+            # window duration in session
+            pl.col("sesXaid_sum_dur_sec")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_duration_second"),
+            pl.col("sesXaid_sum_click_dur_sec")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_sum_click_dur_sec"),
+            pl.col("sesXaid_sum_cart_dur_sec")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_sum_cart_dur_sec"),
+            pl.col("sesXaid_sum_order_dur_sec")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_sum_order_dur_sec"),
+            # window log recency score
+            pl.col("sesXaid_log_recency_score")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_log_recency_score"),
+            pl.col("sesXaid_type_weighted_log_recency_score")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_type_weighted_log_recency_score"),
+            pl.col("sesXaid_log_duration_second")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_log_duration_second"),
+            pl.col("sesXaid_type_weighted_log_duration_second")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_type_weighted_log_duration_second"),
         ],
     )
 
@@ -150,6 +202,66 @@ def gen_session_item_features(data: pl.DataFrame):
             (pl.col("sesXaid_order_count") / pl.col("sesXaid_events_count"))
             .fill_nan(0)
             .alias("sesXaid_frac_order_all_events_count"),
+            # frac to all duration event
+            (
+                pl.col("sesXaid_sum_click_dur_sec")
+                / pl.col("sesXaid_all_duration_second")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_dur_click_all_dur_sec"),
+            (pl.col("sesXaid_sum_cart_dur_sec") / pl.col("sesXaid_all_duration_second"))
+            .fill_nan(0)
+            .alias("sesXaid_frac_dur_cart_all_dur_sec"),
+            (
+                pl.col("sesXaid_sum_order_dur_sec")
+                / pl.col("sesXaid_all_duration_second")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_dur_order_all_dur_sec"),
+            # frac to total duration specific event
+            (
+                pl.col("sesXaid_sum_click_dur_sec")
+                / pl.col("sesXaid_all_sum_click_dur_sec")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_dur_click_all_dur_sec"),
+            (
+                pl.col("sesXaid_sum_cart_dur_sec")
+                / pl.col("sesXaid_all_sum_cart_dur_sec")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_dur_cart_all_dur_sec"),
+            (
+                pl.col("sesXaid_sum_order_dur_sec")
+                / pl.col("sesXaid_all_sum_order_dur_sec")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_dur_order_all_dur_sec"),
+            # frac to total log_recency_score
+            (
+                pl.col("sesXaid_log_recency_score")
+                / pl.col("sesXaid_all_log_recency_score")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_log_recency_to_all"),
+            (
+                pl.col("sesXaid_type_weighted_log_recency_score")
+                / pl.col("sesXaid_all_type_weighted_log_recency_score")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_type_weighted_log_recency_to_all"),
+            (
+                pl.col("sesXaid_log_duration_second")
+                / pl.col("sesXaid_all_log_duration_second")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_log_duration_sec_to_all"),
+            (
+                pl.col("sesXaid_type_weighted_log_duration_second")
+                / pl.col("sesXaid_all_type_weighted_log_duration_second")
+            )
+            .fill_nan(0)
+            .alias("sesXaid_frac_type_weighted_log_duration_sec_to_all"),
         ],
     )
 
@@ -162,6 +274,14 @@ def gen_session_item_features(data: pl.DataFrame):
             "sesXaid_all_click_count",
             "sesXaid_all_cart_count",
             "sesXaid_all_order_count",
+            "sesXaid_all_duration_second",
+            "sesXaid_all_sum_click_dur_sec",
+            "sesXaid_all_sum_cart_dur_sec",
+            "sesXaid_all_sum_order_dur_sec",
+            "sesXaid_all_log_recency_score",
+            "sesXaid_all_type_weighted_log_recency_score",
+            "sesXaid_all_log_duration_second",
+            "sesXaid_all_type_weighted_log_duration_second",
         ]
     )
 
