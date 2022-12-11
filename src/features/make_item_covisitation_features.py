@@ -346,6 +346,9 @@ def gen_item_covisitation_features(
         del cand_df
         gc.collect()
 
+    del data_aids, data_agg
+    gc.collect()
+
 
 def make_item_covisitation_features(
     name: str,
