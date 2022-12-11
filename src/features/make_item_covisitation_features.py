@@ -355,23 +355,30 @@ def make_item_covisitation_features(
     input_path: Path,
     candidate_path: Path,
     output_path: Path,
+    istart: int,
+    iend: int,
 ):
 
     if name == "train":
         n = CFG.N_train
+        logging.info("read local covisitation buys")
+        top_15_buys = get_top15_covisitation_buys_df()
+        logging.info("read local covisitation buy2buy")
+        top_15_buy2buy = get_top15_covisitation_buy2buy_df()
+        logging.info("read local covisitation click")
+        top_20_clicks = get_top20_covisitation_click_df()
     else:
         n = CFG.N_test
-
-    logging.info("read covisitation buys")
-    top_15_buys = get_top15_covisitation_buys_df()
-    logging.info("read covisitation buy2buy")
-    top_15_buy2buy = get_top15_covisitation_buy2buy_df()
-    logging.info("read covisitation click")
-    top_20_clicks = get_top20_covisitation_click_df()
+        logging.info("read scoring covisitation buys")
+        top_15_buys = get_top15_covisitation_buys_df(mode="scoring")
+        logging.info("read scoring covisitation buy2buy")
+        top_15_buy2buy = get_top15_covisitation_buy2buy_df(mode="scoring")
+        logging.info("read scoring covisitation click")
+        top_20_clicks = get_top20_covisitation_click_df(mode="scoring")
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
-    for ix in tqdm(range(n)):
+    for ix in tqdm(range(istart, iend)):
         # logging.info(f"chunk {ix}: read input")
         filepath = f"{input_path}/{name}_{ix}.parquet"
         df = pl.read_parquet(filepath)
@@ -397,7 +404,15 @@ def make_item_covisitation_features(
     "--mode",
     help="avaiable mode: training_train/training_test/scoring_train/scoring_test",
 )
-def main(mode: str):
+@click.option(
+    "--istart",
+    help="index start",
+)
+@click.option(
+    "--iend",
+    help="index end",
+)
+def main(mode: str, istart: int, iend: int):
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()
         output_path = get_processed_training_train_item_covisitation_features_dir()
@@ -409,6 +424,8 @@ def main(mode: str):
             input_path=input_path,
             candidate_path=candidate_path,
             output_path=output_path,
+            istart=istart,
+            iend=iend,
         )
 
     elif mode == "training_test":
@@ -422,6 +439,8 @@ def main(mode: str):
             input_path=input_path,
             candidate_path=candidate_path,
             output_path=output_path,
+            istart=istart,
+            iend=iend,
         )
 
     elif mode == "scoring_train":
@@ -435,6 +454,8 @@ def main(mode: str):
             input_path=input_path,
             candidate_path=candidate_path,
             output_path=output_path,
+            istart=istart,
+            iend=iend,
         )
 
     elif mode == "scoring_test":
@@ -448,6 +469,8 @@ def main(mode: str):
             input_path=input_path,
             candidate_path=candidate_path,
             output_path=output_path,
+            istart=istart,
+            iend=iend,
         )
 
 

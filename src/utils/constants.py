@@ -6,8 +6,8 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 
 
 class CFG:
-    N_test = 40
-    N_train = 10
+    N_test = 60
+    N_train = 30
 
 
 ### Create directory
@@ -43,8 +43,13 @@ def get_full_data_dir() -> Path:
     return path
 
 
-def get_covisitation_dir() -> Path:
-    path = ROOT_DIR / "data" / "processed" / "co-visitation"
+def get_scoring_covisitation_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "raw-data" / "co-visitation"
+    return path
+
+
+def get_local_covisitation_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "local-validation" / "co-visitation"
     return path
 
 

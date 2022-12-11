@@ -77,7 +77,7 @@ def generate_candidates_covisitation(
             logging.info(f"start of suggesting {event}")
             if event == "clicks":
                 candidates_list = suggest_clicks(
-                    n_candidate=40,
+                    n_candidate=80,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     top_clicks=top_clicks,
@@ -85,7 +85,7 @@ def generate_candidates_covisitation(
                 )
             elif event == "carts":
                 candidates_list = suggest_carts(
-                    n_candidate=40,
+                    n_candidate=80,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     top_carts=top_carts,
@@ -94,7 +94,7 @@ def generate_candidates_covisitation(
                 )
             elif event == "orders":
                 candidates_list = suggest_buys(
-                    n_candidate=40,
+                    n_candidate=80,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     top_orders=top_orders,
@@ -122,12 +122,21 @@ def generate_candidates_covisitation(
     help="avaiable mode: training_train/training_test/scoring_train/scoring_test",
 )
 def main(mode: str):
-    logging.info("read covisitation buys")
-    top_15_buys = get_top15_covisitation_buys()
-    logging.info("read covisitation buy2buy")
-    top_15_buy2buy = get_top15_covisitation_buy2buy()
-    logging.info("read covisitation click")
-    top_20_clicks = get_top20_covisitation_click()
+
+    if mode in ["training_train", "training_test"]:
+        logging.info("read local covisitation buys")
+        top_15_buys = get_top15_covisitation_buys()
+        logging.info("read local covisitation buy2buy")
+        top_15_buy2buy = get_top15_covisitation_buy2buy()
+        logging.info("read local covisitation click")
+        top_20_clicks = get_top20_covisitation_click()
+    else:
+        logging.info("read scoring covisitation buys")
+        top_15_buys = get_top15_covisitation_buys(mode="scoring")
+        logging.info("read scoring covisitation buy2buy")
+        top_15_buy2buy = get_top15_covisitation_buy2buy(mode="scoring")
+        logging.info("read scoring covisitation click")
+        top_20_clicks = get_top20_covisitation_click(mode="scoring")
 
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()

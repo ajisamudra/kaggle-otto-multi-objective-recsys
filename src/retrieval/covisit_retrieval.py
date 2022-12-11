@@ -38,7 +38,8 @@ def suggest_clicks(
     sessions = []
     candidates = []
     for session, aids in tqdm(ses2aids.items()):
-        unique_aids = set(aids)
+        # unique_aids = set(aids)
+        unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
 
         # RERANK CANDIDATES USING WEIGHTS
@@ -96,7 +97,8 @@ def suggest_carts(
     candidates = []
     for session, aids in tqdm(ses2aids.items()):
         unique_buys = []
-        unique_aids = set(aids)
+        # unique_aids = set(aids)
+        unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
         for ix, aid in enumerate(aids):
             curr_type = types[ix]
@@ -177,7 +179,8 @@ def suggest_buys(
     candidates = []
     for session, aids in tqdm(ses2aids.items()):
         unique_buys = []
-        unique_aids = set(aids)
+        # unique_aids = set(aids)
+        unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
         for ix, aid in enumerate(aids):
             curr_type = types[ix]
@@ -286,7 +289,7 @@ if __name__ == "__main__":
 
     logging.info("start of suggesting clicks")
     pred_df_clicks = suggest_clicks(
-        n_candidate=30,
+        n_candidate=20,
         ses2aids=ses2aids,
         ses2types=ses2types,
         top_clicks=top_clicks,
@@ -296,7 +299,7 @@ if __name__ == "__main__":
 
     logging.info("start of suggesting carts")
     pred_df_carts = suggest_carts(
-        n_candidate=30,
+        n_candidate=20,
         ses2aids=ses2aids,
         ses2types=ses2types,
         top_carts=top_carts,
@@ -308,7 +311,7 @@ if __name__ == "__main__":
 
     logging.info("start of suggesting buys")
     pred_df_buys = suggest_buys(
-        n_candidate=30,
+        n_candidate=20,
         ses2aids=ses2aids,
         ses2types=ses2types,
         top_orders=top_orders,
@@ -352,8 +355,36 @@ if __name__ == "__main__":
     logging.info("start computing metrics")
     # COMPUTE METRIC
     test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
-    measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30])
+    measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20])
 # measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 30, 40])
+
+# ver 7
+# [2022-12-12 00:33:00,597] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5260462058837938
+# [2022-12-12 00:33:00,598] {submission_evaluation.py:84} INFO - clicks hits@20 = 923492 / gt@20 = 1755534
+# [2022-12-12 00:33:00,598] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.5260462058837938
+# [2022-12-12 00:34:10,078] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.5501018332046964
+# [2022-12-12 00:34:10,083] {submission_evaluation.py:84} INFO - carts hits@20 = 235767 / gt@20 = 576482
+# [2022-12-12 00:34:10,083] {submission_evaluation.py:85} INFO - carts recall@20 = 0.4089754753834465
+# [2022-12-12 00:34:25,178] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.7333867004777302
+# [2022-12-12 00:34:25,179] {submission_evaluation.py:84} INFO - orders hits@20 = 203277 / gt@20 = 313303
+# [2022-12-12 00:34:25,179] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6488191941985874
+# [2022-12-12 00:34:25,180] {submission_evaluation.py:91} INFO - =============
+# [2022-12-12 00:34:25,180] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.5645887797225657
+# [2022-12-12 00:34:25,180] {submission_evaluation.py:93} INFO - =============
+
+# ver 6
+# [2022-12-12 00:49:45,642] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5255751241502585
+# [2022-12-12 00:49:45,643] {submission_evaluation.py:84} INFO - clicks hits@20 = 922665 / gt@20 = 1755534
+# [2022-12-12 00:49:45,643] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.5255751241502585
+# [2022-12-12 00:50:56,982] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.5508109000827096
+# [2022-12-12 00:50:56,985] {submission_evaluation.py:84} INFO - carts hits@20 = 236111 / gt@20 = 576482
+# [2022-12-12 00:50:56,985] {submission_evaluation.py:85} INFO - carts recall@20 = 0.4095721982646466
+# [2022-12-12 00:51:16,101] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.7329741134290875
+# [2022-12-12 00:51:16,103] {submission_evaluation.py:84} INFO - orders hits@20 = 203307 / gt@20 = 313303
+# [2022-12-12 00:51:16,103] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6489149481492357
+# [2022-12-12 00:51:16,104] {submission_evaluation.py:91} INFO - =============
+# [2022-12-12 00:51:16,104] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.5647781407839612
+# [2022-12-12 00:51:16,104] {submission_evaluation.py:93} INFO - =============
 
 ## Add suggest Cart and see Recall@20/30/40/50
 # using co-visitation LB 565 & type_weight_multipliers = {0: 1, 1: 6, 2: 3}
@@ -436,3 +467,53 @@ if __name__ == "__main__":
 # [2022-12-01 23:39:23,174] {submission_evaluation.py:88} INFO - Overall Recall@20 = 0.6129915377520061
 
 # 2022-12-01 -> decide using co-visitation LB 565 & type_weight_multipliers = {0: 1, 1: 6, 2: 3}
+
+# [2022-12-11 21:20:59,774] {submission_evaluation.py:38} INFO - create prediction type column
+# [2022-12-11 21:21:45,607] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5150541088922231
+# [2022-12-11 21:21:45,617] {submission_evaluation.py:84} INFO - clicks hits@20 = 904195 / gt@20 = 1755534
+# [2022-12-11 21:21:45,617] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.5150541088922231
+# [2022-12-11 21:26:06,159] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.5451934512162289
+# [2022-12-11 21:26:06,186] {submission_evaluation.py:84} INFO - carts hits@20 = 233345 / gt@20 = 576482
+# [2022-12-11 21:26:06,186] {submission_evaluation.py:85} INFO - carts recall@20 = 0.4047741299815085
+# [2022-12-11 21:26:34,826] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.729704410268415
+# [2022-12-11 21:26:34,837] {submission_evaluation.py:84} INFO - orders hits@20 = 202370 / gt@20 = 313303
+# [2022-12-11 21:26:34,837] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6459242330906503
+# [2022-12-11 21:26:34,837] {submission_evaluation.py:91} INFO - =============
+# [2022-12-11 21:26:34,837] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.560492189738065
+# [2022-12-11 21:26:34,838] {submission_evaluation.py:93} INFO - =============
+# [2022-12-11 21:27:49,120] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@50 = 0.5588202791857064
+# [2022-12-11 21:27:49,123] {submission_evaluation.py:84} INFO - clicks hits@50 = 981028 / gt@50 = 1755534
+# [2022-12-11 21:27:49,123] {submission_evaluation.py:85} INFO - clicks recall@50 = 0.5588202791857064
+# [2022-12-11 21:32:18,470] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@50 = 0.5901398672620644
+# [2022-12-11 21:32:18,489] {submission_evaluation.py:84} INFO - carts hits@50 = 260741 / gt@50 = 576482
+# [2022-12-11 21:32:18,489] {submission_evaluation.py:85} INFO - carts recall@50 = 0.4522968626947589
+# [2022-12-11 21:33:03,868] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@50 = 0.7508805555376429
+# [2022-12-11 21:33:03,871] {submission_evaluation.py:84} INFO - orders hits@50 = 210698 / gt@50 = 313303
+# [2022-12-11 21:33:03,871] {submission_evaluation.py:85} INFO - orders recall@50 = 0.6725055297906499
+# [2022-12-11 21:33:03,872] {submission_evaluation.py:91} INFO - =============
+# [2022-12-11 21:33:03,874] {submission_evaluation.py:92} INFO - Overall Recall@50 = 0.5950744046013883
+# [2022-12-11 21:33:03,874] {submission_evaluation.py:93} INFO - =============
+# [2022-12-11 21:38:21,427] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@80 = 0.5672479143098339
+# [2022-12-11 21:38:21,550] {submission_evaluation.py:84} INFO - clicks hits@80 = 995823 / gt@80 = 1755534
+# [2022-12-11 21:38:21,551] {submission_evaluation.py:85} INFO - clicks recall@80 = 0.5672479143098339
+# [2022-12-11 21:39:23,493] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@80 = 0.6033332294956156
+# [2022-12-11 21:39:23,514] {submission_evaluation.py:84} INFO - carts hits@80 = 270044 / gt@80 = 576482
+# [2022-12-11 21:39:23,514] {submission_evaluation.py:85} INFO - carts recall@80 = 0.46843440038023737
+# [2022-12-11 21:44:22,754] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@80 = 0.7563372124928959
+# [2022-12-11 21:44:22,769] {submission_evaluation.py:84} INFO - orders hits@80 = 213145 / gt@80 = 313303
+# [2022-12-11 21:44:22,770] {submission_evaluation.py:85} INFO - orders recall@80 = 0.6803158603652055
+# [2022-12-11 21:44:22,771] {submission_evaluation.py:91} INFO - =============
+# [2022-12-11 21:44:22,772] {submission_evaluation.py:92} INFO - Overall Recall@80 = 0.6054446277641778
+# [2022-12-11 21:44:22,772] {submission_evaluation.py:93} INFO - =============
+# [2022-12-11 21:45:58,886] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@100 = 0.5695400943530572
+# [2022-12-11 21:45:58,918] {submission_evaluation.py:84} INFO - clicks hits@100 = 999847 / gt@100 = 1755534
+# [2022-12-11 21:45:58,919] {submission_evaluation.py:85} INFO - clicks recall@100 = 0.5695400943530572
+# [2022-12-11 21:46:58,696] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@100 = 0.6075547191665737
+# [2022-12-11 21:46:58,702] {submission_evaluation.py:84} INFO - carts hits@100 = 273261 / gt@100 = 576482
+# [2022-12-11 21:46:58,703] {submission_evaluation.py:85} INFO - carts recall@100 = 0.4740148001151814
+# [2022-12-11 21:51:29,861] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@100 = 0.7578230377024212
+# [2022-12-11 21:51:29,875] {submission_evaluation.py:84} INFO - orders hits@100 = 213928 / gt@100 = 313303
+# [2022-12-11 21:51:29,875] {submission_evaluation.py:85} INFO - orders recall@100 = 0.6828150384771292
+# [2022-12-11 21:51:29,875] {submission_evaluation.py:91} INFO - =============
+# [2022-12-11 21:51:29,876] {submission_evaluation.py:92} INFO - Overall Recall@100 = 0.6088474725561377
+# [2022-12-11 21:51:29,876] {submission_evaluation.py:93} INFO - =============
