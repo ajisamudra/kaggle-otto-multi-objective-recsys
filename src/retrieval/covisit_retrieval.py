@@ -386,6 +386,20 @@ if __name__ == "__main__":
 # [2022-12-12 00:51:16,104] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.5647781407839612
 # [2022-12-12 00:51:16,104] {submission_evaluation.py:93} INFO - =============
 
+# ver 9
+# [2022-12-12 01:15:15,673] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5260462058837938
+# [2022-12-12 01:15:15,675] {submission_evaluation.py:84} INFO - clicks hits@20 = 923492 / gt@20 = 1755534
+# [2022-12-12 01:15:15,675] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.5260462058837938
+# [2022-12-12 01:16:23,951] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.5510988330711586
+# [2022-12-12 01:16:23,958] {submission_evaluation.py:84} INFO - carts hits@20 = 236289 / gt@20 = 576482
+# [2022-12-12 01:16:23,958] {submission_evaluation.py:85} INFO - carts recall@20 = 0.4098809676624769
+# [2022-12-12 01:16:38,867] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.7329741134290875
+# [2022-12-12 01:16:38,869] {submission_evaluation.py:84} INFO - orders hits@20 = 203307 / gt@20 = 313303
+# [2022-12-12 01:16:38,869] {submission_evaluation.py:85} INFO - orders recall@20 = 0.6489149481492357
+# [2022-12-12 01:16:38,869] {submission_evaluation.py:91} INFO - =============
+# [2022-12-12 01:16:38,869] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.5649178797766639
+# [2022-12-12 01:16:38,869] {submission_evaluation.py:93} INFO - =============
+
 ## Add suggest Cart and see Recall@20/30/40/50
 # using co-visitation LB 565 & type_weight_multipliers = {0: 1, 1: 6, 2: 3}
 # [2022-12-01 10:00:36,791] {covisit_retrieval.py:287} INFO - start computing metrics
