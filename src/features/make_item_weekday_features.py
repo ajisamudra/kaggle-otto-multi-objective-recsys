@@ -48,6 +48,7 @@ def gen_item_weekday_features(data: pl.DataFrame):
     # conversion rate per event
     data_agg = data_agg.with_columns(
         [
+            # window aid
             pl.col("itemXweekday_click_count")
             .sum()
             .over("aid")
@@ -60,6 +61,19 @@ def gen_item_weekday_features(data: pl.DataFrame):
             .sum()
             .over("aid")
             .alias("itemXweekday_all_order_count"),
+            # window weekday
+            pl.col("itemXweekday_click_count")
+            .sum()
+            .over("weekday")
+            .alias("itemXweekday_all_weekday_click_count"),
+            pl.col("itemXweekday_cart_count")
+            .sum()
+            .over("weekday")
+            .alias("itemXweekday_all_weekday_cart_count"),
+            pl.col("itemXweekday_order_count")
+            .sum()
+            .over("weekday")
+            .alias("itemXweekday_all_weekday_order_count"),
             (pl.col("itemXweekday_cart_count") / pl.col("itemXweekday_click_count"))
             .fill_nan(0)
             .alias("itemXweekday_click_to_cart_cvr"),
@@ -72,6 +86,7 @@ def gen_item_weekday_features(data: pl.DataFrame):
     # frac event per hourda
     data_agg = data_agg.with_columns(
         [
+            # frac compare to its aid
             (
                 pl.col("itemXweekday_click_count")
                 / pl.col("itemXweekday_all_click_count")
@@ -87,6 +102,26 @@ def gen_item_weekday_features(data: pl.DataFrame):
             )
             .fill_nan(0)
             .alias("itemXweekday_frac_order_all_order_count"),
+            # frac compare to total event in particular weekday
+            # represent popularity at that weekday
+            (
+                pl.col("itemXweekday_click_count")
+                / pl.col("itemXweekday_all_weekday_click_count")
+            )
+            .fill_nan(0)
+            .alias("itemXweekday_frac_click_all_weekday_click_count"),
+            (
+                pl.col("itemXweekday_cart_count")
+                / pl.col("itemXweekday_all_weekday_cart_count")
+            )
+            .fill_nan(0)
+            .alias("itemXweekday_frac_cart_all_weekday_cart_count"),
+            (
+                pl.col("itemXweekday_order_count")
+                / pl.col("itemXweekday_all_weekday_order_count")
+            )
+            .fill_nan(0)
+            .alias("itemXweekday_frac_order_all_weekday_order_count"),
         ],
     )
 
@@ -96,6 +131,9 @@ def gen_item_weekday_features(data: pl.DataFrame):
             "itemXweekday_all_click_count",
             "itemXweekday_all_cart_count",
             "itemXweekday_all_order_count",
+            "itemXweekday_all_weekday_click_count",
+            "itemXweekday_all_weekday_cart_count",
+            "itemXweekday_all_weekday_order_count",
         ]
     )
 
@@ -115,22 +153,21 @@ def make_session_features(
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
+    df = pl.DataFrame()
     for ix in tqdm(range(n)):
-        # logging.info(f"chunk {ix}: read input")
         filepath = f"{input_path}/{name}_{ix}.parquet"
-        df = pl.read_parquet(filepath)
+        df_chunk = pl.read_parquet(filepath)
+        df = pl.concat([df, df_chunk])
 
-        logging.info(f"start creating item features")
-        df_output = gen_item_weekday_features(data=df)
-        df_output = freemem(df_output)
+    logging.info(f"input df shape {df.shape}")
+    logging.info(f"start creating itemXweekday features")
+    df_output = gen_item_weekday_features(data=df)
+    df_output = freemem(df_output)
 
-        filepath = output_path / f"{name}_{ix}_item_weekday_feas.parquet"
-        logging.info(f"save chunk to: {filepath}")
-        df_output.write_parquet(f"{filepath}")
-        logging.info(f"output df shape {df_output.shape}")
-
-        del df, df_output
-        gc.collect()
+    filepath = output_path / f"{name}_item_weekday_feas.parquet"
+    logging.info(f"save chunk to: {filepath}")
+    df_output.write_parquet(f"{filepath}")
+    logging.info(f"output df shape {df_output.shape}")
 
 
 @click.command()

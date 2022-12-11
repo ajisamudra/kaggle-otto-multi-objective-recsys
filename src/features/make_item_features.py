@@ -100,22 +100,21 @@ def make_session_features(
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
+    df = pl.DataFrame()
     for ix in tqdm(range(n)):
-        # logging.info(f"chunk {ix}: read input")
         filepath = f"{input_path}/{name}_{ix}.parquet"
-        df = pl.read_parquet(filepath)
+        df_chunk = pl.read_parquet(filepath)
+        df = pl.concat([df, df_chunk])
 
-        logging.info(f"start creating item features")
-        df_output = gen_item_features(data=df)
-        df_output = freemem(df_output)
+    logging.info(f"input df shape {df.shape}")
+    logging.info(f"start creating item features")
+    df_output = gen_item_features(data=df)
+    df_output = freemem(df_output)
 
-        filepath = output_path / f"{name}_{ix}_item_feas.parquet"
-        logging.info(f"save chunk to: {filepath}")
-        df_output.write_parquet(f"{filepath}")
-        logging.info(f"output df shape {df_output.shape}")
-
-        del df, df_output
-        gc.collect()
+    filepath = output_path / f"{name}_item_feas.parquet"
+    logging.info(f"save chunk to: {filepath}")
+    df_output.write_parquet(f"{filepath}")
+    logging.info(f"output df shape {df_output.shape}")
 
 
 @click.command()

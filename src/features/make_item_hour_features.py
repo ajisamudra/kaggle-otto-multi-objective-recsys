@@ -48,6 +48,7 @@ def gen_item_hour_features(data: pl.DataFrame):
     # conversion rate per event
     data_agg = data_agg.with_columns(
         [
+            # window aid
             pl.col("itemXhour_click_count")
             .sum()
             .over("aid")
@@ -60,6 +61,19 @@ def gen_item_hour_features(data: pl.DataFrame):
             .sum()
             .over("aid")
             .alias("itemXhour_all_order_count"),
+            # window hour
+            pl.col("itemXhour_click_count")
+            .sum()
+            .over("hour")
+            .alias("itemXhour_all_hour_click_count"),
+            pl.col("itemXhour_cart_count")
+            .sum()
+            .over("hour")
+            .alias("itemXhour_all_hour_cart_count"),
+            pl.col("itemXhour_order_count")
+            .sum()
+            .over("hour")
+            .alias("itemXhour_all_hour_order_count"),
             (pl.col("itemXhour_cart_count") / pl.col("itemXhour_click_count"))
             .fill_nan(0)
             .alias("itemXhour_click_to_cart_cvr"),
@@ -72,6 +86,7 @@ def gen_item_hour_features(data: pl.DataFrame):
     # frac event per hour
     data_agg = data_agg.with_columns(
         [
+            # frac compare to its aid
             (pl.col("itemXhour_click_count") / pl.col("itemXhour_all_click_count"))
             .fill_nan(0)
             .alias("itemXhour_frac_click_all_click_count"),
@@ -81,6 +96,17 @@ def gen_item_hour_features(data: pl.DataFrame):
             (pl.col("itemXhour_order_count") / pl.col("itemXhour_all_order_count"))
             .fill_nan(0)
             .alias("itemXhour_frac_order_all_order_count"),
+            # frac compare to total event in particular hour
+            # represent popularity at that hour
+            (pl.col("itemXhour_click_count") / pl.col("itemXhour_all_hour_click_count"))
+            .fill_nan(0)
+            .alias("itemXhour_frac_click_all_hour_click_count"),
+            (pl.col("itemXhour_cart_count") / pl.col("itemXhour_all_hour_cart_count"))
+            .fill_nan(0)
+            .alias("itemXhour_frac_cart_all_hour_cart_count"),
+            (pl.col("itemXhour_order_count") / pl.col("itemXhour_all_hour_order_count"))
+            .fill_nan(0)
+            .alias("itemXhour_frac_order_all_hour_order_count"),
         ],
     )
 
@@ -90,6 +116,9 @@ def gen_item_hour_features(data: pl.DataFrame):
             "itemXhour_all_click_count",
             "itemXhour_all_cart_count",
             "itemXhour_all_order_count",
+            "itemXhour_all_hour_click_count",
+            "itemXhour_all_hour_cart_count",
+            "itemXhour_all_hour_order_count",
         ]
     )
 
@@ -109,22 +138,21 @@ def make_session_features(
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
+    df = pl.DataFrame()
     for ix in tqdm(range(n)):
-        # logging.info(f"chunk {ix}: read input")
         filepath = f"{input_path}/{name}_{ix}.parquet"
-        df = pl.read_parquet(filepath)
+        df_chunk = pl.read_parquet(filepath)
+        df = pl.concat([df, df_chunk])
 
-        logging.info(f"start creating item features")
-        df_output = gen_item_hour_features(data=df)
-        df_output = freemem(df_output)
+    logging.info(f"input df shape {df.shape}")
+    logging.info(f"start creating itemXhour features")
+    df_output = gen_item_hour_features(data=df)
+    df_output = freemem(df_output)
 
-        filepath = output_path / f"{name}_{ix}_item_hour_feas.parquet"
-        logging.info(f"save chunk to: {filepath}")
-        df_output.write_parquet(f"{filepath}")
-        logging.info(f"output df shape {df_output.shape}")
-
-        del df, df_output
-        gc.collect()
+    filepath = output_path / f"{name}_item_hour_feas.parquet"
+    logging.info(f"save chunk to: {filepath}")
+    df_output.write_parquet(f"{filepath}")
+    logging.info(f"output df shape {df_output.shape}")
 
 
 @click.command()

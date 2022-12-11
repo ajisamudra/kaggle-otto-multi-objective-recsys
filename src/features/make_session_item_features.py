@@ -109,12 +109,59 @@ def gen_session_item_features(data: pl.DataFrame):
         ],
     )
 
+    # fraction of event to all event in session
+    data_agg = data_agg.with_columns(
+        [
+            # window session
+            pl.col("sesXaid_click_count")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_click_count"),
+            pl.col("sesXaid_cart_count")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_cart_count"),
+            pl.col("sesXaid_order_count")
+            .sum()
+            .over("session")
+            .alias("sesXaid_all_order_count"),
+        ],
+    )
+
+    data_agg = data_agg.with_columns(
+        [
+            # frac compare to total event in particular session
+            (pl.col("sesXaid_click_count") / pl.col("sesXaid_all_click_count"))
+            .fill_nan(0)
+            .alias("sesXaid_frac_click_all_click_count"),
+            (pl.col("sesXaid_cart_count") / pl.col("sesXaid_all_cart_count"))
+            .fill_nan(0)
+            .alias("sesXaid_frac_cart_all_cart_count"),
+            (pl.col("sesXaid_order_count") / pl.col("sesXaid_all_order_count"))
+            .fill_nan(0)
+            .alias("sesXaid_frac_order_all_order_count"),
+            # frac compare to total event in particular sessionXaid
+            (pl.col("sesXaid_click_count") / pl.col("sesXaid_events_count"))
+            .fill_nan(0)
+            .alias("sesXaid_frac_click_all_events_count"),
+            (pl.col("sesXaid_cart_count") / pl.col("sesXaid_events_count"))
+            .fill_nan(0)
+            .alias("sesXaid_frac_cart_all_events_count"),
+            (pl.col("sesXaid_order_count") / pl.col("sesXaid_events_count"))
+            .fill_nan(0)
+            .alias("sesXaid_frac_order_all_events_count"),
+        ],
+    )
+
     # drop cols
     data_agg = data_agg.drop(
         columns=[
             "sesXaid_sec_from_last_event",
             "sesXaid_log_duration_second",
             "sesXaid_type_weighted_log_duration_second",
+            "sesXaid_all_click_count",
+            "sesXaid_all_cart_count",
+            "sesXaid_all_order_count",
         ]
     )
 

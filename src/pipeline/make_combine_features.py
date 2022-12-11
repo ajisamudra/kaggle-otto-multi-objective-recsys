@@ -113,9 +113,9 @@ def fcombine_features(mode: str, event: str, ix: int):
     c_path = f"{candidate_path}/{name}_{ix}_{event}_rows.parquet"
     sfea_path = f"{session_fea_path}/{name}_{ix}_session_feas.parquet"
     sfeaXaid_path = f"{sessionXaid_fea_path}/{name}_{ix}_session_item_feas.parquet"
-    item_path = f"{item_fea_path}/{name}_{ix}_item_feas.parquet"
-    itemXhour_path = f"{itemXhour_fea_path}/{name}_{ix}_item_hour_feas.parquet"
-    itemXweekday_path = f"{itemXweekday_fea_path}/{name}_{ix}_item_weekday_feas.parquet"
+    item_path = f"{item_fea_path}/{name}_item_feas.parquet"
+    itemXhour_path = f"{itemXhour_fea_path}/{name}_item_hour_feas.parquet"
+    itemXweekday_path = f"{itemXweekday_fea_path}/{name}_item_weekday_feas.parquet"
     itemXcovisit_path = (
         f"{itemXcovisit_fea_path}/{name}_{ix}_{event}_item_covisitation_feas.parquet"
     )
