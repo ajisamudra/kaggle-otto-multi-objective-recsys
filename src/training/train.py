@@ -12,6 +12,7 @@ from sklearn.utils import resample
 from sklearn.model_selection import train_test_split, StratifiedGroupKFold
 from sklearn.metrics import roc_auc_score, average_precision_score
 from src.utils.constants import (
+    CFG,
     write_json,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_training_test_dataset_dir,
@@ -44,6 +45,23 @@ from src.utils.logger import get_logger
 logging = get_logger()
 
 TARGET = "label"
+
+
+def downsample(df: pd.DataFrame):
+    desired_ratio = 20
+    positive_class = df[df[TARGET] == 1]
+    negative_class = df[df[TARGET] == 0]
+    negative_downsample = resample(
+        negative_class,
+        replace=False,
+        n_samples=len(positive_class) * desired_ratio,
+        random_state=777,
+    )
+
+    df = pd.concat([positive_class, negative_downsample], ignore_index=True)
+    df = df.sort_values(by=["session", TARGET], ascending=[True, True])
+
+    return df
 
 
 def train(algo: str, events: list, week: str, n: int, eval: int):
@@ -196,9 +214,12 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             train_df = pl.DataFrame()
             val_df = pl.DataFrame()
             if EVENT == "orders":
-                for i in range(10):
+                for i in range(CFG.N_train):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
                 for i in range(8):
@@ -208,9 +229,12 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
             elif EVENT == "carts":
                 train_df = pl.DataFrame()
-                for i in range(10):
+                for i in range(CFG.N_train):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
                 for i in range(8):
@@ -218,8 +242,13 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     df_chunk = pl.read_parquet(filepath)
                     val_df = pl.concat([val_df, df_chunk])
             else:
-                filepath = f"{input_path}/train_{IX}_{EVENT}_combined.parquet"
-                train_df = pl.read_parquet(filepath)
+                for i in range(int(CFG.N_train / 10)):
+                    filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
+                    train_df = pl.concat([train_df, df_chunk])
 
                 for i in range(2):
                     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
@@ -254,30 +283,6 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             # selected_features.remove("itemXweekday_cart_to_order_cvr")
 
             selected_features.remove(TARGET)
-
-            # logging.info(
-            #     "downsample training data so negative class 20:1 positive class"
-            # )
-            # desired_ratio = 20
-            # positive_class = train_df[train_df[TARGET] == 1]
-            # negative_class = train_df[train_df[TARGET] == 0]
-            # negative_downsample = resample(
-            #     negative_class,
-            #     replace=False,
-            #     n_samples=len(positive_class) * desired_ratio,
-            #     random_state=777,
-            # )
-
-            # train_df = pd.concat(
-            #     [positive_class, negative_downsample], ignore_index=True
-            # )
-            # train_df = train_df.sort_values(
-            #     by=["session", TARGET], ascending=[True, True]
-            # )
-            # logging.info(train_df.shape)
-
-            # del positive_class, negative_class, negative_downsample
-            # gc.collect()
 
             X_train = train_df[selected_features]
             group_train = train_df["session"]

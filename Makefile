@@ -28,8 +28,10 @@ item_hour_features:
 item_weekday_features:
 	python src/features/make_item_weekday_features.py --mode $(MODE)
 
+START=0
+END=10
 item_covisitation_features:
-	python src/features/make_item_covisitation_features.py --mode $(MODE)
+	python src/features/make_item_covisitation_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 combine_features:
 	python src/pipeline/make_combine_features.py --mode $(MODE)
