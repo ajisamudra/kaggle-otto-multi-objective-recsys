@@ -53,8 +53,8 @@ train:
 # tune command
 ALGO="lgbm_classifier" # cat_classifier / lgbm_ranker / cat_ranker
 EVENT="orders"
-K=2
-TRIAL=50
+K=1
+TRIAL=30
 tune:
 	python src/training/tune.py --event $(EVENT) --k $(K) --algo $(ALGO) --n_trial $(TRIAL)
 

@@ -89,42 +89,96 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             hyperparams = {}
             if algo == "lgbm_classifier":
                 if EVENT == "orders":
+                    # LB 0.564 fea 99
+                    # hyperparams = {
+                    #     "n_estimators": 500,
+                    #     "learning_rate": 0.05479523964757477,
+                    #     "max_depth": 7,
+                    #     "num_leaves": 40,
+                    #     "min_data_in_leaf": 560,
+                    #     "feature_fraction": 0.849801842682232,
+                    #     "bagging_fraction": 0.8599407686777631,
+                    # }
                     hyperparams = {
                         "n_estimators": 500,
-                        "learning_rate": 0.05479523964757477,
+                        "learning_rate": 0.052824552063657305,
                         "max_depth": 7,
-                        "num_leaves": 40,
-                        "min_data_in_leaf": 560,
-                        "feature_fraction": 0.849801842682232,
-                        "bagging_fraction": 0.8599407686777631,
+                        "num_leaves": 98,
+                        "min_data_in_leaf": 536,
+                        "feature_fraction": 0.9373038392898101,
+                        "bagging_fraction": 0.926452587658148,
                     }
                 elif EVENT == "carts":
+                    # LB 0.564 fea 99
+                    # hyperparams = {
+                    #     "n_estimators": 500,
+                    #     "learning_rate": 0.023284940416743508,
+                    #     "max_depth": 2,
+                    #     "num_leaves": 39,
+                    #     "min_data_in_leaf": 435,
+                    #     "feature_fraction": 0.7118135289194919,
+                    #     "bagging_fraction": 0.8703404040978261,
+                    # }
                     hyperparams = {
                         "n_estimators": 500,
-                        "learning_rate": 0.023284940416743508,
-                        "max_depth": 2,
-                        "num_leaves": 39,
-                        "min_data_in_leaf": 435,
-                        "feature_fraction": 0.7118135289194919,
-                        "bagging_fraction": 0.8703404040978261,
+                        "learning_rate": 0.034626607160951436,
+                        "max_depth": 6,
+                        "num_leaves": 34,
+                        "min_data_in_leaf": 420,
+                        "feature_fraction": 0.948462644663103,
+                        "bagging_fraction": 0.7636737045356861,
                     }
                 elif EVENT == "clicks":
+                    # LB 0.564 fea 99
+                    # hyperparams = {
+                    #     "n_estimators": 500,
+                    #     "learning_rate": 0.03165988766745295,
+                    #     "max_depth": 5,
+                    #     "num_leaves": 102,
+                    #     "min_data_in_leaf": 416,
+                    #     "feature_fraction": 0.7231413635494773,
+                    #     "bagging_fraction": 0.7577740460272675,
+                    # }
                     hyperparams = {
                         "n_estimators": 500,
-                        "learning_rate": 0.03165988766745295,
-                        "max_depth": 5,
-                        "num_leaves": 102,
-                        "min_data_in_leaf": 416,
-                        "feature_fraction": 0.7231413635494773,
-                        "bagging_fraction": 0.7577740460272675,
+                        "learning_rate": 0.04045305955075708,
+                        "max_depth": 6,
+                        "num_leaves": 49,
+                        "min_data_in_leaf": 1138,
+                        "feature_fraction": 0.8756392153185409,
+                        "bagging_fraction": 0.8882829042882201,
                     }
             elif algo == "lgbm_ranker":
                 if EVENT == "orders":
-                    hyperparams = {}
+                    hyperparams = {
+                        "n_estimators": 500,
+                        "learning_rate": 0.06686942900752924,
+                        "max_depth": 2,
+                        "num_leaves": 19,
+                        "min_data_in_leaf": 1258,
+                        "feature_fraction": 0.8126707937968762,
+                        "bagging_fraction": 0.9120592736711024,
+                    }
                 elif EVENT == "carts":
-                    hyperparams = {}
+                    hyperparams = {
+                        "n_estimators": 500,
+                        "learning_rate": 0.0489842694434591,
+                        "max_depth": 5,
+                        "num_leaves": 83,
+                        "min_data_in_leaf": 1358,
+                        "feature_fraction": 0.7825532461598741,
+                        "bagging_fraction": 0.7240384385328306,
+                    }
                 elif EVENT == "clicks":
-                    hyperparams = {}
+                    hyperparams = {
+                        "n_estimators": 500,
+                        "learning_rate": 0.04184392968947091,
+                        "max_depth": 6,
+                        "num_leaves": 106,
+                        "min_data_in_leaf": 780,
+                        "feature_fraction": 0.932581545103427,
+                        "bagging_fraction": 0.8143391317097348,
+                    }
 
             if algo == "lgbm_classifier":
                 model = LGBClassifier(**hyperparams)
@@ -137,14 +191,20 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             else:
                 raise NotImplementedError("algorithm not implemented! (lgbm/catboost)")
 
-            logging.info(f"read training data for chunk: {IX}")
+            logging.info(f"read training & validation data for chunk: {IX}")
 
+            train_df = pl.DataFrame()
+            val_df = pl.DataFrame()
             if EVENT == "orders":
-                train_df = pl.DataFrame()
                 for i in range(10):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     train_df = pl.concat([train_df, df_chunk])
+
+                for i in range(8):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    val_df = pl.concat([val_df, df_chunk])
 
             elif EVENT == "carts":
                 train_df = pl.DataFrame()
@@ -152,20 +212,25 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     train_df = pl.concat([train_df, df_chunk])
+
+                for i in range(8):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    val_df = pl.concat([val_df, df_chunk])
             else:
                 filepath = f"{input_path}/train_{IX}_{EVENT}_combined.parquet"
                 train_df = pl.read_parquet(filepath)
 
-            logging.info(train_df.shape)
+                for i in range(2):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    val_df = pl.concat([val_df, df_chunk])
 
+            logging.info(f"train shape {train_df.shape}")
+            logging.info(f"val shape {val_df.shape}")
             # sort data based on session & label
             train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
             train_df = train_df.to_pandas()
-
-            logging.info(f"read validation data for chunk: {IX}")
-            filepath = f"{val_path}/test_{IX}_{EVENT}_combined.parquet"
-            val_df = pl.read_parquet(filepath)
-            logging.info(val_df.shape)
             val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
             val_df = val_df.to_pandas()
 

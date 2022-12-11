@@ -54,6 +54,12 @@ def eval_submission(
     dict_metrics = measure_recall(
         df_pred=df_pred.to_pandas(), df_truth=df_truth.to_pandas(), Ks=[20]
     )
+
+    # add information about models in eval_metrics
+    dict_metrics["click_model"] = click_model
+    dict_metrics["cart_model"] = cart_model
+    dict_metrics["order_model"] = order_model
+
     # save metrics
     logging.info(dict_metrics)
     filepath = f"{output_path}/eval_metrics.json"

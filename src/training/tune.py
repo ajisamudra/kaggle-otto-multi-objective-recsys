@@ -48,10 +48,42 @@ def cross_validation_ap_score(
 
     val_pr_aucs = []
     for IX in range(k):
-        filepath = f"{input_path}/train_{IX}_{event}_combined.parquet"
-        train_df = pl.read_parquet(filepath)
-        filepath = f"{val_path}/test_{IX}_{event}_combined.parquet"
-        val_df = pl.read_parquet(filepath)
+        # filepath = f"{input_path}/train_{IX}_{event}_combined.parquet"
+        # train_df = pl.read_parquet(filepath)
+        # filepath = f"{val_path}/test_{IX}_{event}_combined.parquet"
+        # val_df = pl.read_parquet(filepath)
+
+        train_df = pl.DataFrame()
+        val_df = pl.DataFrame()
+        if event == "orders":
+            for i in range(10):
+                filepath = f"{input_path}/train_{i}_{event}_combined.parquet"
+                df_chunk = pl.read_parquet(filepath)
+                train_df = pl.concat([train_df, df_chunk])
+
+            for i in range(5):
+                filepath = f"{val_path}/test_{k*(i+1)}_{event}_combined.parquet"
+                df_chunk = pl.read_parquet(filepath)
+                val_df = pl.concat([val_df, df_chunk])
+
+        elif event == "carts":
+            train_df = pl.DataFrame()
+            for i in range(10):
+                filepath = f"{input_path}/train_{i}_{event}_combined.parquet"
+                df_chunk = pl.read_parquet(filepath)
+                train_df = pl.concat([train_df, df_chunk])
+
+            for i in range(5):
+                filepath = f"{val_path}/test_{k*(i+1)}_{event}_combined.parquet"
+                df_chunk = pl.read_parquet(filepath)
+                val_df = pl.concat([val_df, df_chunk])
+        else:
+            filepath = f"{input_path}/train_{IX}_{event}_combined.parquet"
+            train_df = pl.read_parquet(filepath)
+            for i in range(2):
+                filepath = f"{val_path}/test_{k*(i+1)}_{event}_combined.parquet"
+                df_chunk = pl.read_parquet(filepath)
+                val_df = pl.concat([val_df, df_chunk])
 
         # sort data based on session & label
         train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
@@ -65,23 +97,23 @@ def cross_validation_ap_score(
         selected_features.remove("candidate_aid")
         selected_features.remove(TARGET)
 
-        # downsample training data so negative class 20:1 positive class
-        desired_ratio = 20
-        positive_class = train_df[train_df[TARGET] == 1]
-        negative_class = train_df[train_df[TARGET] == 0]
-        negative_downsample = resample(
-            negative_class,
-            replace=False,
-            n_samples=len(positive_class) * desired_ratio,
-            random_state=777,
-        )
+        # # downsample training data so negative class 20:1 positive class
+        # desired_ratio = 20
+        # positive_class = train_df[train_df[TARGET] == 1]
+        # negative_class = train_df[train_df[TARGET] == 0]
+        # negative_downsample = resample(
+        #     negative_class,
+        #     replace=False,
+        #     n_samples=len(positive_class) * desired_ratio,
+        #     random_state=777,
+        # )
 
-        train_df = pd.concat([positive_class, negative_downsample], ignore_index=True)
-        train_df = train_df.sort_values(by=["session", TARGET], ascending=[True, True])
-        logging.info(train_df.shape)
+        # train_df = pd.concat([positive_class, negative_downsample], ignore_index=True)
+        # train_df = train_df.sort_values(by=["session", TARGET], ascending=[True, True])
+        # logging.info(train_df.shape)
 
-        del positive_class, negative_class, negative_downsample
-        gc.collect()
+        # del positive_class, negative_class, negative_downsample
+        # gc.collect()
 
         X_train = train_df[selected_features]
         group_train = train_df["session"]
@@ -134,12 +166,12 @@ class ObjectiveLGBModel:
             "n_estimators": trial.suggest_int(
                 "n_estimators", self.n_estimators, self.n_estimators
             ),
-            "learning_rate": trial.suggest_loguniform("learning_rate", 0.008, 0.1),
+            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
             "max_depth": trial.suggest_int("max_depth", 1, 7),
             "num_leaves": trial.suggest_int("num_leaves", 8, 128),
-            "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 100, 1500),
-            "feature_fraction": trial.suggest_float("feature_fraction", 0.7, 0.9),
-            "bagging_fraction": trial.suggest_float("bagging_fraction", 0.7, 0.9),
+            "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 400, 1500),
+            "feature_fraction": trial.suggest_float("feature_fraction", 0.7, 0.95),
+            "bagging_fraction": trial.suggest_float("bagging_fraction", 0.7, 0.95),
             "random_state": 747,
             "verbose": 0,
         }
@@ -159,12 +191,53 @@ class ObjectiveLGBModel:
 def perform_tuning(algo: str, events: list, k: int, n_estimators: int, n_trial: int):
     for EVENT in events:
         logging.info("measure AP before tuning")
+
+        hyperparams = {}
+        if algo == "lgbm_classifier":
+            if EVENT == "orders":
+                hyperparams = {
+                    "n_estimators": 500,
+                    "learning_rate": 0.052824552063657305,
+                    "max_depth": 7,
+                    "num_leaves": 98,
+                    "min_data_in_leaf": 536,
+                    "feature_fraction": 0.9373038392898101,
+                    "bagging_fraction": 0.926452587658148,
+                }
+            elif EVENT == "carts":
+                hyperparams = hyperparams = {
+                    "n_estimators": 500,
+                    "learning_rate": 0.034626607160951436,
+                    "max_depth": 6,
+                    "num_leaves": 34,
+                    "min_data_in_leaf": 420,
+                    "feature_fraction": 0.948462644663103,
+                    "bagging_fraction": 0.7636737045356861,
+                }
+            elif EVENT == "clicks":
+                hyperparams = {
+                    "n_estimators": 500,
+                    "learning_rate": 0.04045305955075708,
+                    "max_depth": 6,
+                    "num_leaves": 49,
+                    "min_data_in_leaf": 1138,
+                    "feature_fraction": 0.8756392153185409,
+                    "bagging_fraction": 0.8882829042882201,
+                }
+        elif algo == "lgbm_ranker":
+            if EVENT == "orders":
+                hyperparams = {}
+            elif EVENT == "carts":
+                hyperparams = {}
+            elif EVENT == "clicks":
+                hyperparams = {}
+
         # check performance before tuning
         model: Union[ClassifierModel, RankingModel]
         if algo == "lgbm_classifier":
-            model = LGBClassifier()
+            model = LGBClassifier(**hyperparams)
         elif algo == "lgbm_ranker":
-            model = LGBRanker()
+            model = LGBRanker(**hyperparams)
         mean_val_pr_auc_before = cross_validation_ap_score(
             model=model, algo=algo, event=EVENT, k=k
         )
@@ -226,7 +299,7 @@ def perform_tuning(algo: str, events: list, k: int, n_estimators: int, n_trial: 
 )
 @click.option(
     "--k",
-    default=2,
+    default=1,
     help="number of K in cross-validation; between 1-10",
 )
 @click.option(
@@ -242,7 +315,7 @@ def perform_tuning(algo: str, events: list, k: int, n_estimators: int, n_trial: 
 def main(
     event: str = "all",
     algo: str = "lgbm",
-    k: int = 2,
+    k: int = 1,
     n_estimators: int = 500,
     n_trial: int = 50,
 ):
