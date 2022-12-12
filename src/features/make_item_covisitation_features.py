@@ -472,6 +472,7 @@ def gen_item_covisitation_features(
 
 
 def make_item_covisitation_features(
+    mode: str,
     name: str,
     ses_representation_path: Path,
     output_path: Path,
@@ -481,6 +482,10 @@ def make_item_covisitation_features(
 
     if name == "train":
         n = CFG.N_train
+    else:
+        n = CFG.N_test
+
+    if mode in ["training_train", "training_test"]:
         logging.info("read local covisitation buys")
         top_15_buys = get_top15_covisitation_buys_df()
         logging.info("read local covisitation buy2buy")
@@ -488,7 +493,6 @@ def make_item_covisitation_features(
         logging.info("read local covisitation click")
         top_20_clicks = get_top20_covisitation_click_df()
     else:
-        n = CFG.N_test
         logging.info("read scoring covisitation buys")
         top_15_buys = get_top15_covisitation_buys_df(mode="scoring")
         logging.info("read scoring covisitation buy2buy")
@@ -535,6 +539,7 @@ def main(mode: str, istart: int, iend: int):
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_item_covisitation_features(
+            mode=mode,
             name="train",
             ses_representation_path=ses_representation_path,
             output_path=output_path,
@@ -550,6 +555,7 @@ def main(mode: str, istart: int, iend: int):
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_item_covisitation_features(
+            mode=mode,
             name="test",
             ses_representation_path=ses_representation_path,
             output_path=output_path,
@@ -565,6 +571,7 @@ def main(mode: str, istart: int, iend: int):
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_item_covisitation_features(
+            mode=mode,
             name="train",
             ses_representation_path=ses_representation_path,
             output_path=output_path,
@@ -580,6 +587,7 @@ def main(mode: str, istart: int, iend: int):
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
         make_item_covisitation_features(
+            mode=mode,
             name="test",
             ses_representation_path=ses_representation_path,
             output_path=output_path,
