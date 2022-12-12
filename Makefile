@@ -28,6 +28,9 @@ item_hour_features:
 item_weekday_features:
 	python src/features/make_item_weekday_features.py --mode $(MODE)
 
+session_representation_items:
+	python src/features/make_session_representation_items.py --mode $(MODE)
+
 START=0
 END=10
 item_covisitation_features:

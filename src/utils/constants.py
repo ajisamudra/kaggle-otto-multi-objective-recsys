@@ -44,7 +44,7 @@ def get_full_data_dir() -> Path:
 
 
 def get_scoring_covisitation_dir() -> Path:
-    path = ROOT_DIR / "data" / "processed" / "raw-data" / "co-visitation"
+    path = ROOT_DIR / "data" / "processed" / "full-data" / "co-visitation"
     return path
 
 
@@ -310,6 +310,68 @@ def get_processed_scoring_train_item_covisitation_features_dir() -> Path:
 def get_processed_scoring_test_item_covisitation_features_dir() -> Path:
     path = get_processed_full_data_dir()
     path = path / "scoring" / "test_features" / "item_covisitation_features"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: SESSION REPRESENTATION ITEMS
+
+
+def get_processed_training_train_session_representation_items_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "session_representation_items"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_session_representation_items_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "session_representation_items"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_session_representation_items_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "session_representation_items"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_session_representation_items_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "session_representation_items"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: DISTANCE MATRIX FACTORIZATION FEATURES
+
+
+def get_processed_training_train_matrix_fact_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "matrix_fact_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_matrix_fact_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "matrix_fact_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_matrix_fact_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "matrix_fact_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_matrix_fact_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "matrix_fact_features"
     check_directory(path)
     return path
 
