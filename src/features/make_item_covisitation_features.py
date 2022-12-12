@@ -406,10 +406,12 @@ def make_item_covisitation_features(
 )
 @click.option(
     "--istart",
+    default=0,
     help="index start",
 )
 @click.option(
     "--iend",
+    default=10,
     help="index end",
 )
 def main(mode: str, istart: int, iend: int):

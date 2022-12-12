@@ -81,7 +81,7 @@ def split_data_into_chunks(data: pl.DataFrame, name: str, output_path: Path):
     ):
         logging.info(f"chunk {ix} have unique session {len(chunk_sessions)}")
         logging.info(
-            f"assuming each sesssion will have 40 candidates: n_row {len(chunk_sessions)*40}"
+            f"assuming each sesssion will have 80 candidates: n_row {len(chunk_sessions)*80}"
         )
         subset_of_data = data.filter(pl.col("session").is_in(list(chunk_sessions)))
         logging.info(subset_of_data["type"].value_counts(sort=True))
