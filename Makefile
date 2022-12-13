@@ -40,7 +40,7 @@ matrix_factorization_features:
 	python src/features/make_item_matrix_fact_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 combine_features:
-	python src/pipeline/make_combine_features.py --mode $(MODE)
+	python src/pipeline/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 remake_session_features: session_features combine_features
 remake_session_item_features: session_item_features combine_features

@@ -94,7 +94,7 @@ def gen_matrix_fact_features(
         logging.info("calculating distances between candidate_aid & last_event_aid")
         vectors1 = []
         vectors2 = []
-        for source, target in tqdm(zip(candidate_aids, last_event_aids)):
+        for source, target in zip(candidate_aids, last_event_aids):
             vector1 = embedding[source]
             vector2 = embedding[target]
             vectors1.append(vector1)
@@ -117,7 +117,7 @@ def gen_matrix_fact_features(
 
         logging.info("calculating distances between candidate_aid & max_recency_aid")
         vectors2 = []
-        for target in tqdm(max_recency_aids):
+        for target in max_recency_aids:
             vector2 = embedding[target]
             vectors2.append(vector2)
 
@@ -135,7 +135,7 @@ def gen_matrix_fact_features(
             "calculating distances between candidate_aid & max_weighted_recency_aids"
         )
         vectors2 = []
-        for target in tqdm(max_weighted_recency_aids):
+        for target in max_weighted_recency_aids:
             vector2 = embedding[target]
             vectors2.append(vector2)
 
@@ -151,7 +151,7 @@ def gen_matrix_fact_features(
 
         logging.info("calculating distances between candidate_aid & max_duration_aids")
         vectors2 = []
-        for target in tqdm(max_duration_aids):
+        for target in max_duration_aids:
             vector2 = embedding[target]
             vectors2.append(vector2)
 
@@ -169,7 +169,7 @@ def gen_matrix_fact_features(
             "calculating distances between candidate_aid & max_weighted_duration_aids"
         )
         vectors2 = []
-        for target in tqdm(max_weighted_duration_aids):
+        for target in max_weighted_duration_aids:
             vector2 = embedding[target]
             vectors2.append(vector2)
 

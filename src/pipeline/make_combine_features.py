@@ -69,7 +69,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_training_train_item_covisitation_features_dir()
         )
-        MatrixFact_fea_path = get_processed_training_train_item_weekday_features_dir()
+        MatrixFact_fea_path = get_processed_training_train_matrix_fact_features_dir()
         output_path = get_processed_training_train_dataset_dir()
         name = "train"
 
@@ -83,7 +83,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_training_test_item_covisitation_features_dir()
         )
-        MatrixFact_fea_path = get_processed_training_test_item_weekday_features_dir()
+        MatrixFact_fea_path = get_processed_training_test_matrix_fact_features_dir()
         output_path = get_processed_training_test_dataset_dir()
         name = "test"
 
@@ -97,7 +97,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_scoring_train_item_covisitation_features_dir()
         )
-        MatrixFact_fea_path = get_processed_scoring_train_item_weekday_features_dir()
+        MatrixFact_fea_path = get_processed_scoring_train_matrix_fact_features_dir()
         output_path = get_processed_scoring_train_dataset_dir()
         name = "train"
 
@@ -111,7 +111,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_scoring_test_item_covisitation_features_dir()
         )
-        MatrixFact_fea_path = get_processed_scoring_test_item_weekday_features_dir()
+        MatrixFact_fea_path = get_processed_scoring_test_matrix_fact_features_dir()
         output_path = get_processed_scoring_test_dataset_dir()
         name = "test"
 
@@ -337,7 +337,17 @@ def fcombine_features(mode: str, event: str, ix: int):
     "--mode",
     help="avaiable mode: training_train/training_test/scoring_train/scoring_test",
 )
-def main(mode: str):
+@click.option(
+    "--istart",
+    default=0,
+    help="index start",
+)
+@click.option(
+    "--iend",
+    default=10,
+    help="index end",
+)
+def main(mode: str, istart: int, iend: int):
     name = "train"
     if mode == "training_train":
         name = "train"
@@ -358,7 +368,7 @@ def main(mode: str):
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
-    for ix in tqdm(range(n)):
+    for ix in tqdm(range(istart, iend)):
         for event in ["clicks", "carts", "orders"]:
             logging.info(f"start combining features")
             fcombine_features(mode=mode, event=event, ix=ix)

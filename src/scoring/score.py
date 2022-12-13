@@ -57,7 +57,7 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         test_df = pl.read_parquet(filepath)
         logging.info(test_df.shape)
 
-        logging.info("select features")
+        # logging.info("select features")
         selected_features = test_df.columns
         selected_features.remove("session")
         selected_features.remove("candidate_aid")
@@ -92,7 +92,7 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         # select only session & candidate_aid cols
         test_df = test_df.select([pl.col(["session", "candidate_aid", "label"])])
         # add scores columns
-        logging.info("merge with test_df")
+        # logging.info("merge with test_df")
         test_df = test_df.with_columns([pl.Series(name="score", values=scores)])
 
         # save to parquet

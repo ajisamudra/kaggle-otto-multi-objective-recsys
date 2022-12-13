@@ -119,12 +119,12 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     # }
                     hyperparams = {
                         "n_estimators": 500,
-                        "learning_rate": 0.052824552063657305,
-                        "max_depth": 7,
-                        "num_leaves": 98,
-                        "min_data_in_leaf": 536,
-                        "feature_fraction": 0.9373038392898101,
-                        "bagging_fraction": 0.926452587658148,
+                        "learning_rate": 0.0965750536587211,
+                        "max_depth": 9,
+                        "num_leaves": 122,
+                        "min_data_in_leaf": 485,
+                        # "feature_fraction": 0.9548624391190365,
+                        # "bagging_fraction": 0.9460697405895611,
                     }
                 elif EVENT == "carts":
                     # LB 0.564 fea 99
@@ -222,9 +222,12 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                for i in range(8):
+                for i in range(10):
                     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
                     val_df = pl.concat([val_df, df_chunk])
 
             elif EVENT == "carts":
@@ -237,12 +240,15 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                for i in range(8):
+                for i in range(10):
                     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
                     val_df = pl.concat([val_df, df_chunk])
             else:
-                for i in range(int(CFG.N_train / 10)):
+                for i in range(int(CFG.N_train / 10) + 1):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     df_chunk = df_chunk.to_pandas()
@@ -250,9 +256,12 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                for i in range(2):
+                for i in range(5):
                     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
                     val_df = pl.concat([val_df, df_chunk])
 
             logging.info(f"train shape {train_df.shape}")
@@ -260,8 +269,11 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             # sort data based on session & label
             train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
             train_df = train_df.to_pandas()
-            val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
-            val_df = val_df.to_pandas()
+            # val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
+            # val_df = val_df.to_pandas()
+
+            # del val_df
+            # gc.collect()
 
             selected_features = list(train_df.columns)
             selected_features.remove("session")
@@ -284,32 +296,32 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
             selected_features.remove(TARGET)
 
-            X_train = train_df[selected_features]
-            group_train = train_df["session"]
-            y_train = train_df[TARGET]
+            # X_train = train_df[selected_features]
+            # group_train = train_df["session"]
+            # y_train = train_df[TARGET]
 
-            X_val = val_df[selected_features]
-            group_val = val_df["session"]
-            y_val = val_df[TARGET]
+            # X_val = val_df[selected_features]
+            # group_val = val_df["session"]
+            # y_val = val_df[TARGET]
 
             # split train and validation using StratifiedGroupKFold
             # X_train, X_val, y_train, y_val, group_train, group_val = train_test_split(
             #     X, y, group, test_size=0.2, stratify=y, random_state=745
             # )
 
-            # X = train_df[selected_features]
-            # group = train_df["session"]
-            # y = train_df[TARGET]
+            X = train_df[selected_features]
+            group = train_df["session"]
+            y = train_df[TARGET]
 
-            # skgfold = StratifiedGroupKFold(n_splits=5)
-            # train_idx, val_idx = [], []
+            skgfold = StratifiedGroupKFold(n_splits=5)
+            train_idx, val_idx = [], []
 
-            # for tidx, vidx in skgfold.split(X, y, groups=group):
-            #     train_idx, val_idx = tidx, vidx
+            for tidx, vidx in skgfold.split(X, y, groups=group):
+                train_idx, val_idx = tidx, vidx
 
-            # X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
-            # y_train, y_val = y[train_idx], y[val_idx]
-            # group_train, group_val = group[train_idx], group[val_idx]
+            X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
+            y_train, y_val = y[train_idx], y[val_idx]
+            group_train, group_val = group[train_idx], group[val_idx]
 
             # calculate num samples per group
             logging.info("calculate num samples per group")

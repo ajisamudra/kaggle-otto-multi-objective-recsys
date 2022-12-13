@@ -7,9 +7,11 @@ import datetime
 from typing import Union
 import optuna
 from optuna.samplers import TPESampler
-from sklearn.utils import resample
+from sklearn.model_selection import train_test_split, StratifiedGroupKFold
 from sklearn.metrics import average_precision_score
+from src.training.train import downsample
 from src.utils.constants import (
+    CFG,
     write_json,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_training_test_dataset_dir,
@@ -47,42 +49,58 @@ def cross_validation_ap_score(
     val_path = get_processed_training_test_dataset_dir()
 
     val_pr_aucs = []
-    for IX in range(k):
-        # filepath = f"{input_path}/train_{IX}_{event}_combined.parquet"
-        # train_df = pl.read_parquet(filepath)
-        # filepath = f"{val_path}/test_{IX}_{event}_combined.parquet"
-        # val_df = pl.read_parquet(filepath)
-
+    for _ in range(k):
         train_df = pl.DataFrame()
         val_df = pl.DataFrame()
         if event == "orders":
-            for i in range(10):
+            for i in range(CFG.N_train):
                 filepath = f"{input_path}/train_{i}_{event}_combined.parquet"
                 df_chunk = pl.read_parquet(filepath)
+                df_chunk = df_chunk.to_pandas()
+                df_chunk = downsample(df_chunk)
+                df_chunk = pl.from_pandas(df_chunk)
                 train_df = pl.concat([train_df, df_chunk])
 
-            for i in range(5):
-                filepath = f"{val_path}/test_{k*(i+1)}_{event}_combined.parquet"
+            for i in range(10):
+                filepath = f"{val_path}/test_{i}_{event}_combined.parquet"
                 df_chunk = pl.read_parquet(filepath)
+                df_chunk = df_chunk.to_pandas()
+                df_chunk = downsample(df_chunk)
+                df_chunk = pl.from_pandas(df_chunk)
                 val_df = pl.concat([val_df, df_chunk])
 
         elif event == "carts":
             train_df = pl.DataFrame()
-            for i in range(10):
+            for i in range(CFG.N_train):
                 filepath = f"{input_path}/train_{i}_{event}_combined.parquet"
                 df_chunk = pl.read_parquet(filepath)
+                df_chunk = df_chunk.to_pandas()
+                df_chunk = downsample(df_chunk)
+                df_chunk = pl.from_pandas(df_chunk)
+                train_df = pl.concat([train_df, df_chunk])
+
+            for i in range(10):
+                filepath = f"{val_path}/test_{i}_{event}_combined.parquet"
+                df_chunk = pl.read_parquet(filepath)
+                df_chunk = df_chunk.to_pandas()
+                df_chunk = downsample(df_chunk)
+                df_chunk = pl.from_pandas(df_chunk)
+                val_df = pl.concat([val_df, df_chunk])
+        else:
+            for i in range(int(CFG.N_train / 10) + 1):
+                filepath = f"{input_path}/train_{i}_{event}_combined.parquet"
+                df_chunk = pl.read_parquet(filepath)
+                df_chunk = df_chunk.to_pandas()
+                df_chunk = downsample(df_chunk)
+                df_chunk = pl.from_pandas(df_chunk)
                 train_df = pl.concat([train_df, df_chunk])
 
             for i in range(5):
-                filepath = f"{val_path}/test_{k*(i+1)}_{event}_combined.parquet"
+                filepath = f"{val_path}/test_{i}_{event}_combined.parquet"
                 df_chunk = pl.read_parquet(filepath)
-                val_df = pl.concat([val_df, df_chunk])
-        else:
-            filepath = f"{input_path}/train_{IX}_{event}_combined.parquet"
-            train_df = pl.read_parquet(filepath)
-            for i in range(2):
-                filepath = f"{val_path}/test_{k*(i+1)}_{event}_combined.parquet"
-                df_chunk = pl.read_parquet(filepath)
+                df_chunk = df_chunk.to_pandas()
+                df_chunk = downsample(df_chunk)
+                df_chunk = pl.from_pandas(df_chunk)
                 val_df = pl.concat([val_df, df_chunk])
 
         # sort data based on session & label
@@ -97,31 +115,27 @@ def cross_validation_ap_score(
         selected_features.remove("candidate_aid")
         selected_features.remove(TARGET)
 
-        # # downsample training data so negative class 20:1 positive class
-        # desired_ratio = 20
-        # positive_class = train_df[train_df[TARGET] == 1]
-        # negative_class = train_df[train_df[TARGET] == 0]
-        # negative_downsample = resample(
-        #     negative_class,
-        #     replace=False,
-        #     n_samples=len(positive_class) * desired_ratio,
-        #     random_state=777,
-        # )
+        # X_train = train_df[selected_features]
+        # group_train = train_df["session"]
+        # y_train = train_df[TARGET]
 
-        # train_df = pd.concat([positive_class, negative_downsample], ignore_index=True)
-        # train_df = train_df.sort_values(by=["session", TARGET], ascending=[True, True])
-        # logging.info(train_df.shape)
+        # X_val = val_df[selected_features]
+        # group_val = val_df["session"]
+        # y_val = val_df[TARGET]
 
-        # del positive_class, negative_class, negative_downsample
-        # gc.collect()
+        X = train_df[selected_features]
+        group = train_df["session"]
+        y = train_df[TARGET]
 
-        X_train = train_df[selected_features]
-        group_train = train_df["session"]
-        y_train = train_df[TARGET]
+        skgfold = StratifiedGroupKFold(n_splits=5)
+        train_idx, val_idx = [], []
 
-        X_val = val_df[selected_features]
-        group_val = val_df["session"]
-        y_val = val_df[TARGET]
+        for tidx, vidx in skgfold.split(X, y, groups=group):
+            train_idx, val_idx = tidx, vidx
+
+        X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
+        y_train, y_val = y[train_idx], y[val_idx]
+        group_train, group_val = group[train_idx], group[val_idx]
 
         # calculate num samples per group
         n_group_train = list(group_train.value_counts())
@@ -166,12 +180,12 @@ class ObjectiveLGBModel:
             "n_estimators": trial.suggest_int(
                 "n_estimators", self.n_estimators, self.n_estimators
             ),
-            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.1),
-            "max_depth": trial.suggest_int("max_depth", 1, 7),
+            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.15),
+            "max_depth": trial.suggest_int("max_depth", 6, 12),
             "num_leaves": trial.suggest_int("num_leaves", 8, 128),
             "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 400, 1500),
-            "feature_fraction": trial.suggest_float("feature_fraction", 0.7, 0.95),
-            "bagging_fraction": trial.suggest_float("bagging_fraction", 0.7, 0.95),
+            # "feature_fraction": trial.suggest_float("feature_fraction", 0.9, 1),
+            # "bagging_fraction": trial.suggest_float("bagging_fraction", 0.9, 1),
             "random_state": 747,
             "verbose": 0,
         }
