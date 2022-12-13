@@ -21,14 +21,15 @@
 # make session_item_features MODE=training_test
 # make item_hour_features MODE=training_test
 # make item_weekday_features MODE=training_test
-make item_covisitation_features MODE=training_test START=0 END=10
-make item_covisitation_features MODE=training_test START=10 END=20
-make item_covisitation_features MODE=training_test START=20 END=30
-make item_covisitation_features MODE=training_test START=30 END=40
-make item_covisitation_features MODE=training_test START=40 END=50
-make item_covisitation_features MODE=training_test START=50 END=60
-make item_covisitation_features MODE=training_test START=66 END=70
-make item_covisitation_features MODE=training_test START=70 END=80
+# make item_covisitation_features MODE=training_test START=0 END=10
+# make item_covisitation_features MODE=training_test START=10 END=20
+# make item_covisitation_features MODE=training_test START=20 END=30
+# make item_covisitation_features MODE=training_test START=30 END=40
+# make item_covisitation_features MODE=training_test START=40 END=50
+# make item_covisitation_features MODE=training_test START=50 END=60
+make item_covisitation_features MODE=training_test START=60 END=70
+# make item_covisitation_features MODE=training_test START=60 END=70
+# make item_covisitation_features MODE=training_test START=70 END=80
 make combine_features  MODE=training_test
 
 # make split_into_chunks MODE=scoring_test
@@ -39,15 +40,15 @@ make combine_features  MODE=training_test
 # make session_item_features MODE=scoring_test
 # make item_hour_features MODE=scoring_test
 # make item_weekday_features MODE=scoring_test
-make item_covisitation_features MODE=scoring_test START=0 END=10
-make item_covisitation_features MODE=scoring_test START=10 END=20
-make item_covisitation_features MODE=scoring_test START=20 END=30
-make item_covisitation_features MODE=scoring_test START=30 END=40
-make item_covisitation_features MODE=scoring_test START=40 END=50
-make item_covisitation_features MODE=scoring_test START=50 END=60
-make item_covisitation_features MODE=scoring_test START=60 END=70
-make item_covisitation_features MODE=scoring_test START=70 END=80
-make combine_features  MODE=scoring_test
+# make item_covisitation_features MODE=scoring_test START=0 END=10
+# make item_covisitation_features MODE=scoring_test START=10 END=20
+# make item_covisitation_features MODE=scoring_test START=20 END=30
+# make item_covisitation_features MODE=scoring_test START=30 END=40
+# make item_covisitation_features MODE=scoring_test START=40 END=50
+# make item_covisitation_features MODE=scoring_test START=50 END=60
+# make item_covisitation_features MODE=scoring_test START=60 END=70
+# make item_covisitation_features MODE=scoring_test START=70 END=80
+# make combine_features  MODE=scoring_test
 
 # make split_into_chunks MODE=scoring_test
 # make candidate_list MODE=scoring_test
@@ -65,11 +66,16 @@ make combine_features  MODE=scoring_test
 
 # make eda EDA_MODE=class_dist
 
+# make item_covisitation_features MODE=training_train START=0 END=10
+# make item_covisitation_features MODE=training_train START=10 END=20
+# make item_covisitation_features MODE=training_train START=20 END=30
+# make combine_features  MODE=training_train
+
 # make score_and_eval
 make train ALGO=lgbm_classifier
-# make train ALGO=lgbm_ranker
-# make train ALGO=cat_classifier
-# make train ALGO=cat_ranker
+make train ALGO=lgbm_ranker
+make train ALGO=cat_classifier
+make train ALGO=cat_ranker
 
 # # take last 1 week data from the whole train data
 # python src/preprocess/split_local_train_label.py --mode training
