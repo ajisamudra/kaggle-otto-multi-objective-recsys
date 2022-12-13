@@ -118,13 +118,13 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     #     "bagging_fraction": 0.8599407686777631,
                     # }
                     hyperparams = {
-                        "n_estimators": 500,
-                        "learning_rate": 0.0965750536587211,
-                        "max_depth": 9,
-                        "num_leaves": 122,
-                        "min_data_in_leaf": 485,
-                        # "feature_fraction": 0.9548624391190365,
-                        # "bagging_fraction": 0.9460697405895611,
+                        "n_estimators": 1100,
+                        "learning_rate": 0.052824552063657305,
+                        "max_depth": 7,
+                        "num_leaves": 98,
+                        "min_data_in_leaf": 536,
+                        "feature_fraction": 0.9373038392898101,
+                        "bagging_fraction": 0.926452587658148,
                     }
                 elif EVENT == "carts":
                     # LB 0.564 fea 99

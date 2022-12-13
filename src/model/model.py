@@ -30,7 +30,7 @@ class LGBClassifier(ClassifierModel):
         self.best_score_ = 0
 
         kwargs["importance_type"] = "gain"
-        kwargs["n_estimators"] = 500
+        # kwargs["n_estimators"] = 500
         # kwargs["feature_fraction"] = 0.75
         # kwargs["bagging_fraction"] = 0.7
         # kwargs["bagging_freq"] = 10
