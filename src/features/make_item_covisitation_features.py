@@ -35,11 +35,11 @@ def gen_item_covisitation_features(
     top_20_clicks: pl.DataFrame,
 ):
     """
-    df input
-    session | type | ts | aid
-    123 | 0 | 12313 | AID1
-    123 | 1 | 12314 | AID1
-    123 | 2 | 12345 | AID1
+    session representation aids
+    session | candidate_aid | last_event_in_session_aid | last_event_in_session_aid
+    123 | AID1 | AID1 | AID4
+    123 | AID2 | AID1 | AID4
+    123 | AID3 | AID1 | AID4
     """
 
     for event in ["clicks", "carts", "orders"]:

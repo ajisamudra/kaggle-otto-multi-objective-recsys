@@ -53,6 +53,16 @@ def get_local_covisitation_dir() -> Path:
     return path
 
 
+def get_scoring_matrix_fact_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "full-data" / "matrix-factorization"
+    return path
+
+
+def get_local_matrix_fact_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "local-validation" / "matrix-factorization"
+    return path
+
+
 ### Data/Processed Dir
 
 ### Data/Processed Dir: CANDIDATE RETRIEVAL
