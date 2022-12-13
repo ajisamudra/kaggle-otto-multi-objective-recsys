@@ -33,6 +33,10 @@ from src.utils.constants import (
     get_processed_training_test_item_covisitation_features_dir,
     get_processed_scoring_train_item_covisitation_features_dir,
     get_processed_scoring_test_item_covisitation_features_dir,
+    get_processed_training_train_matrix_fact_features_dir,  # Matrix Factorization feature dir
+    get_processed_training_test_matrix_fact_features_dir,
+    get_processed_scoring_train_matrix_fact_features_dir,
+    get_processed_scoring_test_matrix_fact_features_dir,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_training_test_dataset_dir,
     get_processed_scoring_train_dataset_dir,
@@ -65,6 +69,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_training_train_item_covisitation_features_dir()
         )
+        MatrixFact_fea_path = get_processed_training_train_item_weekday_features_dir()
         output_path = get_processed_training_train_dataset_dir()
         name = "train"
 
@@ -78,6 +83,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_training_test_item_covisitation_features_dir()
         )
+        MatrixFact_fea_path = get_processed_training_test_item_weekday_features_dir()
         output_path = get_processed_training_test_dataset_dir()
         name = "test"
 
@@ -91,6 +97,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_scoring_train_item_covisitation_features_dir()
         )
+        MatrixFact_fea_path = get_processed_scoring_train_item_weekday_features_dir()
         output_path = get_processed_scoring_train_dataset_dir()
         name = "train"
 
@@ -104,6 +111,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         itemXcovisit_fea_path = (
             get_processed_scoring_test_item_covisitation_features_dir()
         )
+        MatrixFact_fea_path = get_processed_scoring_test_item_weekday_features_dir()
         output_path = get_processed_scoring_test_dataset_dir()
         name = "test"
 
@@ -118,6 +126,9 @@ def fcombine_features(mode: str, event: str, ix: int):
     itemXweekday_path = f"{itemXweekday_fea_path}/{name}_item_weekday_feas.parquet"
     itemXcovisit_path = (
         f"{itemXcovisit_fea_path}/{name}_{ix}_{event}_item_covisitation_feas.parquet"
+    )
+    matrix_fact_path = (
+        f"{MatrixFact_fea_path}/{name}_{ix}_{event}_matrix_fact_feas.parquet"
     )
 
     cand_df = pl.read_parquet(c_path)
@@ -156,6 +167,22 @@ def fcombine_features(mode: str, event: str, ix: int):
     gc.collect()
 
     cand_df = cand_df.fill_null(0)
+
+    # read matrix factorization features
+    matrix_fact_fea = pl.read_parquet(matrix_fact_path)
+    logging.info(
+        f"read sessionXmatrix_fact features with shape {matrix_fact_fea.shape}"
+    )
+    cand_df = cand_df.join(
+        matrix_fact_fea,
+        how="left",
+        left_on=["session", "candidate_aid"],
+        right_on=["session", "candidate_aid"],
+    )
+    logging.info(f"joined with sessionXmatrix_fact features! shape {cand_df.shape}")
+
+    del matrix_fact_fea
+    gc.collect()
 
     # read session-item features
     ses_aid_agg = pl.read_parquet(sfeaXaid_path)
