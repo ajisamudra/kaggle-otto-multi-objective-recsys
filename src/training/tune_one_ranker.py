@@ -50,9 +50,9 @@ def cross_validation_ap_score(
         for i in range(2):
             filepath = f"{input_path}/train_{i}_one_ranker_combined.parquet"
             df_chunk = pl.read_parquet(filepath)
-            # df_chunk = df_chunk.to_pandas()
-            # df_chunk = downsample(df_chunk)
-            # df_chunk = pl.from_pandas(df_chunk)
+            df_chunk = df_chunk.to_pandas()
+            df_chunk = downsample(df_chunk)
+            df_chunk = pl.from_pandas(df_chunk)
             train_df = pl.concat([train_df, df_chunk])
 
         logging.info(f"train shape {train_df.shape}")

@@ -98,12 +98,6 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     if algo == "lgbm_ranker":
         hyperparams = {
             "n_estimators": 1000,
-            "learning_rate": 0.09246409203678124,
-            "max_depth": 6,
-            "num_leaves": 12,
-            "min_data_in_leaf": 1104,
-            "feature_fraction": 0.8283350368113122,
-            "bagging_fraction": 0.8320488219598658,
         }
     elif algo == "cat_ranker":
         hyperparams = {}
@@ -121,9 +115,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     for i in range(2):
         filepath = f"{input_path}/train_{i}_one_ranker_combined.parquet"
         df_chunk = pl.read_parquet(filepath)
-        # df_chunk = df_chunk.to_pandas()
-        # df_chunk = downsample(df_chunk)
-        # df_chunk = pl.from_pandas(df_chunk)
+        df_chunk = df_chunk.to_pandas()
+        df_chunk = downsample(df_chunk)
+        df_chunk = pl.from_pandas(df_chunk)
         train_df = pl.concat([train_df, df_chunk])
 
     logging.info(f"train shape {train_df.shape}")
