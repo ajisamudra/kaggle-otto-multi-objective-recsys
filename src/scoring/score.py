@@ -62,6 +62,47 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         selected_features.remove("session")
         selected_features.remove("candidate_aid")
 
+        selected_features.remove("matrix_fact_cart_order_last_event_cosine_distance")
+        selected_features.remove("matrix_fact_cart_order_last_event_euclidean_distance")
+        selected_features.remove("matrix_fact_cart_order_max_recency_cosine_distance")
+        selected_features.remove(
+            "matrix_fact_cart_order_max_recency_euclidean_distance"
+        )
+        selected_features.remove(
+            "matrix_fact_cart_order_max_weighted_recency_cosine_distance"
+        )
+        selected_features.remove(
+            "matrix_fact_cart_order_max_weighted_recency_euclidean_distance"
+        )
+        selected_features.remove("matrix_fact_cart_order_max_duration_cosine_distance")
+        selected_features.remove(
+            "matrix_fact_cart_order_max_duration_euclidean_distance"
+        )
+        selected_features.remove(
+            "matrix_fact_cart_order_max_weighted_duration_cosine_distance"
+        )
+        selected_features.remove(
+            "matrix_fact_cart_order_max_weighted_duration_euclidean_distance"
+        )
+        selected_features.remove("matrix_fact_buy2buy_last_event_cosine_distance")
+        selected_features.remove("matrix_fact_buy2buy_last_event_euclidean_distance")
+        selected_features.remove("matrix_fact_buy2buy_max_recency_cosine_distance")
+        selected_features.remove("matrix_fact_buy2buy_max_recency_euclidean_distance")
+        selected_features.remove(
+            "matrix_fact_buy2buy_max_weighted_recency_cosine_distance"
+        )
+        selected_features.remove(
+            "matrix_fact_buy2buy_max_weighted_recency_euclidean_distance"
+        )
+        selected_features.remove("matrix_fact_buy2buy_max_duration_cosine_distance")
+        selected_features.remove("matrix_fact_buy2buy_max_duration_euclidean_distance")
+        selected_features.remove(
+            "matrix_fact_buy2buy_max_weighted_duration_cosine_distance"
+        )
+        selected_features.remove(
+            "matrix_fact_buy2buy_max_weighted_duration_euclidean_distance"
+        )
+
         # selected_features.remove("item_all_events_count")
         # selected_features.remove("item_click_count")
         # selected_features.remove("item_cart_count")
