@@ -71,11 +71,15 @@
 # make item_covisitation_features MODE=training_train START=20 END=30
 # make combine_features  MODE=training_train
 
-# make matrix_factorization_features MODE=training_train START=0 END=30
-# make combine_features  MODE=training_train
+make matrix_factorization_features MODE=training_train START=0 END=30
+make combine_features  MODE=training_train START=0 END=30
 
-# make matrix_factorization_features MODE=training_test START=0 END=80
-# make combine_features  MODE=training_test
+make matrix_factorization_features MODE=training_test START=0 END=20
+make matrix_factorization_features MODE=training_test START=20 END=40
+make matrix_factorization_features MODE=training_test START=40 END=60
+make matrix_factorization_features MODE=training_test START=60 END=80
+make combine_features  MODE=training_test START=0 END=40
+make combine_features  MODE=training_test START=40 END=80
 
 # make matrix_factorization_features MODE=scoring_test START=0 END=80
 # make combine_features  MODE=scoring_test START=0 END=40
@@ -83,7 +87,7 @@
 
 # make score_and_eval
 # make train ALGO=lgbm_classifier
-# make train ALGO=lgbm_ranker
+make train ALGO=lgbm_ranker
 # make train ALGO=cat_classifier
 # make train ALGO=cat_ranker
 

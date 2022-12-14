@@ -26,7 +26,7 @@ from src.utils.logger import get_logger
 logging = get_logger()
 
 
-def vectorized_cosine_distance(vectors1: np.array, vectors2: np.array):
+def vectorized_cosine_distance(vectors1: np.ndarray, vectors2: np.ndarray):
     """
     Reference: https://www.geeksforgeeks.org/how-to-calculate-cosine-similarity-in-python/
     """
@@ -36,8 +36,105 @@ def vectorized_cosine_distance(vectors1: np.array, vectors2: np.array):
     return cosine_distances
 
 
-def vectorized_euclidean_distance(vectors1: np.array, vectors2: np.array):
+def vectorized_euclidean_distance(vectors1: np.ndarray, vectors2: np.ndarray):
     return np.linalg.norm((vectors1 - vectors2), axis=1)
+
+
+def calculate_distance_metrics(
+    embedding: np.ndarray,
+    candidate_aids: list,
+    last_event_aids: list,
+    max_recency_aids: list,
+    max_weighted_recency_aids: list,
+    max_duration_aids: list,
+    max_weighted_duration_aids: list,
+):
+    vectors1 = []
+    vectors2 = []
+    for source, target in zip(candidate_aids, last_event_aids):
+        vector1 = embedding[source]
+        vector2 = embedding[target]
+        vectors1.append(vector1)
+        vectors2.append(vector2)
+
+    # convert list to array 2d
+    nd_vectors1 = np.array(vectors1)
+    nd_vectors2 = np.array(vectors2)
+
+    # compute cosine similarity
+    last_event_cosine_distances = vectorized_cosine_distance(nd_vectors1, nd_vectors2)
+    last_event_euclidean_distances = vectorized_euclidean_distance(
+        nd_vectors1, nd_vectors2
+    )
+
+    vectors2 = []
+    for target in max_recency_aids:
+        vector2 = embedding[target]
+        vectors2.append(vector2)
+
+    # convert list to array 2d
+    nd_vectors2 = np.array(vectors2)
+    # compute cosine similarity
+    max_recency_cosine_distances = vectorized_cosine_distance(nd_vectors1, nd_vectors2)
+    max_recency_euclidean_distances = vectorized_euclidean_distance(
+        nd_vectors1, nd_vectors2
+    )
+
+    vectors2 = []
+    for target in max_weighted_recency_aids:
+        vector2 = embedding[target]
+        vectors2.append(vector2)
+
+    # convert list to array 2d
+    nd_vectors2 = np.array(vectors2)
+    # compute cosine similarity
+    max_weighted_recency_cosine_distances = vectorized_cosine_distance(
+        nd_vectors1, nd_vectors2
+    )
+    max_weighted_recency_euclidean_distances = vectorized_euclidean_distance(
+        nd_vectors1, nd_vectors2
+    )
+
+    vectors2 = []
+    for target in max_duration_aids:
+        vector2 = embedding[target]
+        vectors2.append(vector2)
+
+    # convert list to array 2d
+    nd_vectors2 = np.array(vectors2)
+    # compute cosine similarity
+    max_duration_cosine_distances = vectorized_cosine_distance(nd_vectors1, nd_vectors2)
+    max_duration_euclidean_distances = vectorized_euclidean_distance(
+        nd_vectors1, nd_vectors2
+    )
+
+    vectors2 = []
+    for target in max_weighted_duration_aids:
+        vector2 = embedding[target]
+        vectors2.append(vector2)
+
+    # convert list to array 2d
+    nd_vectors2 = np.array(vectors2)
+    # compute cosine similarity
+    max_weighted_duration_cosine_distances = vectorized_cosine_distance(
+        nd_vectors1, nd_vectors2
+    )
+    max_weighted_duration_euclidean_distances = vectorized_euclidean_distance(
+        nd_vectors1, nd_vectors2
+    )
+
+    return (
+        last_event_cosine_distances,
+        last_event_euclidean_distances,
+        max_recency_cosine_distances,
+        max_recency_euclidean_distances,
+        max_weighted_recency_cosine_distances,
+        max_weighted_recency_euclidean_distances,
+        max_duration_cosine_distances,
+        max_duration_euclidean_distances,
+        max_weighted_duration_cosine_distances,
+        max_weighted_duration_euclidean_distances,
+    )
 
 
 def gen_matrix_fact_features(
@@ -97,112 +194,106 @@ def gen_matrix_fact_features(
             "max_weighted_log_duration_event_in_session_aid"
         ].to_list()
 
-        logging.info("calculating distances between candidate_aid & last_event_aid")
-        vectors1 = []
-        vectors2 = []
-        for source, target in zip(candidate_aids, last_event_aids):
-            vector1 = embedding_click[source]
-            vector2 = embedding_click[target]
-            vectors1.append(vector1)
-            vectors2.append(vector2)
-            # cosine_dist = distance.cosine(vector1, vector2)
-            # jaccard_dist = distance.jaccard(vector1, vector2)
-            # euclidean_dist = np.linalg.norm(vector1 - vector2)
-
-        # convert list to array 2d
-        nd_vectors1 = np.array(vectors1)
-        nd_vectors2 = np.array(vectors2)
-
-        # compute cosine similarity
-        last_event_cosine_distances = vectorized_cosine_distance(
-            nd_vectors1, nd_vectors2
-        )
-        last_event_euclidean_distances = vectorized_euclidean_distance(
-            nd_vectors1, nd_vectors2
+        logging.info("calculating distances in embedding click")
+        (
+            click_last_event_cosine_distances,
+            click_last_event_euclidean_distances,
+            click_max_recency_cosine_distances,
+            click_max_recency_euclidean_distances,
+            click_max_weighted_recency_cosine_distances,
+            click_max_weighted_recency_euclidean_distances,
+            click_max_duration_cosine_distances,
+            click_max_duration_euclidean_distances,
+            click_max_weighted_duration_cosine_distances,
+            click_max_weighted_duration_euclidean_distances,
+        ) = calculate_distance_metrics(
+            embedding=embedding_click,
+            candidate_aids=candidate_aids,
+            last_event_aids=last_event_aids,
+            max_recency_aids=max_recency_aids,
+            max_weighted_recency_aids=max_weighted_recency_aids,
+            max_duration_aids=max_duration_aids,
+            max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
-        logging.info("calculating distances between candidate_aid & max_recency_aid")
-        vectors2 = []
-        for target in max_recency_aids:
-            vector2 = embedding_click[target]
-            vectors2.append(vector2)
-
-        # convert list to array 2d
-        nd_vectors2 = np.array(vectors2)
-        # compute cosine similarity
-        max_recency_cosine_distances = vectorized_cosine_distance(
-            nd_vectors1, nd_vectors2
-        )
-        max_recency_euclidean_distances = vectorized_euclidean_distance(
-            nd_vectors1, nd_vectors2
-        )
-
-        logging.info(
-            "calculating distances between candidate_aid & max_weighted_recency_aids"
-        )
-        vectors2 = []
-        for target in max_weighted_recency_aids:
-            vector2 = embedding_click[target]
-            vectors2.append(vector2)
-
-        # convert list to array 2d
-        nd_vectors2 = np.array(vectors2)
-        # compute cosine similarity
-        max_weighted_recency_cosine_distances = vectorized_cosine_distance(
-            nd_vectors1, nd_vectors2
-        )
-        max_weighted_recency_euclidean_distances = vectorized_euclidean_distance(
-            nd_vectors1, nd_vectors2
+        logging.info("calculating distances in embedding cart_order")
+        (
+            cart_order_last_event_cosine_distances,
+            cart_order_last_event_euclidean_distances,
+            cart_order_max_recency_cosine_distances,
+            cart_order_max_recency_euclidean_distances,
+            cart_order_max_weighted_recency_cosine_distances,
+            cart_order_max_weighted_recency_euclidean_distances,
+            cart_order_max_duration_cosine_distances,
+            cart_order_max_duration_euclidean_distances,
+            cart_order_max_weighted_duration_cosine_distances,
+            cart_order_max_weighted_duration_euclidean_distances,
+        ) = calculate_distance_metrics(
+            embedding=embedding_cart_order,
+            candidate_aids=candidate_aids,
+            last_event_aids=last_event_aids,
+            max_recency_aids=max_recency_aids,
+            max_weighted_recency_aids=max_weighted_recency_aids,
+            max_duration_aids=max_duration_aids,
+            max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
-        logging.info("calculating distances between candidate_aid & max_duration_aids")
-        vectors2 = []
-        for target in max_duration_aids:
-            vector2 = embedding_click[target]
-            vectors2.append(vector2)
-
-        # convert list to array 2d
-        nd_vectors2 = np.array(vectors2)
-        # compute cosine similarity
-        max_duration_cosine_distances = vectorized_cosine_distance(
-            nd_vectors1, nd_vectors2
-        )
-        max_duration_euclidean_distances = vectorized_euclidean_distance(
-            nd_vectors1, nd_vectors2
-        )
-
-        logging.info(
-            "calculating distances between candidate_aid & max_weighted_duration_aids"
-        )
-        vectors2 = []
-        for target in max_weighted_duration_aids:
-            vector2 = embedding_click[target]
-            vectors2.append(vector2)
-
-        # convert list to array 2d
-        nd_vectors2 = np.array(vectors2)
-        # compute cosine similarity
-        max_weighted_duration_cosine_distances = vectorized_cosine_distance(
-            nd_vectors1, nd_vectors2
-        )
-        max_weighted_duration_euclidean_distances = vectorized_euclidean_distance(
-            nd_vectors1, nd_vectors2
+        logging.info("calculating distances in embedding buy2buy")
+        (
+            buy2buy_last_event_cosine_distances,
+            buy2buy_last_event_euclidean_distances,
+            buy2buy_max_recency_cosine_distances,
+            buy2buy_max_recency_euclidean_distances,
+            buy2buy_max_weighted_recency_cosine_distances,
+            buy2buy_max_weighted_recency_euclidean_distances,
+            buy2buy_max_duration_cosine_distances,
+            buy2buy_max_duration_euclidean_distances,
+            buy2buy_max_weighted_duration_cosine_distances,
+            buy2buy_max_weighted_duration_euclidean_distances,
+        ) = calculate_distance_metrics(
+            embedding=embedding_cart_order,
+            candidate_aids=candidate_aids,
+            last_event_aids=last_event_aids,
+            max_recency_aids=max_recency_aids,
+            max_weighted_recency_aids=max_weighted_recency_aids,
+            max_duration_aids=max_duration_aids,
+            max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
         # save matrix factorization features
         output_data = {
             "session": sessions,
             "candidate_aid": candidate_aids,
-            "matrix_fact_click_last_event_cosine_distance": last_event_cosine_distances,
-            "matrix_fact_click_last_event_euclidean_distance": last_event_euclidean_distances,
-            "matrix_fact_click_max_recency_cosine_distance": max_recency_cosine_distances,
-            "matrix_fact_click_max_recency_euclidean_distance": max_recency_euclidean_distances,
-            "matrix_fact_click_max_weighted_recency_cosine_distance": max_weighted_recency_cosine_distances,
-            "matrix_fact_click_max_weighted_recency_euclidean_distance": max_weighted_recency_euclidean_distances,
-            "matrix_fact_click_max_duration_cosine_distance": max_duration_cosine_distances,
-            "matrix_fact_click_max_duration_euclidean_distance": max_duration_euclidean_distances,
-            "matrix_fact_click_max_weighted_duration_cosine_distance": max_weighted_duration_cosine_distances,
-            "matrix_fact_click_max_weighted_duration_euclidean_distance": max_weighted_duration_euclidean_distances,
+            "matrix_fact_click_last_event_cosine_distance": click_last_event_cosine_distances,
+            "matrix_fact_click_last_event_euclidean_distance": click_last_event_euclidean_distances,
+            "matrix_fact_click_max_recency_cosine_distance": click_max_recency_cosine_distances,
+            "matrix_fact_click_max_recency_euclidean_distance": click_max_recency_euclidean_distances,
+            "matrix_fact_click_max_weighted_recency_cosine_distance": click_max_weighted_recency_cosine_distances,
+            "matrix_fact_click_max_weighted_recency_euclidean_distance": click_max_weighted_recency_euclidean_distances,
+            "matrix_fact_click_max_duration_cosine_distance": click_max_duration_cosine_distances,
+            "matrix_fact_click_max_duration_euclidean_distance": click_max_duration_euclidean_distances,
+            "matrix_fact_click_max_weighted_duration_cosine_distance": click_max_weighted_duration_cosine_distances,
+            "matrix_fact_click_max_weighted_duration_euclidean_distance": click_max_weighted_duration_euclidean_distances,
+            "matrix_fact_cart_order_last_event_cosine_distance": cart_order_last_event_cosine_distances,
+            "matrix_fact_cart_order_last_event_euclidean_distance": cart_order_last_event_euclidean_distances,
+            "matrix_fact_cart_order_max_recency_cosine_distance": cart_order_max_recency_cosine_distances,
+            "matrix_fact_cart_order_max_recency_euclidean_distance": cart_order_max_recency_euclidean_distances,
+            "matrix_fact_cart_order_max_weighted_recency_cosine_distance": cart_order_max_weighted_recency_cosine_distances,
+            "matrix_fact_cart_order_max_weighted_recency_euclidean_distance": cart_order_max_weighted_recency_euclidean_distances,
+            "matrix_fact_cart_order_max_duration_cosine_distance": cart_order_max_duration_cosine_distances,
+            "matrix_fact_cart_order_max_duration_euclidean_distance": cart_order_max_duration_euclidean_distances,
+            "matrix_fact_cart_order_max_weighted_duration_cosine_distance": cart_order_max_weighted_duration_cosine_distances,
+            "matrix_fact_cart_order_max_weighted_duration_euclidean_distance": cart_order_max_weighted_duration_euclidean_distances,
+            "matrix_fact_buy2buy_last_event_cosine_distance": buy2buy_last_event_cosine_distances,
+            "matrix_fact_buy2buy_last_event_euclidean_distance": buy2buy_last_event_euclidean_distances,
+            "matrix_fact_buy2buy_max_recency_cosine_distance": buy2buy_max_recency_cosine_distances,
+            "matrix_fact_buy2buy_max_recency_euclidean_distance": buy2buy_max_recency_euclidean_distances,
+            "matrix_fact_buy2buy_max_weighted_recency_cosine_distance": buy2buy_max_weighted_recency_cosine_distances,
+            "matrix_fact_buy2buy_max_weighted_recency_euclidean_distance": buy2buy_max_weighted_recency_euclidean_distances,
+            "matrix_fact_buy2buy_max_duration_cosine_distance": buy2buy_max_duration_cosine_distances,
+            "matrix_fact_buy2buy_max_duration_euclidean_distance": buy2buy_max_duration_euclidean_distances,
+            "matrix_fact_buy2buy_max_weighted_duration_cosine_distance": buy2buy_max_weighted_duration_cosine_distances,
+            "matrix_fact_buy2buy_max_weighted_duration_euclidean_distance": buy2buy_max_weighted_duration_euclidean_distances,
         }
 
         output_df = pl.DataFrame(output_data)
