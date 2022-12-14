@@ -269,6 +269,11 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             # sort data based on session & label
             train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
             train_df = train_df.to_pandas()
+            # replace inf with 0
+            # and make sure there's no None
+            train_df = train_df.replace([np.inf, -np.inf], 0)
+            train_df = train_df.fillna(0)
+
             # val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
             # val_df = val_df.to_pandas()
 

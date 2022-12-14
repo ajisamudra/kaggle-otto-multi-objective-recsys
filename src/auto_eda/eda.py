@@ -228,6 +228,18 @@ def perform_eda(events: list, n: int, mode: str):
             f"EDA artifacts for event {EVENT} could be found here {artifact_path}"
         )
 
+        if mode in ["all", "biserial"]:
+            logging.info("start calculate biserial correlation")
+            df = df.replace([np.inf, -np.inf], 0)
+            df = df.fillna(0)
+            logging.info(df.isnull().sum())
+            # create artifact dir
+            filepath = artifact_path / "biserial"
+            check_directory(filepath)
+            report_biserial_correlation(
+                data=df, target_variable=TARGET, filepath=f"{filepath}"
+            )
+
 
 @click.command()
 @click.option(
@@ -246,7 +258,7 @@ def perform_eda(events: list, n: int, mode: str):
     help="number of chunk for training; between 1-10",
 )
 def main(event: str = "all", n: int = 1, mode: str = "all"):
-    events = ["clicks", "carts", "orders"]
+    events = ["orders", "carts", "clicks"]
     if event != "all":
         events = [event]
     perform_eda(events=events, n=n, mode=mode)

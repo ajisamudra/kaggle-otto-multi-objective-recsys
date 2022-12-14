@@ -52,10 +52,10 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
 
     logging.info("start scoring")
     for IX in tqdm(range(N_test)):
-        logging.info(f"read test data for chunk: {IX}")
+        # logging.info(f"read test data for chunk: {IX}")
         filepath = f"{input_path}/test_{IX}_{EVENT}_combined.parquet"
         test_df = pl.read_parquet(filepath)
-        logging.info(test_df.shape)
+        logging.info(f"input shape {test_df.shape}")
 
         # logging.info("select features")
         selected_features = test_df.columns
@@ -86,14 +86,22 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
 
         # select features
         X_test = test_df[selected_features].to_pandas()
+
+        # replace inf with 0
+        X_test = X_test.replace([np.inf, -np.inf], 0)
+        X_test = X_test.fillna(0)
+
         # perform scoring
-        logging.info("perform scoring")
+        # logging.info("perform scoring")
         scores = model.predict(X_test)
         # select only session & candidate_aid cols
         test_df = test_df.select([pl.col(["session", "candidate_aid", "label"])])
         # add scores columns
         # logging.info("merge with test_df")
         test_df = test_df.with_columns([pl.Series(name="score", values=scores)])
+
+        del X_test
+        gc.collect()
 
         # save to parquet
         if week_data == "w1":
@@ -108,16 +116,20 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         filepath = f"{output_path}/test_{IX}_{EVENT}_scores.parquet"
         test_df = freemem(test_df)
         test_df.write_parquet(f"{filepath}")
-        logging.info(f"save prediction scores to: {filepath}")
-        logging.info(f"output df shape {test_df.shape}")
 
-        logging.info(f"rank & select top 20")
+        # logging.info(f"save prediction scores to: {filepath}")
+        # logging.info(f"output df shape {test_df.shape}")
+
+        # logging.info(f"rank & select top 20")
         # take top 20 candidate aid and save it as list
         test_predictions = (
             test_df.sort(["session", "score"], reverse=True)
             .groupby("session")
             .agg([pl.col("candidate_aid").limit(20).list().alias("labels")])
         )
+
+        del test_df
+        gc.collect()
 
         test_predictions = test_predictions.select([pl.col(["session", "labels"])])
         test_predictions = test_predictions.with_columns(
@@ -134,7 +146,7 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         logging.info(f"save prediction submission to: {filepath}")
         logging.info(f"output df shape {test_predictions.shape}")
 
-        del X_test, test_df, test_predictions
+        del test_predictions
         gc.collect()
 
     logging.info(f"scoring complete for {EVENT.upper()}!")
