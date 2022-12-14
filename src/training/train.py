@@ -232,7 +232,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
             elif EVENT == "carts":
                 train_df = pl.DataFrame()
-                for i in range(CFG.N_train - 5):
+                for i in range(CFG.N_train - 10):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     df_chunk = df_chunk.to_pandas()
@@ -248,7 +248,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                 #     df_chunk = pl.from_pandas(df_chunk)
                 #     val_df = pl.concat([val_df, df_chunk])
             else:
-                for i in range(int(CFG.N_train / 10) + 1):
+                for i in range(int(CFG.N_train / 10)):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     df_chunk = df_chunk.to_pandas()
@@ -284,20 +284,60 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             selected_features.remove("session")
             selected_features.remove("candidate_aid")
             # # remove item features
-            # selected_features.remove("item_click_to_cart_cvr")
-            # selected_features.remove("item_cart_to_order_cvr")
-            # selected_features.remove("itemXhour_all_events_count")
-            # selected_features.remove("itemXhour_click_count")
-            # selected_features.remove("itemXhour_cart_count")
-            # selected_features.remove("itemXhour_order_count")
-            # selected_features.remove("itemXhour_click_to_cart_cvr")
-            # selected_features.remove("itemXhour_cart_to_order_cvr")
-            # selected_features.remove("itemXweekday_all_events_count")
-            # selected_features.remove("itemXweekday_click_count")
-            # selected_features.remove("itemXweekday_cart_count")
-            # selected_features.remove("itemXweekday_order_count")
-            # selected_features.remove("itemXweekday_click_to_cart_cvr")
-            # selected_features.remove("itemXweekday_cart_to_order_cvr")
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_last_event_cosine_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_last_event_euclidean_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_recency_cosine_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_recency_euclidean_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_weighted_recency_cosine_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_weighted_recency_euclidean_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_duration_cosine_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_duration_euclidean_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_weighted_duration_cosine_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_cart_order_max_weighted_duration_euclidean_distance"
+            # )
+            # selected_features.remove("matrix_fact_buy2buy_last_event_cosine_distance")
+            # selected_features.remove(
+            #     "matrix_fact_buy2buy_last_event_euclidean_distance"
+            # )
+            # selected_features.remove("matrix_fact_buy2buy_max_recency_cosine_distance")
+            # selected_features.remove(
+            #     "matrix_fact_buy2buy_max_recency_euclidean_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_buy2buy_max_weighted_recency_cosine_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_buy2buy_max_weighted_recency_euclidean_distance"
+            # )
+            # selected_features.remove("matrix_fact_buy2buy_max_duration_cosine_distance")
+            # selected_features.remove(
+            #     "matrix_fact_buy2buy_max_duration_euclidean_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_buy2buy_max_weighted_duration_cosine_distance"
+            # )
+            # selected_features.remove(
+            #     "matrix_fact_buy2buy_max_weighted_duration_euclidean_distance"
+            # )
 
             selected_features.remove(TARGET)
 

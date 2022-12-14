@@ -62,7 +62,6 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         selected_features.remove("session")
         selected_features.remove("candidate_aid")
 
-        # # remove item features
         # selected_features.remove("item_all_events_count")
         # selected_features.remove("item_click_count")
         # selected_features.remove("item_cart_count")

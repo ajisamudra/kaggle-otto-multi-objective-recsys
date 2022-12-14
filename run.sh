@@ -87,7 +87,8 @@
 # make combine_features  MODE=scoring_test START=0 END=40
 # make combine_features  MODE=scoring_test START=40 END=80
 
-# python src/training/train.py --event carts --n 1 --algo lgbm_ranker --week w2 --eval 0
+# python src/training/train.py --event carts --n 1 --algo lgbm_classifier --week w2 --eval 0
+# python src/training/train.py --event clicks --n 1 --algo lgbm_classifier --week w2 --eval 0
 # make score_and_eval
 # make train ALGO=lgbm_ranker
 # make train ALGO=lgbm_classifier
@@ -170,37 +171,38 @@
 # ORDER_MODEL="2022-12-10_orders_lgbm_classifier_67461_95720"
 # WEEK_DATA=w1
 
-# TRAINING EVALUATION
-CLICK_MODEL="2022-12-14_clicks_lgbm_ranker_30157_82671"
-CART_MODEL="2022-12-14_carts_lgbm_ranker_53618_90263"
-ORDER_MODEL="2022-12-14_orders_lgbm_ranker_68975_93748"
-WEEK_DATA=w2
+# # TRAINING EVALUATION
+# CLICK_MODEL="2022-12-14_clicks_lgbm_classifier_34471_85784"
+# CART_MODEL="2022-12-14_carts_lgbm_classifier_53396_90776"
+# ORDER_MODEL="2022-12-14_orders_lgbm_classifier_73015_95121"
+# WEEK_DATA=w2
 
-python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
-
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
-
-# eval submission, only for week_data & week_model w2
-python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
-
-
-# # CV 0.563701 Fea 169
-# CLICK_MODEL="2022-12-14_clicks_lgbm_classifier_35215_86132"
-# CART_MODEL="2022-12-14_carts_lgbm_classifier_53767_90677"
-# ORDER_MODEL="2022-12-14_orders_lgbm_classifier_71938_94805"
-# WEEK_DATA=w1
-
-# # # perform scoring
-# # # week_data w2 means local validation
-# # # week_data w1 means real test submission
-# python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
 # python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
 # python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
 # # make submission
 # python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+# # eval submission, only for week_data & week_model w2
+# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+
+
+## SCORING
+# CV 0.563701 Fea 142
+CLICK_MODEL="2022-12-14_clicks_lgbm_classifier_35215_86132"
+CART_MODEL="2022-12-14_carts_lgbm_classifier_53767_90677"
+ORDER_MODEL="2022-12-14_orders_lgbm_classifier_71938_94805"
+WEEK_DATA=w1
+
+# # perform scoring
+# # week_data w2 means local validation
+# # week_data w1 means real test submission
+python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
 # # eval submission, only for week_data & week_model w2
 # python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL

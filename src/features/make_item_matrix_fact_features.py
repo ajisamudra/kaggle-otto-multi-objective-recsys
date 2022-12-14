@@ -143,8 +143,8 @@ def gen_matrix_fact_features(
     ses_representation_path: Path,
     output_path: Path,
     embedding_click: np.ndarray,
-    embedding_cart_order: np.ndarray,
-    embedding_buy2buy: np.ndarray,
+    # embedding_cart_order: np.ndarray,
+    # embedding_buy2buy: np.ndarray,
 ):
     """
     session representation aids
@@ -216,49 +216,49 @@ def gen_matrix_fact_features(
             max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
-        logging.info("calculating distances in embedding cart_order")
-        (
-            cart_order_last_event_cosine_distances,
-            cart_order_last_event_euclidean_distances,
-            cart_order_max_recency_cosine_distances,
-            cart_order_max_recency_euclidean_distances,
-            cart_order_max_weighted_recency_cosine_distances,
-            cart_order_max_weighted_recency_euclidean_distances,
-            cart_order_max_duration_cosine_distances,
-            cart_order_max_duration_euclidean_distances,
-            cart_order_max_weighted_duration_cosine_distances,
-            cart_order_max_weighted_duration_euclidean_distances,
-        ) = calculate_distance_metrics(
-            embedding=embedding_cart_order,
-            candidate_aids=candidate_aids,
-            last_event_aids=last_event_aids,
-            max_recency_aids=max_recency_aids,
-            max_weighted_recency_aids=max_weighted_recency_aids,
-            max_duration_aids=max_duration_aids,
-            max_weighted_duration_aids=max_weighted_duration_aids,
-        )
+        # logging.info("calculating distances in embedding cart_order")
+        # (
+        #     cart_order_last_event_cosine_distances,
+        #     cart_order_last_event_euclidean_distances,
+        #     cart_order_max_recency_cosine_distances,
+        #     cart_order_max_recency_euclidean_distances,
+        #     cart_order_max_weighted_recency_cosine_distances,
+        #     cart_order_max_weighted_recency_euclidean_distances,
+        #     cart_order_max_duration_cosine_distances,
+        #     cart_order_max_duration_euclidean_distances,
+        #     cart_order_max_weighted_duration_cosine_distances,
+        #     cart_order_max_weighted_duration_euclidean_distances,
+        # ) = calculate_distance_metrics(
+        #     embedding=embedding_cart_order,
+        #     candidate_aids=candidate_aids,
+        #     last_event_aids=last_event_aids,
+        #     max_recency_aids=max_recency_aids,
+        #     max_weighted_recency_aids=max_weighted_recency_aids,
+        #     max_duration_aids=max_duration_aids,
+        #     max_weighted_duration_aids=max_weighted_duration_aids,
+        # )
 
-        logging.info("calculating distances in embedding buy2buy")
-        (
-            buy2buy_last_event_cosine_distances,
-            buy2buy_last_event_euclidean_distances,
-            buy2buy_max_recency_cosine_distances,
-            buy2buy_max_recency_euclidean_distances,
-            buy2buy_max_weighted_recency_cosine_distances,
-            buy2buy_max_weighted_recency_euclidean_distances,
-            buy2buy_max_duration_cosine_distances,
-            buy2buy_max_duration_euclidean_distances,
-            buy2buy_max_weighted_duration_cosine_distances,
-            buy2buy_max_weighted_duration_euclidean_distances,
-        ) = calculate_distance_metrics(
-            embedding=embedding_buy2buy,
-            candidate_aids=candidate_aids,
-            last_event_aids=last_event_aids,
-            max_recency_aids=max_recency_aids,
-            max_weighted_recency_aids=max_weighted_recency_aids,
-            max_duration_aids=max_duration_aids,
-            max_weighted_duration_aids=max_weighted_duration_aids,
-        )
+        # logging.info("calculating distances in embedding buy2buy")
+        # (
+        #     buy2buy_last_event_cosine_distances,
+        #     buy2buy_last_event_euclidean_distances,
+        #     buy2buy_max_recency_cosine_distances,
+        #     buy2buy_max_recency_euclidean_distances,
+        #     buy2buy_max_weighted_recency_cosine_distances,
+        #     buy2buy_max_weighted_recency_euclidean_distances,
+        #     buy2buy_max_duration_cosine_distances,
+        #     buy2buy_max_duration_euclidean_distances,
+        #     buy2buy_max_weighted_duration_cosine_distances,
+        #     buy2buy_max_weighted_duration_euclidean_distances,
+        # ) = calculate_distance_metrics(
+        #     embedding=embedding_buy2buy,
+        #     candidate_aids=candidate_aids,
+        #     last_event_aids=last_event_aids,
+        #     max_recency_aids=max_recency_aids,
+        #     max_weighted_recency_aids=max_weighted_recency_aids,
+        #     max_duration_aids=max_duration_aids,
+        #     max_weighted_duration_aids=max_weighted_duration_aids,
+        # )
 
         # save matrix factorization features
         output_data = {
@@ -274,26 +274,26 @@ def gen_matrix_fact_features(
             "matrix_fact_click_max_duration_euclidean_distance": click_max_duration_euclidean_distances,
             "matrix_fact_click_max_weighted_duration_cosine_distance": click_max_weighted_duration_cosine_distances,
             "matrix_fact_click_max_weighted_duration_euclidean_distance": click_max_weighted_duration_euclidean_distances,
-            "matrix_fact_cart_order_last_event_cosine_distance": cart_order_last_event_cosine_distances,
-            "matrix_fact_cart_order_last_event_euclidean_distance": cart_order_last_event_euclidean_distances,
-            "matrix_fact_cart_order_max_recency_cosine_distance": cart_order_max_recency_cosine_distances,
-            "matrix_fact_cart_order_max_recency_euclidean_distance": cart_order_max_recency_euclidean_distances,
-            "matrix_fact_cart_order_max_weighted_recency_cosine_distance": cart_order_max_weighted_recency_cosine_distances,
-            "matrix_fact_cart_order_max_weighted_recency_euclidean_distance": cart_order_max_weighted_recency_euclidean_distances,
-            "matrix_fact_cart_order_max_duration_cosine_distance": cart_order_max_duration_cosine_distances,
-            "matrix_fact_cart_order_max_duration_euclidean_distance": cart_order_max_duration_euclidean_distances,
-            "matrix_fact_cart_order_max_weighted_duration_cosine_distance": cart_order_max_weighted_duration_cosine_distances,
-            "matrix_fact_cart_order_max_weighted_duration_euclidean_distance": cart_order_max_weighted_duration_euclidean_distances,
-            "matrix_fact_buy2buy_last_event_cosine_distance": buy2buy_last_event_cosine_distances,
-            "matrix_fact_buy2buy_last_event_euclidean_distance": buy2buy_last_event_euclidean_distances,
-            "matrix_fact_buy2buy_max_recency_cosine_distance": buy2buy_max_recency_cosine_distances,
-            "matrix_fact_buy2buy_max_recency_euclidean_distance": buy2buy_max_recency_euclidean_distances,
-            "matrix_fact_buy2buy_max_weighted_recency_cosine_distance": buy2buy_max_weighted_recency_cosine_distances,
-            "matrix_fact_buy2buy_max_weighted_recency_euclidean_distance": buy2buy_max_weighted_recency_euclidean_distances,
-            "matrix_fact_buy2buy_max_duration_cosine_distance": buy2buy_max_duration_cosine_distances,
-            "matrix_fact_buy2buy_max_duration_euclidean_distance": buy2buy_max_duration_euclidean_distances,
-            "matrix_fact_buy2buy_max_weighted_duration_cosine_distance": buy2buy_max_weighted_duration_cosine_distances,
-            "matrix_fact_buy2buy_max_weighted_duration_euclidean_distance": buy2buy_max_weighted_duration_euclidean_distances,
+            # "matrix_fact_cart_order_last_event_cosine_distance": cart_order_last_event_cosine_distances,
+            # "matrix_fact_cart_order_last_event_euclidean_distance": cart_order_last_event_euclidean_distances,
+            # "matrix_fact_cart_order_max_recency_cosine_distance": cart_order_max_recency_cosine_distances,
+            # "matrix_fact_cart_order_max_recency_euclidean_distance": cart_order_max_recency_euclidean_distances,
+            # "matrix_fact_cart_order_max_weighted_recency_cosine_distance": cart_order_max_weighted_recency_cosine_distances,
+            # "matrix_fact_cart_order_max_weighted_recency_euclidean_distance": cart_order_max_weighted_recency_euclidean_distances,
+            # "matrix_fact_cart_order_max_duration_cosine_distance": cart_order_max_duration_cosine_distances,
+            # "matrix_fact_cart_order_max_duration_euclidean_distance": cart_order_max_duration_euclidean_distances,
+            # "matrix_fact_cart_order_max_weighted_duration_cosine_distance": cart_order_max_weighted_duration_cosine_distances,
+            # "matrix_fact_cart_order_max_weighted_duration_euclidean_distance": cart_order_max_weighted_duration_euclidean_distances,
+            # "matrix_fact_buy2buy_last_event_cosine_distance": buy2buy_last_event_cosine_distances,
+            # "matrix_fact_buy2buy_last_event_euclidean_distance": buy2buy_last_event_euclidean_distances,
+            # "matrix_fact_buy2buy_max_recency_cosine_distance": buy2buy_max_recency_cosine_distances,
+            # "matrix_fact_buy2buy_max_recency_euclidean_distance": buy2buy_max_recency_euclidean_distances,
+            # "matrix_fact_buy2buy_max_weighted_recency_cosine_distance": buy2buy_max_weighted_recency_cosine_distances,
+            # "matrix_fact_buy2buy_max_weighted_recency_euclidean_distance": buy2buy_max_weighted_recency_euclidean_distances,
+            # "matrix_fact_buy2buy_max_duration_cosine_distance": buy2buy_max_duration_cosine_distances,
+            # "matrix_fact_buy2buy_max_duration_euclidean_distance": buy2buy_max_duration_euclidean_distances,
+            # "matrix_fact_buy2buy_max_weighted_duration_cosine_distance": buy2buy_max_weighted_duration_cosine_distances,
+            # "matrix_fact_buy2buy_max_weighted_duration_euclidean_distance": buy2buy_max_weighted_duration_euclidean_distances,
         }
 
         output_df = pl.DataFrame(output_data)
@@ -324,13 +324,13 @@ def make_matrix_fact_features(
     if mode in ["training_train", "training_test"]:
         logging.info("read local matrix factorization embedding")
         embedding_click = load_matrix_fact_embedding()
-        embedding_cart_order = load_matrix_fact_order_cart_embedding()
-        embedding_buy2buy = load_matrix_fact_buy2buy_embedding()
+        # embedding_cart_order = load_matrix_fact_order_cart_embedding()
+        # embedding_buy2buy = load_matrix_fact_buy2buy_embedding()
     else:
         logging.info("read scoring matrix factorization embedding")
         embedding_click = load_matrix_fact_embedding(mode="scoring")
-        embedding_cart_order = load_matrix_fact_order_cart_embedding(mode="scoring")
-        embedding_buy2buy = load_matrix_fact_buy2buy_embedding(mode="scoring")
+        # embedding_cart_order = load_matrix_fact_order_cart_embedding(mode="scoring")
+        # embedding_buy2buy = load_matrix_fact_buy2buy_embedding(mode="scoring")
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
@@ -342,8 +342,8 @@ def make_matrix_fact_features(
             ses_representation_path=ses_representation_path,
             output_path=output_path,
             embedding_click=embedding_click,
-            embedding_cart_order=embedding_cart_order,
-            embedding_buy2buy=embedding_buy2buy,
+            # embedding_cart_order=embedding_cart_order,
+            # embedding_buy2buy=embedding_buy2buy,
         )
 
 
