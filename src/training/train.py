@@ -222,17 +222,17 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                for i in range(10):
-                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
-                    df_chunk = pl.read_parquet(filepath)
-                    df_chunk = df_chunk.to_pandas()
-                    df_chunk = downsample(df_chunk)
-                    df_chunk = pl.from_pandas(df_chunk)
-                    val_df = pl.concat([val_df, df_chunk])
+                # for i in range(10):
+                #     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                #     df_chunk = pl.read_parquet(filepath)
+                #     df_chunk = df_chunk.to_pandas()
+                #     df_chunk = downsample(df_chunk)
+                #     df_chunk = pl.from_pandas(df_chunk)
+                #     val_df = pl.concat([val_df, df_chunk])
 
             elif EVENT == "carts":
                 train_df = pl.DataFrame()
-                for i in range(CFG.N_train):
+                for i in range(CFG.N_train - 5):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     df_chunk = df_chunk.to_pandas()
@@ -240,13 +240,13 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                for i in range(10):
-                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
-                    df_chunk = pl.read_parquet(filepath)
-                    df_chunk = df_chunk.to_pandas()
-                    df_chunk = downsample(df_chunk)
-                    df_chunk = pl.from_pandas(df_chunk)
-                    val_df = pl.concat([val_df, df_chunk])
+                # for i in range(10):
+                #     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                #     df_chunk = pl.read_parquet(filepath)
+                #     df_chunk = df_chunk.to_pandas()
+                #     df_chunk = downsample(df_chunk)
+                #     df_chunk = pl.from_pandas(df_chunk)
+                #     val_df = pl.concat([val_df, df_chunk])
             else:
                 for i in range(int(CFG.N_train / 10) + 1):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
@@ -256,16 +256,16 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                for i in range(5):
-                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
-                    df_chunk = pl.read_parquet(filepath)
-                    df_chunk = df_chunk.to_pandas()
-                    df_chunk = downsample(df_chunk)
-                    df_chunk = pl.from_pandas(df_chunk)
-                    val_df = pl.concat([val_df, df_chunk])
+                # for i in range(3):
+                #     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                #     df_chunk = pl.read_parquet(filepath)
+                #     df_chunk = df_chunk.to_pandas()
+                #     df_chunk = downsample(df_chunk)
+                #     df_chunk = pl.from_pandas(df_chunk)
+                #     val_df = pl.concat([val_df, df_chunk])
 
             logging.info(f"train shape {train_df.shape}")
-            logging.info(f"val shape {val_df.shape}")
+            # logging.info(f"val shape {val_df.shape}")
             # sort data based on session & label
             train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
             train_df = train_df.to_pandas()
@@ -327,6 +327,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
             y_train, y_val = y[train_idx], y[val_idx]
             group_train, group_val = group[train_idx], group[val_idx]
+
+            del X, y, group
+            gc.collect()
 
             # calculate num samples per group
             logging.info("calculate num samples per group")
@@ -395,8 +398,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             val_score = pd.DataFrame(val_score)
             val_score_dists.append(val_score)
 
-            del train_df, X_train, X_val, y_train, y_val
-            # del X, y, group
+            del train_df, X_train, X_val, y_train, y_val, group_train, group_val
             del val_df
             gc.collect()
 
