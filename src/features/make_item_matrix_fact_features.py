@@ -251,7 +251,7 @@ def gen_matrix_fact_features(
             buy2buy_max_weighted_duration_cosine_distances,
             buy2buy_max_weighted_duration_euclidean_distances,
         ) = calculate_distance_metrics(
-            embedding=embedding_cart_order,
+            embedding=embedding_buy2buy,
             candidate_aids=candidate_aids,
             last_event_aids=last_event_aids,
             max_recency_aids=max_recency_aids,
