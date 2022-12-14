@@ -15,7 +15,11 @@ from src.utils.constants import (
     get_processed_scoring_train_matrix_fact_features_dir,
     get_processed_scoring_test_matrix_fact_features_dir,
 )
-from src.utils.matrix_factorization import load_matrix_fact_embedding
+from src.utils.matrix_factorization import (
+    load_matrix_fact_embedding,
+    load_matrix_fact_order_cart_embedding,
+    load_matrix_fact_buy2buy_embedding,
+)
 from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
@@ -41,7 +45,9 @@ def gen_matrix_fact_features(
     ix: int,
     ses_representation_path: Path,
     output_path: Path,
-    embedding: np.ndarray,
+    embedding_click: np.ndarray,
+    embedding_cart_order: np.ndarray,
+    embedding_buy2buy: np.ndarray,
 ):
     """
     session representation aids
@@ -95,8 +101,8 @@ def gen_matrix_fact_features(
         vectors1 = []
         vectors2 = []
         for source, target in zip(candidate_aids, last_event_aids):
-            vector1 = embedding[source]
-            vector2 = embedding[target]
+            vector1 = embedding_click[source]
+            vector2 = embedding_click[target]
             vectors1.append(vector1)
             vectors2.append(vector2)
             # cosine_dist = distance.cosine(vector1, vector2)
@@ -118,7 +124,7 @@ def gen_matrix_fact_features(
         logging.info("calculating distances between candidate_aid & max_recency_aid")
         vectors2 = []
         for target in max_recency_aids:
-            vector2 = embedding[target]
+            vector2 = embedding_click[target]
             vectors2.append(vector2)
 
         # convert list to array 2d
@@ -136,7 +142,7 @@ def gen_matrix_fact_features(
         )
         vectors2 = []
         for target in max_weighted_recency_aids:
-            vector2 = embedding[target]
+            vector2 = embedding_click[target]
             vectors2.append(vector2)
 
         # convert list to array 2d
@@ -152,7 +158,7 @@ def gen_matrix_fact_features(
         logging.info("calculating distances between candidate_aid & max_duration_aids")
         vectors2 = []
         for target in max_duration_aids:
-            vector2 = embedding[target]
+            vector2 = embedding_click[target]
             vectors2.append(vector2)
 
         # convert list to array 2d
@@ -170,7 +176,7 @@ def gen_matrix_fact_features(
         )
         vectors2 = []
         for target in max_weighted_duration_aids:
-            vector2 = embedding[target]
+            vector2 = embedding_click[target]
             vectors2.append(vector2)
 
         # convert list to array 2d
@@ -187,16 +193,16 @@ def gen_matrix_fact_features(
         output_data = {
             "session": sessions,
             "candidate_aid": candidate_aids,
-            "matrix_fact_last_event_cosine_distance": last_event_cosine_distances,
-            "matrix_fact_last_event_euclidean_distance": last_event_euclidean_distances,
-            "matrix_fact_max_recency_cosine_distance": max_recency_cosine_distances,
-            "matrix_fact_max_recency_euclidean_distance": max_recency_euclidean_distances,
-            "matrix_fact_max_weighted_recency_cosine_distance": max_weighted_recency_cosine_distances,
-            "matrix_fact_max_weighted_recency_euclidean_distance": max_weighted_recency_euclidean_distances,
-            "matrix_fact_max_duration_cosine_distance": max_duration_cosine_distances,
-            "matrix_fact_max_duration_euclidean_distance": max_duration_euclidean_distances,
-            "matrix_fact_max_weighted_duration_cosine_distance": max_weighted_duration_cosine_distances,
-            "matrix_fact_max_weighted_duration_euclidean_distance": max_weighted_duration_euclidean_distances,
+            "matrix_fact_click_last_event_cosine_distance": last_event_cosine_distances,
+            "matrix_fact_click_last_event_euclidean_distance": last_event_euclidean_distances,
+            "matrix_fact_click_max_recency_cosine_distance": max_recency_cosine_distances,
+            "matrix_fact_click_max_recency_euclidean_distance": max_recency_euclidean_distances,
+            "matrix_fact_click_max_weighted_recency_cosine_distance": max_weighted_recency_cosine_distances,
+            "matrix_fact_click_max_weighted_recency_euclidean_distance": max_weighted_recency_euclidean_distances,
+            "matrix_fact_click_max_duration_cosine_distance": max_duration_cosine_distances,
+            "matrix_fact_click_max_duration_euclidean_distance": max_duration_euclidean_distances,
+            "matrix_fact_click_max_weighted_duration_cosine_distance": max_weighted_duration_cosine_distances,
+            "matrix_fact_click_max_weighted_duration_euclidean_distance": max_weighted_duration_euclidean_distances,
         }
 
         output_df = pl.DataFrame(output_data)
@@ -226,10 +232,14 @@ def make_matrix_fact_features(
 
     if mode in ["training_train", "training_test"]:
         logging.info("read local matrix factorization embedding")
-        embedding = load_matrix_fact_embedding()
+        embedding_click = load_matrix_fact_embedding()
+        embedding_cart_order = load_matrix_fact_order_cart_embedding()
+        embedding_buy2buy = load_matrix_fact_buy2buy_embedding()
     else:
         logging.info("read scoring matrix factorization embedding")
-        embedding = load_matrix_fact_embedding(mode="scoring")
+        embedding_click = load_matrix_fact_embedding(mode="scoring")
+        embedding_cart_order = load_matrix_fact_order_cart_embedding(mode="scoring")
+        embedding_buy2buy = load_matrix_fact_buy2buy_embedding(mode="scoring")
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
@@ -240,7 +250,9 @@ def make_matrix_fact_features(
             ix=ix,
             ses_representation_path=ses_representation_path,
             output_path=output_path,
-            embedding=embedding,
+            embedding_click=embedding_click,
+            embedding_cart_order=embedding_cart_order,
+            embedding_buy2buy=embedding_buy2buy,
         )
 
 

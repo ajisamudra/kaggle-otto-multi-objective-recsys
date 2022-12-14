@@ -138,7 +138,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     #     "bagging_fraction": 0.8703404040978261,
                     # }
                     hyperparams = {
-                        "n_estimators": 500,
+                        "n_estimators": 1100,
                         "learning_rate": 0.034626607160951436,
                         "max_depth": 6,
                         "num_leaves": 34,
@@ -158,7 +158,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     #     "bagging_fraction": 0.7577740460272675,
                     # }
                     hyperparams = {
-                        "n_estimators": 500,
+                        "n_estimators": 1100,
                         "learning_rate": 0.04045305955075708,
                         "max_depth": 6,
                         "num_leaves": 49,

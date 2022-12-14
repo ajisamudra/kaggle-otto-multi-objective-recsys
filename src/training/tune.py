@@ -184,8 +184,8 @@ class ObjectiveLGBModel:
             "max_depth": trial.suggest_int("max_depth", 6, 12),
             "num_leaves": trial.suggest_int("num_leaves", 8, 128),
             "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 400, 1500),
-            # "feature_fraction": trial.suggest_float("feature_fraction", 0.9, 1),
-            # "bagging_fraction": trial.suggest_float("bagging_fraction", 0.9, 1),
+            "feature_fraction": trial.suggest_float("feature_fraction", 0.9, 1),
+            "bagging_fraction": trial.suggest_float("bagging_fraction", 0.9, 1),
             "random_state": 747,
             "verbose": 0,
         }
