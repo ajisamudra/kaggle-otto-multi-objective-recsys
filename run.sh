@@ -205,9 +205,9 @@
 # python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
 # TRAINING EVALUATION
-CLICK_MODEL="2022-12-15_one_ranker_cat_ranker_70819_50094_44974"
-CART_MODEL="2022-12-15_one_ranker_cat_ranker_70819_50094_44974"
-ORDER_MODEL="2022-12-15_one_ranker_cat_ranker_70819_50094_44974"
+CLICK_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
+CART_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
+ORDER_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
 WEEK_DATA=w2
 
 python src/scoring/score_one_ranker.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
