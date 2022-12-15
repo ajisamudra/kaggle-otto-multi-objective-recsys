@@ -156,7 +156,6 @@ class LGBRanker(RankingModel):
 
         kwargs["importance_type"] = "gain"
         kwargs["objective"] = "rank_xendcg"
-        kwargs["n_estimators"] = 500
 
         self._model = LGBMRanker(**kwargs)
         # self._model = LGBMRanker(class_weight="balanced", **kwargs)

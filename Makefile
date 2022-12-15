@@ -62,7 +62,7 @@ one_ranker_dataset:
 	python src/pipeline/make_one_ranker_training_dataset.py --mode training_train --istart 0 --iend 10
 
 train_one_ranker:
-	python src/training/train_one_ranker.py --event all --n 1 --algo lgbm_ranker --week w2 --eval 0
+	python src/training/train_one_ranker.py --event all --n 1 --algo $(ALGO) --week w2 --eval 0
 
 tune_one_ranker:
 	python src/training/tune_one_ranker.py --event all --k 1 --algo lgbm_ranker --n_estimators 1000 --n_trial 15

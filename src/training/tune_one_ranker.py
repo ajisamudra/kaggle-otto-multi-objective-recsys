@@ -14,6 +14,8 @@ from src.utils.constants import (
     CFG,
     write_json,
     get_processed_training_train_dataset_dir,  # final dataset dir
+    get_processed_training_test_dataset_dir,
+    get_processed_local_validation_dir,
 )
 from src.model.model import (
     CATRanker,
@@ -35,6 +37,71 @@ logging = get_logger()
 TARGET = "label"
 
 
+def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, K: int = 20):
+    """
+    df_pred is in submission format
+    session | type | labels
+    123 | clicks | [AID1 AID2 AID3]
+    123 | carts | [AID1 AID2]
+    123 | orders | [AID1]
+
+    df_truth is in following format
+    session | type | ground_truth
+    123 | clicks | [AID1 AID4]
+    123 | carts | [AID1]
+    123 | orders | [AID1]
+
+    Ks list of recall@K want to measure
+
+    """
+    # competition eval metrics
+    score = 0
+    weights = {"clicks": 0.10, "carts": 0.30, "orders": 0.60}
+    for t in ["clicks", "carts", "orders"]:
+        # logging.info(f"filter submission event {t}")
+        sub_session = (
+            df_pred.loc[df_pred["type"] == t]["session"].apply(lambda x: int(x)).values
+        )
+        sub_labels = df_pred.loc[df_pred["type"] == t]["labels"].values
+        # logging.info(f"filter label event {t}")
+        label_session = df_truth.loc[df_truth["type"] == t]["session"].values
+        label_truth = df_truth.loc[df_truth["type"] == t]["ground_truth"].values
+
+        sub_dict = dict(zip(sub_session, sub_labels))
+        tmp_labels_dict = dict(zip(label_session, label_truth))
+
+        recall_scores, hit_scores, gt_counts = [], [], []
+        for session_id in list(sub_session):
+            targets = set(tmp_labels_dict[session_id])
+            preds = set(sub_dict[session_id])
+
+            # calc
+            hit = len((targets & preds))
+            len_truth = min(len(targets), 20)
+            recall_score = hit / len_truth
+
+            recall_scores.append(recall_score)
+            hit_scores.append(hit)
+            gt_counts.append(len_truth)
+
+        recall_scores = np.array(recall_scores)
+        hit_scores = np.array(hit_scores)
+        gt_counts = np.array(gt_counts)
+
+        n_hits = np.sum(hit_scores)
+        n_gt = np.sum(gt_counts)
+        recall = np.sum(hit_scores) / np.sum(gt_counts)
+        score += weights[t] * recall
+        logging.info(f"{t} hits@{K} = {n_hits} / gt@{K} = {n_gt}")
+        logging.info(f"{t} recall@{K} = {recall}")
+
+    logging.info("=============")
+    logging.info(f"Overall Recall@{K} = {score}")
+    logging.info("=============")
+
+    return score
+
+
 def cross_validation_ap_score(
     model: Union[ClassifierModel, RankingModel],
     algo: str,
@@ -42,8 +109,10 @@ def cross_validation_ap_score(
 ) -> float:
 
     input_path = get_processed_training_train_dataset_dir()
+    val_path = get_processed_training_test_dataset_dir()
+    gt_path = get_processed_local_validation_dir()
 
-    val_pr_aucs = []
+    recall20s = []
     for _ in range(k):
         train_df = pl.DataFrame()
 
@@ -116,6 +185,7 @@ def cross_validation_ap_score(
         del train_df
         gc.collect()
 
+        logging.info("split train and val dataset")
         skgfold = StratifiedGroupKFold(n_splits=5)
         train_idx, val_idx = [], []
 
@@ -136,6 +206,7 @@ def cross_validation_ap_score(
         logging.info(f"val shape {X_val.shape} sum groups {sum(n_group_val)}")
         logging.info(f"y_train {np.mean(y_train)} | y_val {np.mean(y_val)}")
 
+        logging.info("fit ranker")
         if algo == "lgbm_ranker":
             model.fit(
                 X_train=X_train,
@@ -147,17 +218,96 @@ def cross_validation_ap_score(
                 eval_at=20,
             )
 
-        # predict val
-        y_proba = model.predict(X_val)
-        true_relevance = np.asarray([y_val])
-        score_relevance = np.asarray([y_proba])
-        pr_auc = ndcg_score(y_true=true_relevance, y_score=score_relevance, k=20)
-        val_pr_aucs.append(pr_auc)
-
-        del X_train, X_val, y_train, y_val, group_train, group_val
+        del X_train, y_train, group_train, X_val, y_val, group_val
         gc.collect()
 
-    return float(np.mean(val_pr_aucs))
+        # measure recall@20
+        logging.info("score candidates and pick top 20")
+        df_pred = pl.DataFrame()
+        for EVENT in ["orders", "carts", "clicks"]:
+            logging.info(f"event: {EVENT.upper()}")
+            test_df = pl.DataFrame()
+            df_chunk = pl.DataFrame()
+            if EVENT == "orders":
+                for i in range(8):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    test_df = pl.concat([test_df, df_chunk])
+
+            elif EVENT == "carts":
+                for i in range(6):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    test_df = pl.concat([test_df, df_chunk])
+
+            else:
+                for i in range(3):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    test_df = pl.concat([test_df, df_chunk])
+
+            test_df = test_df.to_pandas()
+            # replace inf with 0
+            # and make sure there's no None
+            test_df = test_df.replace([np.inf, -np.inf], 0)
+            test_df = test_df.fillna(0)
+
+            X_test = test_df[selected_features]
+
+            del df_chunk
+            gc.collect()
+
+            # predict val
+            scores = model.predict(X_test)
+            # select only session & candidate_aid cols
+            test_df = pl.from_pandas(test_df)
+            test_df = test_df.select([pl.col(["session", "candidate_aid", "label"])])
+            # add scores columns
+            # logging.info("merge with test_df")
+            test_df = test_df.with_columns([pl.Series(name="score", values=scores)])
+
+            del X_test
+            gc.collect()
+
+            test_predictions = (
+                test_df.sort(["session", "score"], reverse=True)
+                .groupby("session")
+                .agg([pl.col("candidate_aid").limit(20).list().alias("labels")])
+            )
+
+            del test_df
+            gc.collect()
+
+            test_predictions = test_predictions.select([pl.col(["session", "labels"])])
+            test_predictions = test_predictions.with_columns(
+                [pl.lit(EVENT).alias("type")]
+            )
+            test_predictions = test_predictions.select(
+                [pl.col(["session", "type", "labels"])]
+            )
+
+            df_pred = pl.concat([df_pred, test_predictions])
+            logging.info(f"df_pred shape {df_pred.shape}")
+
+            del test_predictions
+            gc.collect()
+
+        logging.info("measure recall@20")
+        gt_path = f"{gt_path}/test_labels.parquet"
+        df_truth = pd.read_parquet(gt_path)
+        recall20 = measure_recall(df_pred=df_pred.to_pandas(), df_truth=df_truth, K=20)
+        recall20s.append(recall20)
+
+        del df_truth, df_pred
+        gc.collect()
+        # # predict val
+        # y_proba = model.predict(X_val)
+        # true_relevance = np.asarray([y_val])
+        # score_relevance = np.asarray([y_proba])
+        # pr_auc = ndcg_score(y_true=true_relevance, y_score=score_relevance, k=20)
+        # val_pr_aucs.append(pr_auc)
+
+    return float(np.mean(recall20s))
 
 
 class ObjectiveLGBOneRankerModel:
@@ -190,7 +340,7 @@ class ObjectiveLGBOneRankerModel:
 
 
 def perform_tuning(algo: str, events: list, k: int, n_estimators: int, n_trial: int):
-    logging.info("measure AP before tuning")
+    logging.info("measure Recall@20 before tuning")
     hyperparams = {"n_estimators": 1000}
 
     # check performance before tuning
@@ -199,7 +349,7 @@ def perform_tuning(algo: str, events: list, k: int, n_estimators: int, n_trial: 
         model = LGBRanker(**hyperparams)
 
     mean_val_ap_before = cross_validation_ap_score(model=model, algo=algo, k=k)
-    logging.info(f"VAL AP with {k} fold before tuning: {mean_val_ap_before}")
+    logging.info(f"VAL Recall@20 with {k} fold before tuning: {mean_val_ap_before}")
 
     logging.info("perform tuning")
     study = optuna.create_study(direction="maximize", sampler=TPESampler())

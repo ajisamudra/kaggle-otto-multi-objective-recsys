@@ -98,9 +98,15 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     if algo == "lgbm_ranker":
         hyperparams = {
             "n_estimators": 1000,
+            # "learning_rate": 0.03683453215722998,
+            # "max_depth": 7,
+            # "num_leaves": 78,
+            # "min_data_in_leaf": 1154,
+            # "feature_fraction": 0.7977584122891811,
+            # "bagging_fraction": 0.712445779238389,
         }
     elif algo == "cat_ranker":
-        hyperparams = {}
+        hyperparams = {"n_estimators": 1000}
 
     if algo == "lgbm_ranker":
         model = LGBRanker(**hyperparams)
@@ -129,12 +135,6 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     # and make sure there's no None
     train_df = train_df.replace([np.inf, -np.inf], 0)
     train_df = train_df.fillna(0)
-
-    # val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
-    # val_df = val_df.to_pandas()
-
-    # del val_df
-    # gc.collect()
 
     selected_features = list(train_df.columns)
     selected_features.remove("session")
