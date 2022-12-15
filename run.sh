@@ -7,6 +7,7 @@
 # make item_hour_features MODE=training_train
 # make item_weekday_features MODE=training_train
 # make item_covisitation_features MODE=training_train START=0 END=10
+make item_covisitation_features_v2 MODE=training_train START=0 END=10
 # make item_covisitation_features MODE=training_train START=10 END=20
 # make item_covisitation_features MODE=training_train START=20 END=30
 
@@ -204,21 +205,21 @@
 # # eval submission, only for week_data & week_model w2
 # python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
-# TRAINING EVALUATION
-CLICK_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
-CART_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
-ORDER_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
-WEEK_DATA=w2
+# # TRAINING EVALUATION
+# CLICK_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
+# CART_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
+# ORDER_MODEL="2022-12-15_one_ranker_cat_ranker_70979_50246_44990"
+# WEEK_DATA=w2
 
-python src/scoring/score_one_ranker.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score_one_ranker.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score_one_ranker.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+# python src/scoring/score_one_ranker.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+# python src/scoring/score_one_ranker.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+# python src/scoring/score_one_ranker.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# # make submission
+# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-# eval submission, only for week_data & week_model w2
-python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+# # eval submission, only for week_data & week_model w2
+# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
 # ## SCORING
 # # CV 0.563701 Fea 142

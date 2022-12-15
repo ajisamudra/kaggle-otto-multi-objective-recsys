@@ -36,6 +36,9 @@ END=10
 item_covisitation_features:
 	python src/features/make_item_covisitation_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
+item_covisitation_features_v2:
+	python src/features/make_item_covisitation_features_v2.py --mode $(MODE) --istart $(START) --iend $(END)
+
 matrix_factorization_features:
 	python src/features/make_item_matrix_fact_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
