@@ -5,17 +5,12 @@ import itertools
 from tqdm import tqdm
 from collections import Counter
 from annoy import AnnoyIndex
-from src.utils.data import (
-    get_top15_covisitation_buys,
-    get_top15_covisitation_buy2buy,
-    get_top20_covisitation_click,
-)
 from src.utils.constants import (
     get_processed_local_validation_dir,
     check_directory,
     get_data_output_dir,
 )
-from src.utils.matrix_factorization import load_annoy_idx_matrix_fact_embedding
+from src.utils.word2vec import load_annoy_idx_word2vec_embedding
 from src.metrics.submission_evaluation import measure_recall
 from src.utils.logger import get_logger
 
@@ -25,7 +20,7 @@ logging = get_logger()
 ######### CANDIDATES GENERATION FUNCTION
 
 
-def suggest_mf(
+def suggest_matrix_fact(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
@@ -42,187 +37,30 @@ def suggest_mf(
         # unique_aids = set(aids)
         unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
-        mf_candidate = matrix_fact_idx.get_nns_by_item(unique_aids[0], n=n_candidate)
+
+        # RERANK CANDIDATES USING WEIGHTS
+        if len(unique_aids) >= 20:
+            weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
+            aids_temp = Counter()
+            # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
+            for aid, w, t in zip(aids, weights, types):
+                aids_temp[aid] += w * type_weight_multipliers[t]
+            candidate = [k for k, v in aids_temp.most_common(20)]
+            mf_candidate = matrix_fact_idx.get_nns_by_item(
+                unique_aids[0], n=n_candidate - 20
+            )
+            candidate.extend(mf_candidate)
+
+        else:
+            candidate = list(unique_aids)
+            mf_candidate = matrix_fact_idx.get_nns_by_item(
+                unique_aids[0], n=n_candidate - (len(candidate))
+            )
+            candidate.extend(mf_candidate)
 
         # append to list result
         sessions.append(session)
         candidates.append(mf_candidate)
-
-    # output series
-    result_series = pd.Series(candidates, index=sessions)
-    result_series.index.name = "session"
-
-    return result_series
-
-
-def suggest_clicks(
-    n_candidate: int,
-    ses2aids: dict,
-    ses2types: dict,
-    top_clicks: np.ndarray,
-    matrix_fact_idx: AnnoyIndex,
-):
-    """
-    covisit_click is dict of aid as key and list of suggested aid as value
-    """
-    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
-
-    sessions = []
-    candidates = []
-    for session, aids in tqdm(ses2aids.items()):
-        # unique_aids = set(aids)
-        unique_aids = list(dict.fromkeys(aids[::-1]))
-        types = ses2types[session]
-
-        # RERANK CANDIDATES USING WEIGHTS
-        if len(unique_aids) >= 20:
-            candidate = unique_aids[:20]
-            # get remaining from matrix factorization
-            remaining_candidate = n_candidate - 20
-            if remaining_candidate > 0:
-                mf_candidate = matrix_fact_idx.get_nns_by_item(
-                    unique_aids[0], n=remaining_candidate
-                )
-                candidate.extend(mf_candidate)
-
-        else:
-            candidate = (
-                list(unique_aids) + list(top_clicks)[: n_candidate - len(unique_aids)]
-            )
-
-            # get remaining from matrix factorization
-            remaining_candidate = n_candidate - len(candidate)
-            if remaining_candidate > 0:
-                mf_candidate = matrix_fact_idx.get_nns_by_item(
-                    unique_aids[0], n=remaining_candidate
-                )
-                candidate.extend(mf_candidate)
-
-        # append to list result
-        sessions.append(session)
-        candidates.append(candidate)
-
-    # output series
-    result_series = pd.Series(candidates, index=sessions)
-    result_series.index.name = "session"
-
-    return result_series
-
-
-def suggest_carts(
-    n_candidate: int,
-    ses2aids: dict,
-    ses2types: dict,
-    top_carts: np.ndarray,
-    matrix_fact_idx: AnnoyIndex,
-):
-    """
-    covisit_click is dict of aid as key and list of suggested aid as value
-    """
-    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
-
-    sessions = []
-    candidates = []
-    for session, aids in tqdm(ses2aids.items()):
-        unique_buys = []
-        # unique_aids = set(aids)
-        unique_aids = list(dict.fromkeys(aids[::-1]))
-        types = ses2types[session]
-        for ix, aid in enumerate(aids):
-            curr_type = types[ix]
-            if (curr_type == 0) or (curr_type == 1):
-                unique_buys.append(aid)
-
-        unique_buys = set(unique_buys)
-
-        # RERANK CANDIDATES USING WEIGHTS
-        if len(unique_aids) >= 20:
-            candidate = unique_aids[:20]
-            # get remaining from matrix factorization
-            remaining_candidate = n_candidate - 20
-            if remaining_candidate > 0:
-                mf_candidate = matrix_fact_idx.get_nns_by_item(
-                    unique_aids[0], n=remaining_candidate
-                )
-                candidate.extend(mf_candidate)
-
-        else:
-            candidate = (
-                list(unique_aids) + list(top_carts)[: n_candidate - len(unique_aids)]
-            )
-
-            # get remaining from matrix factorization
-            remaining_candidate = n_candidate - len(candidate)
-            if remaining_candidate > 0:
-                mf_candidate = matrix_fact_idx.get_nns_by_item(
-                    unique_aids[0], n=remaining_candidate
-                )
-                candidate.extend(mf_candidate)
-
-        # append to list result
-        sessions.append(session)
-        candidates.append(candidate)
-
-    # output series
-    result_series = pd.Series(candidates, index=sessions)
-    result_series.index.name = "session"
-
-    return result_series
-
-
-def suggest_buys(
-    n_candidate: int,
-    ses2aids: dict,
-    ses2types: dict,
-    top_orders: np.ndarray,
-    matrix_fact_idx: AnnoyIndex,
-):
-    """
-    covisit_click is dict of aid as key and list of suggested aid as value
-    """
-    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
-
-    sessions = []
-    candidates = []
-    for session, aids in tqdm(ses2aids.items()):
-        unique_buys = []
-        # unique_aids = set(aids)
-        unique_aids = list(dict.fromkeys(aids[::-1]))
-        types = ses2types[session]
-        for ix, aid in enumerate(aids):
-            curr_type = types[ix]
-            if (curr_type == 1) or (curr_type == 2):
-                unique_buys.append(aid)
-
-        unique_buys = set(unique_buys)
-
-        # RERANK CANDIDATES USING WEIGHTS
-        if len(unique_aids) >= 20:
-            candidate = unique_aids[:20]
-            # get remaining from matrix factorization
-            remaining_candidate = n_candidate - 20
-            if remaining_candidate > 0:
-                mf_candidate = matrix_fact_idx.get_nns_by_item(
-                    unique_aids[0], n=remaining_candidate
-                )
-                candidate.extend(mf_candidate)
-
-        else:
-            candidate = (
-                list(unique_aids) + list(top_orders)[: n_candidate - len(unique_aids)]
-            )
-
-            # get remaining from matrix factorization
-            remaining_candidate = n_candidate - len(candidate)
-            if remaining_candidate > 0:
-                mf_candidate = matrix_fact_idx.get_nns_by_item(
-                    unique_aids[0], n=remaining_candidate
-                )
-                candidate.extend(mf_candidate)
-
-        # append to list result
-        sessions.append(session)
-        candidates.append(candidate)
 
     # output series
     result_series = pd.Series(candidates, index=sessions)
@@ -239,16 +77,8 @@ if __name__ == "__main__":
     df_val = pd.read_parquet(DATA_DIR / "test.parquet")
 
     # candidate generation
-    # get top 20 clicks & buys in validation set
-    logging.info("top clicks in validation set")
-    top_clicks = df_val.loc[df_val["type"] == 0, "aid"].value_counts().index.values[:20]
-    logging.info("top carts in validation set")
-    top_carts = df_val.loc[df_val["type"] == 1, "aid"].value_counts().index.values[:20]
-    logging.info("top orders in validation set")
-    top_orders = df_val.loc[df_val["type"] == 2, "aid"].value_counts().index.values[:20]
-
     logging.info("read matrix fact index")
-    matrix_fact_idx = load_annoy_idx_matrix_fact_embedding()
+    matrix_fact_idx = load_annoy_idx_word2vec_embedding()
 
     logging.info("Here are size of our 3 co-visitation matrices:")
     # logging.info(f"{len(top_20_clicks)}, {len(top_15_buy2buy)}, {len(top_15_buys)}")
@@ -256,44 +86,17 @@ if __name__ == "__main__":
     logging.info("start of suggesting clicks")
     logging.info("sort session by ts ascendingly")
     df_val = df_val.sort_values(["session", "ts"])
+    # sample session id
+    lucky_sessions = df_val.drop_duplicates(["session"]).sample(frac=0.1)["session"]
+    df_val = df_val[df_val.session.isin(lucky_sessions)]
     # create dict of session_id: list of aid/ts/type
     logging.info("create ses2aids")
     ses2aids = df_val.groupby("session")["aid"].apply(list).to_dict()
     logging.info("create ses2types")
     ses2types = df_val.groupby("session")["type"].apply(list).to_dict()
 
-    # logging.info("start of suggesting clicks")
-    # pred_df_clicks = suggest_clicks(
-    #     n_candidate=40,
-    #     ses2aids=ses2aids,
-    #     ses2types=ses2types,
-    #     top_clicks=top_clicks,
-    #     matrix_fact_idx=matrix_fact_idx,
-    # )
-    # logging.info("end of suggesting clicks")
-
-    # logging.info("start of suggesting carts")
-    # pred_df_carts = suggest_carts(
-    #     n_candidate=40,
-    #     ses2aids=ses2aids,
-    #     ses2types=ses2types,
-    #     top_carts=top_carts,
-    #     matrix_fact_idx=matrix_fact_idx,
-    # )
-
-    # logging.info("end of suggesting carts")
-
-    # logging.info("start of suggesting buys")
-    # pred_df_buys = suggest_buys(
-    #     n_candidate=40,
-    #     ses2aids=ses2aids,
-    #     ses2types=ses2types,
-    #     top_orders=top_orders,
-    #     matrix_fact_idx=matrix_fact_idx,
-    # )
-
     logging.info("start of suggesting mf")
-    pred_df_mf = suggest_mf(
+    pred_df_mf = suggest_matrix_fact(
         n_candidate=40,
         ses2aids=ses2aids,
         ses2types=ses2types,
@@ -339,6 +142,7 @@ if __name__ == "__main__":
     logging.info("start computing metrics")
     # COMPUTE METRIC
     test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
+    test_labels = test_labels[test_labels.session.isin(lucky_sessions)]
     measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 40])
 
 # covisit retrieval - ver 9
@@ -391,4 +195,28 @@ if __name__ == "__main__":
 # [2022-12-13 09:33:55,958] {submission_evaluation.py:92} INFO - Overall Recall@100 = 0.6099673920349341
 # [2022-12-13 09:33:55,958] {submission_evaluation.py:93} INFO - =============
 
-# covisit + matrix factorial retrieval
+# covisit + word2vec 20wdw 5negative retrieval
+# [2022-12-16 14:06:09,775] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.3212786438901578
+# [2022-12-16 14:06:09,775] {submission_evaluation.py:84} INFO - clicks hits@20 = 56404 / gt@20 = 175561
+# [2022-12-16 14:06:09,776] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.3212786438901578
+# [2022-12-16 14:06:10,941] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.4024365826031879
+# [2022-12-16 14:06:10,941] {submission_evaluation.py:84} INFO - carts hits@20 = 15679 / gt@20 = 57138
+# [2022-12-16 14:06:10,941] {submission_evaluation.py:85} INFO - carts recall@20 = 0.2744058244950821
+# [2022-12-16 14:06:12,288] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.41961585205982016
+# [2022-12-16 14:06:12,290] {submission_evaluation.py:84} INFO - orders hits@20 = 8659 / gt@20 = 31254
+# [2022-12-16 14:06:12,290] {submission_evaluation.py:85} INFO - orders recall@20 = 0.27705253727522877
+# [2022-12-16 14:06:12,290] {submission_evaluation.py:91} INFO - =============
+# [2022-12-16 14:06:12,291] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.28068113410267764
+# [2022-12-16 14:06:12,291] {submission_evaluation.py:93} INFO - =============
+# [2022-12-16 14:06:14,691] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@40 = 0.347816428477851
+# [2022-12-16 14:06:14,692] {submission_evaluation.py:84} INFO - clicks hits@40 = 61063 / gt@40 = 175561
+# [2022-12-16 14:06:14,692] {submission_evaluation.py:85} INFO - clicks recall@40 = 0.347816428477851
+# [2022-12-16 14:06:16,735] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@40 = 0.4197144273310295
+# [2022-12-16 14:06:16,735] {submission_evaluation.py:84} INFO - carts hits@40 = 16518 / gt@40 = 57138
+# [2022-12-16 14:06:16,735] {submission_evaluation.py:85} INFO - carts recall@40 = 0.2890895726136722
+# [2022-12-16 14:06:18,640] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@40 = 0.4337384771203976
+# [2022-12-16 14:06:18,640] {submission_evaluation.py:84} INFO - orders hits@40 = 9024 / gt@40 = 31254
+# [2022-12-16 14:06:18,640] {submission_evaluation.py:85} INFO - orders recall@40 = 0.2887310424265694
+# [2022-12-16 14:06:18,640] {submission_evaluation.py:91} INFO - =============
+# [2022-12-16 14:06:18,640] {submission_evaluation.py:92} INFO - Overall Recall@40 = 0.2947471400878284
+# [2022-12-16 14:06:18,640] {submission_evaluation.py:93} INFO - =============

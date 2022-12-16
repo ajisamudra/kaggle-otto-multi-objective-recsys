@@ -62,6 +62,15 @@ def get_local_matrix_fact_dir() -> Path:
     path = ROOT_DIR / "data" / "processed" / "local-validation" / "matrix-factorization"
     return path
 
+def get_scoring_word2vec_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "full-data" / "word2vec"
+    return path
+
+
+def get_local_word2vec_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "local-validation" / "word2vec"
+    return path
+
 
 ### Data/Processed Dir
 

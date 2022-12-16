@@ -2,6 +2,9 @@ import numpy as np
 from src.utils.constants import get_scoring_matrix_fact_dir, get_local_matrix_fact_dir
 from annoy import AnnoyIndex
 
+VECTOR = 32
+NTREE = 15
+
 
 def load_matrix_fact_embedding(mode: str = "local"):
 
@@ -32,11 +35,11 @@ def load_annoy_idx_matrix_fact_embedding(mode: str = "local"):
     embedding = embedding_dict["arr_0"]
 
     # create annoy index for search nn
-    index = AnnoyIndex(32, "euclidean")
+    index = AnnoyIndex(VECTOR, "euclidean")
     for i in range(embedding.shape[0]):
         index.add_item(i, embedding[i, :])
-    index.build(150)
-
+    # build annoy index
+    index.build(NTREE)
     return index
 
 
