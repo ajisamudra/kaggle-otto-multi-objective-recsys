@@ -16,13 +16,13 @@ from src.utils.constants import (
     get_processed_scoring_train_candidates_dir,
     get_processed_scoring_test_candidates_dir,
 )
-from src.utils.matrix_factorization import load_annoy_idx_matrix_fact_embedding
+from src.utils.word2vec import load_annoy_idx_word2vec_embedding
 from src.utils.logger import get_logger
 
 logging = get_logger()
 
 
-def suggest_matrix_fact(
+def suggest_word2vec(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
@@ -77,7 +77,7 @@ def generate_candidates_matrix_fact(
         gc.collect()
 
         # retrieve matrix factorization candidates
-        candidates_series = suggest_matrix_fact(
+        candidates_series = suggest_word2vec(
             n_candidate=20,
             ses2aids=ses2aids,
             ses2types=ses2types,
@@ -92,7 +92,7 @@ def generate_candidates_matrix_fact(
                 candidates_series_tmp.add_suffix(f"_{event}"), columns=["labels"]
             ).reset_index()
 
-            filepath = output_path / f"{name}_{ix}_{event}_matrix_fact_list.parquet"
+            filepath = output_path / f"{name}_{ix}_{event}_word2vec_list.parquet"
             logging.info(f"save chunk {ix} to: {filepath}")
             candidate_list_df.to_parquet(f"{filepath}")
 
@@ -108,11 +108,11 @@ def generate_candidates_matrix_fact(
 def main(mode: str):
 
     if mode in ["training_train", "training_test"]:
-        logging.info("read local matrix factorization index")
-        matrix_fact_idx = load_annoy_idx_matrix_fact_embedding()
+        logging.info("read local word2vec index")
+        matrix_fact_idx = load_annoy_idx_word2vec_embedding()
     else:
-        logging.info("read scoring matrix factorization index")
-        matrix_fact_idx = load_annoy_idx_matrix_fact_embedding(mode="scoring")
+        logging.info("read scoring word2vec index")
+        matrix_fact_idx = load_annoy_idx_word2vec_embedding(mode="scoring")
 
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()

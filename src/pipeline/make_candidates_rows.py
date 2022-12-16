@@ -24,6 +24,7 @@ logging = get_logger()
 
 def pivot_candidates_list_to_rows(
     cand_df: pd.DataFrame,
+    cand2_df: pd.DataFrame,
     is_train: bool,
     include_all_gt: bool,
     drop_zero_positive_sample: bool,
@@ -36,13 +37,11 @@ def pivot_candidates_list_to_rows(
     123_carts | [aid1, aid2, aid3]
     123_orders | [aid1, aid2, aid3]
     """
-    # drop event in session
-    # logging.info("create prediction session column")
-    cand_df["session"] = cand_df["session"].apply(lambda x: int(x.split("_")[0]))
 
     # dict of session and labels
     # logging.info("create ses2candidates")
     ses2candidates = dict(zip(cand_df["session"], cand_df["labels"]))
+    ses2candidates_word2vec = dict(zip(cand2_df["session"], cand2_df["labels"]))
     unique_sessions = list(cand_df["session"].values)
 
     sessions = []
@@ -65,7 +64,13 @@ def pivot_candidates_list_to_rows(
                     continue
 
         # get candidates for specific session
-        cands = set(ses2candidates[session])
+        # covisitation candidates
+        cands = list(ses2candidates[session])
+        # word2vec candidates
+        word2vec_cands = list(ses2candidates_word2vec[session])
+        cands.extend(word2vec_cands)
+        # drop duplicate
+        cands = set(cands)
 
         if include_all_gt:
             # add all truths if it's training data
@@ -116,9 +121,26 @@ def pivot_candidates(
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):
         for event in ["clicks", "carts", "orders"]:
-            # logging.info(f"chunk {ix}: read input")
+            # candidate #1 covisitation
             filepath = f"{input_path}/{name}_{ix}_{event}_list.parquet"
-            df = pd.read_parquet(filepath)
+            cand1_df = pd.read_parquet(filepath)
+            # drop event in session
+            # logging.info("create prediction session column")
+            cand1_df["session"] = cand1_df["session"].apply(
+                lambda x: int(x.split("_")[0])
+            )
+
+            # candidate #2 word2vec
+            filepath = f"{input_path}/{name}_{ix}_{event}_word2vec_list.parquet"
+            cand2_df = pd.read_parquet(filepath)
+            # drop event in session
+            # logging.info("create prediction session column")
+            cand2_df["session"] = cand2_df["session"].apply(
+                lambda x: int(x.split("_")[0])
+            )
+
+            gc.collect()
+
             # input df as follow
             # session | labels
             # A_clicks | [aid1, aid2]
@@ -137,7 +159,8 @@ def pivot_candidates(
 
             # logging.info(f"start pivoting candidate")
             df_output = pivot_candidates_list_to_rows(
-                cand_df=df,
+                cand_df=cand1_df,
+                cand2_df=cand2_df,
                 is_train=is_train,
                 include_all_gt=include_all_gt,
                 drop_zero_positive_sample=drop_zero_positive_sample,
@@ -149,7 +172,7 @@ def pivot_candidates(
             df_output.to_parquet(f"{filepath}")
             logging.info(f"output df shape {df_output.shape}")
 
-            del df, df_output
+            del cand1_df, cand2_df, df_output
             gc.collect()
 
 

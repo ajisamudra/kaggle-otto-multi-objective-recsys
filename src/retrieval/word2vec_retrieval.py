@@ -97,7 +97,7 @@ if __name__ == "__main__":
 
     logging.info("start of suggesting mf")
     pred_df_mf = suggest_matrix_fact(
-        n_candidate=40,
+        n_candidate=60,
         ses2aids=ses2aids,
         ses2types=ses2types,
         matrix_fact_idx=matrix_fact_idx,
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     # COMPUTE METRIC
     test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
     test_labels = test_labels[test_labels.session.isin(lucky_sessions)]
-    measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 40])
+    measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 40, 60])
 
 # covisit retrieval - ver 9
 # [2022-12-13 09:11:28,984] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5260462058837938

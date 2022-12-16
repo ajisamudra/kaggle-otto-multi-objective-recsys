@@ -1,6 +1,7 @@
 # make split_into_chunks MODE=training_train
 # make candidate_list MODE=training_train
-# make candidate_rows MODE=training_train
+# make candidate_word2vec_list MODE=training_train
+make candidate_rows MODE=training_train
 # make session_features MODE=training_train
 # make item_features MODE=training_train
 # make session_item_features MODE=training_train
@@ -14,6 +15,7 @@
 
 # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
+# make candidate_word2vec_list MODE=training_test
 # make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
@@ -31,6 +33,7 @@
 
 # make split_into_chunks MODE=scoring_test
 # make candidate_list MODE=scoring_test
+# make candidate_word2vec_list MODE=scoring_test
 # make candidate_rows MODE=scoring_test
 # make session_features MODE=scoring_test
 # make item_features MODE=scoring_test
