@@ -179,21 +179,21 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     cand_df = cand_df.fill_null(0)
 
-    # # read matrix factorization features
-    # matrix_fact_fea = pl.read_parquet(matrix_fact_path)
-    # logging.info(
-    #     f"read sessionXmatrix_fact features with shape {matrix_fact_fea.shape}"
-    # )
-    # cand_df = cand_df.join(
-    #     matrix_fact_fea,
-    #     how="left",
-    #     left_on=["session", "candidate_aid"],
-    #     right_on=["session", "candidate_aid"],
-    # )
-    # logging.info(f"joined with sessionXmatrix_fact features! shape {cand_df.shape}")
+    # read matrix factorization features
+    matrix_fact_fea = pl.read_parquet(matrix_fact_path)
+    logging.info(
+        f"read sessionXmatrix_fact features with shape {matrix_fact_fea.shape}"
+    )
+    cand_df = cand_df.join(
+        matrix_fact_fea,
+        how="left",
+        left_on=["session", "candidate_aid"],
+        right_on=["session", "candidate_aid"],
+    )
+    logging.info(f"joined with sessionXmatrix_fact features! shape {cand_df.shape}")
 
-    # del matrix_fact_fea
-    # gc.collect()
+    del matrix_fact_fea
+    gc.collect()
 
     # read word2vec features
     word2vec_fea_df = pl.read_parquet(word2vec_path)
