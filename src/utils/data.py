@@ -35,7 +35,8 @@ def convert_top20_covisitation_click(mode: str = "local"):
             )
         )
 
-    return top_20_clicks
+    filepath = f"{covisit_dir}/top_20_clicks_v{VER}.pkl"
+    joblib.dump(top_20_clicks, filepath)
 
 
 def convert_top15_covisitation_buy2buy(mode: str = "local"):
@@ -48,7 +49,9 @@ def convert_top15_covisitation_buy2buy(mode: str = "local"):
     top_15_buy2buy = pqt_to_pair_dict(
         pd.read_parquet(covisit_dir / f"top_15_buy2buy_v{VER}_0.pqt")
     )
-    return top_15_buy2buy
+
+    filepath = f"{covisit_dir}/top_15_buy2buy_v{VER}.pkl"
+    joblib.dump(top_15_buy2buy, filepath)
 
 
 def convert_top15_covisitation_buys(mode: str = "local"):
@@ -68,7 +71,8 @@ def convert_top15_covisitation_buys(mode: str = "local"):
             )
         )
 
-    return top_15_buys
+    filepath = f"{covisit_dir}/top_15_carts_orders_v{VER}.pkl"
+    joblib.dump(top_15_buys, filepath)
 
 
 def get_top20_covisitation_click(mode: str = "local"):

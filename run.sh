@@ -6,13 +6,11 @@
 # make session_item_features MODE=training_train
 # make item_hour_features MODE=training_train
 # make item_weekday_features MODE=training_train
-# make item_covisitation_features MODE=training_train START=0 END=10
-make item_covisitation_features_v2 MODE=training_train START=0 END=10
-# make item_covisitation_features MODE=training_train START=10 END=20
-# make item_covisitation_features MODE=training_train START=20 END=30
-
 # make session_representation_items MODE=training_train
-# make session_representation_items MODE=scoring_train
+# make item_covisitation_features MODE=training_train START=0 END=30
+# make matrix_factorization_features MODE=training_train START=0 END=30
+# make combine_features  MODE=training_train START=0 END=30
+
 
 # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
@@ -22,71 +20,34 @@ make item_covisitation_features_v2 MODE=training_train START=0 END=10
 # make session_item_features MODE=training_test
 # make item_hour_features MODE=training_test
 # make item_weekday_features MODE=training_test
-# make item_covisitation_features MODE=training_test START=0 END=10
-# make item_covisitation_features MODE=training_test START=10 END=20
-# make item_covisitation_features MODE=training_test START=20 END=30
-# make item_covisitation_features MODE=training_test START=30 END=40
-# make item_covisitation_features MODE=training_test START=40 END=50
-# make item_covisitation_features MODE=training_test START=50 END=60
-# make item_covisitation_features MODE=training_test START=60 END=70
-# make item_covisitation_features MODE=training_test START=60 END=70
-# make item_covisitation_features MODE=training_test START=70 END=80
-# make combine_features  MODE=training_test
-
-# make split_into_chunks MODE=scoring_test
-# make candidate_list MODE=scoring_test
-# make candidate_rows MODE=scoring_test
-# make session_features MODE=scoring_test
-# make item_features MODE=scoring_test
-# make session_item_features MODE=scoring_test
-# make item_hour_features MODE=scoring_test
-# make item_weekday_features MODE=scoring_test
-# make item_covisitation_features MODE=scoring_test START=0 END=10
-# make item_covisitation_features MODE=scoring_test START=10 END=20
-# make item_covisitation_features MODE=scoring_test START=20 END=30
-# make item_covisitation_features MODE=scoring_test START=30 END=40
-# make item_covisitation_features MODE=scoring_test START=40 END=50
-# make item_covisitation_features MODE=scoring_test START=50 END=60
-# make item_covisitation_features MODE=scoring_test START=60 END=70
-# make item_covisitation_features MODE=scoring_test START=70 END=80
-# make combine_features  MODE=scoring_test
-
-# make split_into_chunks MODE=scoring_test
-# make candidate_list MODE=scoring_test
-# make candidate_rows MODE=scoring_test
-# make session_features MODE=scoring_test
-# make session_item_features MODE=scoring_test
-# make item_features MODE=scoring_test
-# make item_hour_features MODE=scoring_test
-# make item_weekday_features MODE=scoring_test
-# make item_covisitation_features MODE=scoring_test
-# make combine_features  MODE=scoring_test
-
-# make combine_features  MODE=training_train
-# make combine_features  MODE=training_test
-
-# make eda EDA_MODE=class_dist
-
-# make item_covisitation_features MODE=training_train START=0 END=10
-# make item_covisitation_features MODE=training_train START=10 END=20
-# make item_covisitation_features MODE=training_train START=20 END=30
-# make combine_features  MODE=training_train
-
-# make matrix_factorization_features MODE=training_train START=0 END=30
-# make combine_features  MODE=training_train START=0 END=30
-
+# make session_representation_items MODE=training_test
+# make item_covisitation_features MODE=training_test START=0 END=40
+# make item_covisitation_features MODE=training_test START=40 END=80
 # make matrix_factorization_features MODE=training_test START=0 END=20
 # make matrix_factorization_features MODE=training_test START=20 END=40
 # make matrix_factorization_features MODE=training_test START=40 END=60
 # make matrix_factorization_features MODE=training_test START=60 END=80
-# make combine_features  MODE=training_test START=0 END=20
-# make combine_features  MODE=training_test START=20 END=40
-# make combine_features  MODE=training_test START=40 END=60
-# make combine_features  MODE=training_test START=60 END=80
+# make combine_features  MODE=training_test START=0 END=80
 
-# make matrix_factorization_features MODE=scoring_test START=0 END=80
-# make combine_features  MODE=scoring_test START=0 END=40
-# make combine_features  MODE=scoring_test START=40 END=80
+# make split_into_chunks MODE=scoring_test
+# make candidate_list MODE=scoring_test
+# make candidate_rows MODE=scoring_test
+# make session_features MODE=scoring_test
+# make item_features MODE=scoring_test
+# make session_item_features MODE=scoring_test
+# make item_hour_features MODE=scoring_test
+# make item_weekday_features MODE=scoring_test
+# make session_representation_items MODE=scoring_test
+# make item_covisitation_features MODE=scoring_test START=0 END=40
+# make item_covisitation_features MODE=scoring_test START=40 END=80
+# make matrix_factorization_features MODE=scoring_test START=0 END=20
+# make matrix_factorization_features MODE=scoring_test START=20 END=40
+# make matrix_factorization_features MODE=scoring_test START=40 END=60
+# make matrix_factorization_features MODE=scoring_test START=60 END=80
+# make combine_features  MODE=scoring_test START=0 END=80
+
+
+# make eda EDA_MODE=class_dist
 
 # python src/training/train.py --event orders --n 1 --algo lgbm_classifier --week w2 --eval 0
 # python src/training/train.py --event carts --n 1 --algo lgbm_classifier --week w2 --eval 0
@@ -96,75 +57,6 @@ make item_covisitation_features_v2 MODE=training_train START=0 END=10
 # make train ALGO=lgbm_classifier
 # make train ALGO=cat_classifier
 # make train ALGO=cat_ranker
-
-# # take last 1 week data from the whole train data
-# python src/preprocess/split_local_train_label.py --mode training
-# # python src/preprocess/split_local_train_label.py --mode scoring
-
-# # # split data last 1 week into 10 chunks
-# # # python src/preprocess/split_data_into_chunks.py --mode scoring_train
-# # # python src/preprocess/split_data_into_chunks.py --mode scoring_test
-# python src/preprocess/split_data_into_chunks.py --mode training_train
-# python src/preprocess/split_data_into_chunks.py --mode training_test
-
-# # # # # generate candidates from retrieval
-# # # # # python src/pipeline/make_candidates_list.py --mode scoring_train
-# # # # # python src/pipeline/make_candidates_list.py --mode scoring_test
-# # python src/pipeline/make_candidates_list.py --mode training_train
-# python src/pipeline/make_candidates_list.py --mode training_test
-
-# # # # # pivot candidate list to candidate rows
-# # # # # python src/pipeline/make_candidates_rows.py --mode scoring_train
-# # # # python src/pipeline/make_candidates_rows.py --mode scoring_test
-# python src/pipeline/make_candidates_rows.py --mode training_test
-# # python src/pipeline/make_candidates_rows.py --mode training_train
-
-# # # # # session_features
-# # python src/features/make_session_features.py --mode training_train
-# python src/features/make_session_features.py --mode training_test
-# # # # python src/features/make_session_features.py --mode scoring_test
-# # # # # python src/features/make_session_features.py --mode scoring_train
-
-# # # # # interaction between session & item features
-# # python src/features/make_session_item_features.py --mode training_train
-# python src/features/make_session_item_features.py --mode training_test
-# # # # python src/features/make_session_item_features.py --mode scoring_test
-# # # # # python src/features/make_session_item_features.py --mode scoring_train
-
-# # # # # item features
-# # python src/features/make_item_features.py --mode training_train
-# python src/features/make_item_features.py --mode training_test
-# # # # python src/features/make_item_features.py --mode scoring_test
-# # # # python src/features/make_item_features.py --mode scoring_train
-
-# # # # # item-hour features
-# # python src/features/make_item_hour_features.py --mode training_train
-# python src/features/make_item_hour_features.py --mode training_test
-# # # # python src/features/make_item_hour_features.py --mode scoring_test
-# # # # python src/features/make_item_hour_features.py --mode scoring_train
-
-# # # # # item-weekday features
-# # python src/features/make_item_weekday_features.py --mode training_train
-# python src/features/make_item_weekday_features.py --mode training_test
-# # # # python src/features/make_item_weekday_features.py --mode scoring_test
-# # # # python src/features/make_item_weekday_features.py --mode scoring_train
-
-# # # # # combine features
-# # python src/pipeline/make_combine_features.py --mode training_train
-# python src/pipeline/make_combine_features.py --mode training_test
-# # # # python src/pipeline/make_combine_features.py --mode scoring_test
-# # # # python src/pipeline/make_combine_features.py --mode scoring_train
-
-# ### EDA
-# python src/auto_eda/eda.py --n 3
-
-
-# # # # perform training
-# # # # python src/training/train.py --event orders
-# python src/training/train.py --event all --n 1 --algo lgbm_classifier --week w2 --eval 1
-# python src/training/train.py --event all --n 1 --algo cat_classifier --week w2 --eval 1
-# python src/training/train.py --event all --n 1 --algo cat_ranker --week w2 --eval 1
-# python src/training/train.py --event all --n 1 --algo lgbm_ranker --week w2 --eval 1
 
 
 # # # LB 0.564 CV 0.562 Fea 99
