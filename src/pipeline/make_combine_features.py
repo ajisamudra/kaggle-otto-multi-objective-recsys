@@ -37,6 +37,10 @@ from src.utils.constants import (
     get_processed_training_test_matrix_fact_features_dir,
     get_processed_scoring_train_matrix_fact_features_dir,
     get_processed_scoring_test_matrix_fact_features_dir,
+    get_processed_training_train_word2vec_features_dir,  # Word2Vec dir
+    get_processed_training_test_word2vec_features_dir,
+    get_processed_scoring_train_word2vec_features_dir,
+    get_processed_scoring_test_word2vec_features_dir,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_training_test_dataset_dir,
     get_processed_scoring_train_dataset_dir,
@@ -56,6 +60,8 @@ def fcombine_features(mode: str, event: str, ix: int):
     itemXhour_fea_path = ""
     itemXweekday_fea_path = ""
     itemXcovisit_fea_path = ""
+    MatrixFact_fea_path = ""
+    Word2Vec_fea_path = ""
     output_path = ""
     name = ""
 
@@ -70,6 +76,7 @@ def fcombine_features(mode: str, event: str, ix: int):
             get_processed_training_train_item_covisitation_features_dir()
         )
         MatrixFact_fea_path = get_processed_training_train_matrix_fact_features_dir()
+        Word2Vec_fea_path = get_processed_training_train_word2vec_features_dir()
         output_path = get_processed_training_train_dataset_dir()
         name = "train"
 
@@ -84,6 +91,7 @@ def fcombine_features(mode: str, event: str, ix: int):
             get_processed_training_test_item_covisitation_features_dir()
         )
         MatrixFact_fea_path = get_processed_training_test_matrix_fact_features_dir()
+        Word2Vec_fea_path = get_processed_training_test_word2vec_features_dir()
         output_path = get_processed_training_test_dataset_dir()
         name = "test"
 
@@ -98,6 +106,7 @@ def fcombine_features(mode: str, event: str, ix: int):
             get_processed_scoring_train_item_covisitation_features_dir()
         )
         MatrixFact_fea_path = get_processed_scoring_train_matrix_fact_features_dir()
+        Word2Vec_fea_path = get_processed_scoring_train_word2vec_features_dir()
         output_path = get_processed_scoring_train_dataset_dir()
         name = "train"
 
@@ -112,6 +121,7 @@ def fcombine_features(mode: str, event: str, ix: int):
             get_processed_scoring_test_item_covisitation_features_dir()
         )
         MatrixFact_fea_path = get_processed_scoring_test_matrix_fact_features_dir()
+        Word2Vec_fea_path = get_processed_scoring_test_word2vec_features_dir()
         output_path = get_processed_scoring_test_dataset_dir()
         name = "test"
 
@@ -130,6 +140,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     matrix_fact_path = (
         f"{MatrixFact_fea_path}/{name}_{ix}_{event}_matrix_fact_feas.parquet"
     )
+    word2vec_path = f"{Word2Vec_fea_path}/{name}_{ix}_{event}_word2vec_feas.parquet"
 
     cand_df = pl.read_parquet(c_path)
     # make sure to cast session id & candidate_aid to int32
@@ -168,20 +179,34 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     cand_df = cand_df.fill_null(0)
 
-    # read matrix factorization features
-    matrix_fact_fea = pl.read_parquet(matrix_fact_path)
-    logging.info(
-        f"read sessionXmatrix_fact features with shape {matrix_fact_fea.shape}"
-    )
+    # # read matrix factorization features
+    # matrix_fact_fea = pl.read_parquet(matrix_fact_path)
+    # logging.info(
+    #     f"read sessionXmatrix_fact features with shape {matrix_fact_fea.shape}"
+    # )
+    # cand_df = cand_df.join(
+    #     matrix_fact_fea,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "candidate_aid"],
+    # )
+    # logging.info(f"joined with sessionXmatrix_fact features! shape {cand_df.shape}")
+
+    # del matrix_fact_fea
+    # gc.collect()
+
+    # read word2vec features
+    word2vec_fea_df = pl.read_parquet(word2vec_path)
+    logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
     cand_df = cand_df.join(
-        matrix_fact_fea,
+        word2vec_fea_df,
         how="left",
         left_on=["session", "candidate_aid"],
         right_on=["session", "candidate_aid"],
     )
-    logging.info(f"joined with sessionXmatrix_fact features! shape {cand_df.shape}")
+    logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
-    del matrix_fact_fea
+    del word2vec_fea_df
     gc.collect()
 
     # read session-item features

@@ -62,6 +62,7 @@ def get_local_matrix_fact_dir() -> Path:
     path = ROOT_DIR / "data" / "processed" / "local-validation" / "matrix-factorization"
     return path
 
+
 def get_scoring_word2vec_dir() -> Path:
     path = ROOT_DIR / "data" / "processed" / "full-data" / "word2vec"
     return path
@@ -391,6 +392,37 @@ def get_processed_scoring_train_matrix_fact_features_dir() -> Path:
 def get_processed_scoring_test_matrix_fact_features_dir() -> Path:
     path = get_processed_full_data_dir()
     path = path / "scoring" / "test_features" / "matrix_fact_features"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: DISTANCE WORD2VEC FEATURES
+
+
+def get_processed_training_train_word2vec_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "word2vec_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_word2vec_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "word2vec_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_word2vec_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "word2vec_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_word2vec_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "word2vec_features"
     check_directory(path)
     return path
 

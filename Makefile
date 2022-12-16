@@ -45,6 +45,9 @@ item_covisitation_features_old:
 matrix_factorization_features:
 	python src/features/make_item_matrix_fact_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
+word2vec_features:
+	python src/features/make_item_word2vec_features.py --mode $(MODE) --istart $(START) --iend $(END)
+
 combine_features:
 	python src/pipeline/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
 

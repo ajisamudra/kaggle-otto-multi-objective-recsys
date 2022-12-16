@@ -4,19 +4,20 @@ from tqdm import tqdm
 import gc
 from pathlib import Path
 import numpy as np
+from gensim.models import KeyedVectors
 from src.utils.constants import (
     CFG,
     get_processed_training_train_session_representation_items_dir,  # session representations dir
     get_processed_training_test_session_representation_items_dir,
     get_processed_scoring_train_session_representation_items_dir,
     get_processed_scoring_test_session_representation_items_dir,
-    get_processed_training_train_matrix_fact_features_dir,  # output dir
-    get_processed_training_test_matrix_fact_features_dir,
-    get_processed_scoring_train_matrix_fact_features_dir,
-    get_processed_scoring_test_matrix_fact_features_dir,
+    get_processed_training_train_word2vec_features_dir,  # output dir
+    get_processed_training_test_word2vec_features_dir,
+    get_processed_scoring_train_word2vec_features_dir,
+    get_processed_scoring_test_word2vec_features_dir,
 )
-from src.utils.matrix_factorization import (
-    load_matrix_fact_embedding,
+from src.utils.word2vec import (
+    load_word2vec_embedding,
 )
 from src.utils.memory import freemem
 from src.utils.logger import get_logger
@@ -39,7 +40,7 @@ def vectorized_euclidean_distance(vectors1: np.ndarray, vectors2: np.ndarray):
 
 
 def calculate_distance_metrics(
-    embedding: np.ndarray,
+    embedding: KeyedVectors,
     candidate_aids: list,
     last_event_aids: list,
     max_recency_aids: list,
@@ -50,8 +51,8 @@ def calculate_distance_metrics(
     vectors1 = []
     vectors2 = []
     for source, target in zip(candidate_aids, last_event_aids):
-        vector1 = embedding[source]
-        vector2 = embedding[target]
+        vector1 = embedding.get_vector(source)
+        vector2 = embedding.get_vector(target)
         vectors1.append(vector1)
         vectors2.append(vector2)
 
@@ -67,7 +68,7 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_recency_aids:
-        vector2 = embedding[target]
+        vector2 = embedding.get_vector(target)
         vectors2.append(vector2)
 
     # convert list to array 2d
@@ -80,7 +81,7 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_weighted_recency_aids:
-        vector2 = embedding[target]
+        vector2 = embedding.get_vector(target)
         vectors2.append(vector2)
 
     # convert list to array 2d
@@ -95,7 +96,7 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_duration_aids:
-        vector2 = embedding[target]
+        vector2 = embedding.get_vector(target)
         vectors2.append(vector2)
 
     # convert list to array 2d
@@ -108,7 +109,7 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_weighted_duration_aids:
-        vector2 = embedding[target]
+        vector2 = embedding.get_vector(target)
         vectors2.append(vector2)
 
     # convert list to array 2d
@@ -135,14 +136,12 @@ def calculate_distance_metrics(
     )
 
 
-def gen_matrix_fact_features(
+def gen_word2vec_features(
     name: str,
     ix: int,
     ses_representation_path: Path,
     output_path: Path,
-    embedding_click: np.ndarray,
-    # embedding_cart_order: np.ndarray,
-    # embedding_buy2buy: np.ndarray,
+    word2vec_embedding: KeyedVectors,
 ):
     """
     session representation aids
@@ -192,20 +191,20 @@ def gen_matrix_fact_features(
             "max_weighted_log_duration_event_in_session_aid"
         ].to_list()
 
-        logging.info("calculating distances in embedding click")
+        logging.info("calculating distances in embedding word2vec")
         (
-            click_last_event_cosine_distances,
-            click_last_event_euclidean_distances,
-            click_max_recency_cosine_distances,
-            click_max_recency_euclidean_distances,
-            click_max_weighted_recency_cosine_distances,
-            click_max_weighted_recency_euclidean_distances,
-            click_max_duration_cosine_distances,
-            click_max_duration_euclidean_distances,
-            click_max_weighted_duration_cosine_distances,
-            click_max_weighted_duration_euclidean_distances,
+            word2vec_last_event_cosine_distances,
+            word2vec_last_event_euclidean_distances,
+            word2vec_max_recency_cosine_distances,
+            word2vec_max_recency_euclidean_distances,
+            word2vec_max_weighted_recency_cosine_distances,
+            word2vec_max_weighted_recency_euclidean_distances,
+            word2vec_max_duration_cosine_distances,
+            word2vec_max_duration_euclidean_distances,
+            word2vec_max_weighted_duration_cosine_distances,
+            word2vec_max_weighted_duration_euclidean_distances,
         ) = calculate_distance_metrics(
-            embedding=embedding_click,
+            embedding=word2vec_embedding,
             candidate_aids=candidate_aids,
             last_event_aids=last_event_aids,
             max_recency_aids=max_recency_aids,
@@ -214,88 +213,24 @@ def gen_matrix_fact_features(
             max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
-        # logging.info("calculating distances in embedding cart_order")
-        # (
-        #     cart_order_last_event_cosine_distances,
-        #     cart_order_last_event_euclidean_distances,
-        #     cart_order_max_recency_cosine_distances,
-        #     cart_order_max_recency_euclidean_distances,
-        #     cart_order_max_weighted_recency_cosine_distances,
-        #     cart_order_max_weighted_recency_euclidean_distances,
-        #     cart_order_max_duration_cosine_distances,
-        #     cart_order_max_duration_euclidean_distances,
-        #     cart_order_max_weighted_duration_cosine_distances,
-        #     cart_order_max_weighted_duration_euclidean_distances,
-        # ) = calculate_distance_metrics(
-        #     embedding=embedding_cart_order,
-        #     candidate_aids=candidate_aids,
-        #     last_event_aids=last_event_aids,
-        #     max_recency_aids=max_recency_aids,
-        #     max_weighted_recency_aids=max_weighted_recency_aids,
-        #     max_duration_aids=max_duration_aids,
-        #     max_weighted_duration_aids=max_weighted_duration_aids,
-        # )
-
-        # logging.info("calculating distances in embedding buy2buy")
-        # (
-        #     buy2buy_last_event_cosine_distances,
-        #     buy2buy_last_event_euclidean_distances,
-        #     buy2buy_max_recency_cosine_distances,
-        #     buy2buy_max_recency_euclidean_distances,
-        #     buy2buy_max_weighted_recency_cosine_distances,
-        #     buy2buy_max_weighted_recency_euclidean_distances,
-        #     buy2buy_max_duration_cosine_distances,
-        #     buy2buy_max_duration_euclidean_distances,
-        #     buy2buy_max_weighted_duration_cosine_distances,
-        #     buy2buy_max_weighted_duration_euclidean_distances,
-        # ) = calculate_distance_metrics(
-        #     embedding=embedding_buy2buy,
-        #     candidate_aids=candidate_aids,
-        #     last_event_aids=last_event_aids,
-        #     max_recency_aids=max_recency_aids,
-        #     max_weighted_recency_aids=max_weighted_recency_aids,
-        #     max_duration_aids=max_duration_aids,
-        #     max_weighted_duration_aids=max_weighted_duration_aids,
-        # )
-
         # save matrix factorization features
         output_data = {
             "session": sessions,
             "candidate_aid": candidate_aids,
-            "matrix_fact_click_last_event_cosine_distance": click_last_event_cosine_distances,
-            "matrix_fact_click_last_event_euclidean_distance": click_last_event_euclidean_distances,
-            "matrix_fact_click_max_recency_cosine_distance": click_max_recency_cosine_distances,
-            "matrix_fact_click_max_recency_euclidean_distance": click_max_recency_euclidean_distances,
-            "matrix_fact_click_max_weighted_recency_cosine_distance": click_max_weighted_recency_cosine_distances,
-            "matrix_fact_click_max_weighted_recency_euclidean_distance": click_max_weighted_recency_euclidean_distances,
-            "matrix_fact_click_max_duration_cosine_distance": click_max_duration_cosine_distances,
-            "matrix_fact_click_max_duration_euclidean_distance": click_max_duration_euclidean_distances,
-            "matrix_fact_click_max_weighted_duration_cosine_distance": click_max_weighted_duration_cosine_distances,
-            "matrix_fact_click_max_weighted_duration_euclidean_distance": click_max_weighted_duration_euclidean_distances,
-            # "matrix_fact_cart_order_last_event_cosine_distance": cart_order_last_event_cosine_distances,
-            # "matrix_fact_cart_order_last_event_euclidean_distance": cart_order_last_event_euclidean_distances,
-            # "matrix_fact_cart_order_max_recency_cosine_distance": cart_order_max_recency_cosine_distances,
-            # "matrix_fact_cart_order_max_recency_euclidean_distance": cart_order_max_recency_euclidean_distances,
-            # "matrix_fact_cart_order_max_weighted_recency_cosine_distance": cart_order_max_weighted_recency_cosine_distances,
-            # "matrix_fact_cart_order_max_weighted_recency_euclidean_distance": cart_order_max_weighted_recency_euclidean_distances,
-            # "matrix_fact_cart_order_max_duration_cosine_distance": cart_order_max_duration_cosine_distances,
-            # "matrix_fact_cart_order_max_duration_euclidean_distance": cart_order_max_duration_euclidean_distances,
-            # "matrix_fact_cart_order_max_weighted_duration_cosine_distance": cart_order_max_weighted_duration_cosine_distances,
-            # "matrix_fact_cart_order_max_weighted_duration_euclidean_distance": cart_order_max_weighted_duration_euclidean_distances,
-            # "matrix_fact_buy2buy_last_event_cosine_distance": buy2buy_last_event_cosine_distances,
-            # "matrix_fact_buy2buy_last_event_euclidean_distance": buy2buy_last_event_euclidean_distances,
-            # "matrix_fact_buy2buy_max_recency_cosine_distance": buy2buy_max_recency_cosine_distances,
-            # "matrix_fact_buy2buy_max_recency_euclidean_distance": buy2buy_max_recency_euclidean_distances,
-            # "matrix_fact_buy2buy_max_weighted_recency_cosine_distance": buy2buy_max_weighted_recency_cosine_distances,
-            # "matrix_fact_buy2buy_max_weighted_recency_euclidean_distance": buy2buy_max_weighted_recency_euclidean_distances,
-            # "matrix_fact_buy2buy_max_duration_cosine_distance": buy2buy_max_duration_cosine_distances,
-            # "matrix_fact_buy2buy_max_duration_euclidean_distance": buy2buy_max_duration_euclidean_distances,
-            # "matrix_fact_buy2buy_max_weighted_duration_cosine_distance": buy2buy_max_weighted_duration_cosine_distances,
-            # "matrix_fact_buy2buy_max_weighted_duration_euclidean_distance": buy2buy_max_weighted_duration_euclidean_distances,
+            "word2vec_last_event_cosine_distance": word2vec_last_event_cosine_distances,
+            "word2vec_last_event_euclidean_distance": word2vec_last_event_euclidean_distances,
+            "word2vec_max_recency_cosine_distance": word2vec_max_recency_cosine_distances,
+            "word2vec_max_recency_euclidean_distance": word2vec_max_recency_euclidean_distances,
+            "word2vec_max_weighted_recency_cosine_distance": word2vec_max_weighted_recency_cosine_distances,
+            "word2vec_max_weighted_recency_euclidean_distance": word2vec_max_weighted_recency_euclidean_distances,
+            "word2vec_max_duration_cosine_distance": word2vec_max_duration_cosine_distances,
+            "word2vec_max_duration_euclidean_distance": word2vec_max_duration_euclidean_distances,
+            "word2vec_max_weighted_duration_cosine_distance": word2vec_max_weighted_duration_cosine_distances,
+            "word2vec_max_weighted_duration_euclidean_distance": word2vec_max_weighted_duration_euclidean_distances,
         }
 
         output_df = pl.DataFrame(output_data)
-        filepath = output_path / f"{name}_{ix}_{event}_matrix_fact_feas.parquet"
+        filepath = output_path / f"{name}_{ix}_{event}_word2vec_feas.parquet"
         logging.info(f"save chunk to: {filepath}")
         output_df = freemem(output_df)
         output_df.write_parquet(f"{filepath}")
@@ -305,7 +240,7 @@ def gen_matrix_fact_features(
         gc.collect()
 
 
-def make_matrix_fact_features(
+def make_word2vec_features(
     mode: str,
     name: str,
     ses_representation_path: Path,
@@ -320,28 +255,26 @@ def make_matrix_fact_features(
         n = CFG.N_test
 
     if mode in ["training_train", "training_test"]:
-        logging.info("read local matrix factorization embedding")
-        embedding_click = load_matrix_fact_embedding()
+        logging.info("read local word2vec embedding")
+        word2vec_embedding = load_word2vec_embedding()
         # embedding_cart_order = load_matrix_fact_order_cart_embedding()
         # embedding_buy2buy = load_matrix_fact_buy2buy_embedding()
     else:
-        logging.info("read scoring matrix factorization embedding")
-        embedding_click = load_matrix_fact_embedding(mode="scoring")
+        logging.info("read scoring word2vec embedding")
+        word2vec_embedding = load_word2vec_embedding(mode="scoring")
         # embedding_cart_order = load_matrix_fact_order_cart_embedding(mode="scoring")
         # embedding_buy2buy = load_matrix_fact_buy2buy_embedding(mode="scoring")
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(istart, iend)):
-        logging.info(f"start creating item covisitation features")
-        gen_matrix_fact_features(
+        logging.info(f"start creating word2vec features")
+        gen_word2vec_features(
             name=name,
             ix=ix,
             ses_representation_path=ses_representation_path,
             output_path=output_path,
-            embedding_click=embedding_click,
-            # embedding_cart_order=embedding_cart_order,
-            # embedding_buy2buy=embedding_buy2buy,
+            word2vec_embedding=word2vec_embedding,
         )
 
 
@@ -365,10 +298,10 @@ def main(mode: str, istart: int, iend: int):
         ses_representation_path = (
             get_processed_training_train_session_representation_items_dir()
         )
-        output_path = get_processed_training_train_matrix_fact_features_dir()
+        output_path = get_processed_training_train_word2vec_features_dir()
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        make_matrix_fact_features(
+        make_word2vec_features(
             mode=mode,
             name="train",
             ses_representation_path=ses_representation_path,
@@ -381,10 +314,10 @@ def main(mode: str, istart: int, iend: int):
         ses_representation_path = (
             get_processed_training_test_session_representation_items_dir()
         )
-        output_path = get_processed_training_test_matrix_fact_features_dir()
+        output_path = get_processed_training_test_word2vec_features_dir()
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        make_matrix_fact_features(
+        make_word2vec_features(
             mode=mode,
             name="test",
             ses_representation_path=ses_representation_path,
@@ -397,10 +330,10 @@ def main(mode: str, istart: int, iend: int):
         ses_representation_path = (
             get_processed_scoring_train_session_representation_items_dir()
         )
-        output_path = get_processed_scoring_train_matrix_fact_features_dir()
+        output_path = get_processed_scoring_train_word2vec_features_dir()
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        make_matrix_fact_features(
+        make_word2vec_features(
             mode=mode,
             name="train",
             ses_representation_path=ses_representation_path,
@@ -413,10 +346,10 @@ def main(mode: str, istart: int, iend: int):
         ses_representation_path = (
             get_processed_scoring_test_session_representation_items_dir()
         )
-        output_path = get_processed_scoring_test_matrix_fact_features_dir()
+        output_path = get_processed_scoring_test_word2vec_features_dir()
         logging.info(f"read input data from: {ses_representation_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        make_matrix_fact_features(
+        make_word2vec_features(
             mode=mode,
             name="test",
             ses_representation_path=ses_representation_path,
