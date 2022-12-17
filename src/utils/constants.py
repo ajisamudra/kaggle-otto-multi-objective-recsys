@@ -72,6 +72,14 @@ def get_local_word2vec_dir() -> Path:
     path = ROOT_DIR / "data" / "processed" / "local-validation" / "word2vec"
     return path
 
+def get_scoring_fasttext_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "full-data" / "fasttext"
+    return path
+
+
+def get_local_fasttext_dir() -> Path:
+    path = ROOT_DIR / "data" / "processed" / "local-validation" / "fasttext"
+    return path
 
 ### Data/Processed Dir
 
@@ -423,6 +431,37 @@ def get_processed_scoring_train_word2vec_features_dir() -> Path:
 def get_processed_scoring_test_word2vec_features_dir() -> Path:
     path = get_processed_full_data_dir()
     path = path / "scoring" / "test_features" / "word2vec_features"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: DISTANCE FASTTEXT FEATURES
+
+
+def get_processed_training_train_fasttext_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "fasttext_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_fasttext_features_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "fasttext_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_fasttext_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "fasttext_features"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_fasttext_features_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "fasttext_features"
     check_directory(path)
     return path
 

@@ -41,6 +41,10 @@ from src.utils.constants import (
     get_processed_training_test_word2vec_features_dir,
     get_processed_scoring_train_word2vec_features_dir,
     get_processed_scoring_test_word2vec_features_dir,
+    get_processed_training_train_fasttext_features_dir,  # Fasttext dir
+    get_processed_training_test_fasttext_features_dir,
+    get_processed_scoring_train_fasttext_features_dir,
+    get_processed_scoring_test_fasttext_features_dir,
     get_processed_training_train_dataset_dir,  # final dataset dir
     get_processed_training_test_dataset_dir,
     get_processed_scoring_train_dataset_dir,
@@ -62,6 +66,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     itemXcovisit_fea_path = ""
     MatrixFact_fea_path = ""
     Word2Vec_fea_path = ""
+    Fasttext_fea_path = ""
     output_path = ""
     name = ""
 
@@ -77,6 +82,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         )
         MatrixFact_fea_path = get_processed_training_train_matrix_fact_features_dir()
         Word2Vec_fea_path = get_processed_training_train_word2vec_features_dir()
+        Fasttext_fea_path = get_processed_training_train_fasttext_features_dir()
         output_path = get_processed_training_train_dataset_dir()
         name = "train"
 
@@ -92,6 +98,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         )
         MatrixFact_fea_path = get_processed_training_test_matrix_fact_features_dir()
         Word2Vec_fea_path = get_processed_training_test_word2vec_features_dir()
+        Fasttext_fea_path = get_processed_training_test_fasttext_features_dir()
         output_path = get_processed_training_test_dataset_dir()
         name = "test"
 
@@ -107,6 +114,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         )
         MatrixFact_fea_path = get_processed_scoring_train_matrix_fact_features_dir()
         Word2Vec_fea_path = get_processed_scoring_train_word2vec_features_dir()
+        Fasttext_fea_path = get_processed_scoring_train_fasttext_features_dir()
         output_path = get_processed_scoring_train_dataset_dir()
         name = "train"
 
@@ -122,6 +130,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         )
         MatrixFact_fea_path = get_processed_scoring_test_matrix_fact_features_dir()
         Word2Vec_fea_path = get_processed_scoring_test_word2vec_features_dir()
+        Fasttext_fea_path = get_processed_scoring_test_fasttext_features_dir()
         output_path = get_processed_scoring_test_dataset_dir()
         name = "test"
 
@@ -141,6 +150,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         f"{MatrixFact_fea_path}/{name}_{ix}_{event}_matrix_fact_feas.parquet"
     )
     word2vec_path = f"{Word2Vec_fea_path}/{name}_{ix}_{event}_word2vec_feas.parquet"
+    fasttext_skipgram_path = (
+        f"{Fasttext_fea_path}/{name}_{ix}_{event}_fasttext_skipgram_feas.parquet"
+    )
 
     cand_df = pl.read_parquet(c_path)
     # make sure to cast session id & candidate_aid to int32
@@ -207,6 +219,24 @@ def fcombine_features(mode: str, event: str, ix: int):
     logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
     del word2vec_fea_df
+    gc.collect()
+
+    # read fasttext_skipgram features
+    fasttext_skipgram_fea_df = pl.read_parquet(fasttext_skipgram_path)
+    logging.info(
+        f"read sessionXfasttext_skipgram features with shape {fasttext_skipgram_fea_df.shape}"
+    )
+    cand_df = cand_df.join(
+        fasttext_skipgram_fea_df,
+        how="left",
+        left_on=["session", "candidate_aid"],
+        right_on=["session", "candidate_aid"],
+    )
+    logging.info(
+        f"joined with sessionXfasttext_skipgram features! shape {cand_df.shape}"
+    )
+
+    del fasttext_skipgram_fea_df
     gc.collect()
 
     # read session-item features

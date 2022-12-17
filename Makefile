@@ -48,6 +48,9 @@ matrix_factorization_features:
 word2vec_features:
 	python src/features/make_item_word2vec_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
+fasttext_skipgram_features:
+	python src/features/make_item_fasttext_skipgram_features.py --mode $(MODE) --istart $(START) --iend $(END)
+
 combine_features:
 	python src/pipeline/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
