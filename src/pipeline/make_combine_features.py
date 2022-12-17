@@ -150,9 +150,7 @@ def fcombine_features(mode: str, event: str, ix: int):
         f"{MatrixFact_fea_path}/{name}_{ix}_{event}_matrix_fact_feas.parquet"
     )
     word2vec_path = f"{Word2Vec_fea_path}/{name}_{ix}_{event}_word2vec_feas.parquet"
-    fasttext_skipgram_path = (
-        f"{Fasttext_fea_path}/{name}_{ix}_{event}_fasttext_skipgram_feas.parquet"
-    )
+    fasttext_path = f"{Fasttext_fea_path}/{name}_{ix}_{event}_fasttext_feas.parquet"
 
     cand_df = pl.read_parquet(c_path)
     # make sure to cast session id & candidate_aid to int32
@@ -221,22 +219,18 @@ def fcombine_features(mode: str, event: str, ix: int):
     del word2vec_fea_df
     gc.collect()
 
-    # read fasttext_skipgram features
-    fasttext_skipgram_fea_df = pl.read_parquet(fasttext_skipgram_path)
-    logging.info(
-        f"read sessionXfasttext_skipgram features with shape {fasttext_skipgram_fea_df.shape}"
-    )
+    # read fasttext features
+    fasttext_fea_df = pl.read_parquet(fasttext_path)
+    logging.info(f"read sessionXfasttext features with shape {fasttext_fea_df.shape}")
     cand_df = cand_df.join(
-        fasttext_skipgram_fea_df,
+        fasttext_fea_df,
         how="left",
         left_on=["session", "candidate_aid"],
         right_on=["session", "candidate_aid"],
     )
-    logging.info(
-        f"joined with sessionXfasttext_skipgram features! shape {cand_df.shape}"
-    )
+    logging.info(f"joined with sessionXfasttext features! shape {cand_df.shape}")
 
-    del fasttext_skipgram_fea_df
+    del fasttext_fea_df
     gc.collect()
 
     # read session-item features
