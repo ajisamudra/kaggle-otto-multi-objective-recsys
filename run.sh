@@ -1,6 +1,8 @@
 # make split_into_chunks MODE=training_train
 # make candidate_list MODE=training_train
 # make candidate_word2vec_list MODE=training_train
+# make candidate_fasttext_list MODE=training_train
+# make candidate_matrix_fact_list MODE=training_train
 # make candidate_rows MODE=training_train
 # make session_features MODE=training_train
 # make item_features MODE=training_train
@@ -18,6 +20,8 @@
 # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
 # make candidate_word2vec_list MODE=training_test
+make candidate_fasttext_list MODE=training_test
+make candidate_matrix_fact_list MODE=training_test
 # make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
@@ -47,6 +51,8 @@
 # make split_into_chunks MODE=scoring_test
 # make candidate_list MODE=scoring_test
 # make candidate_word2vec_list MODE=scoring_test
+# make candidate_fasttext_list MODE=scoring_test
+# make candidate_matrix_fact_list MODE=scoring_test
 # make candidate_rows MODE=scoring_test
 # make session_features MODE=scoring_test
 # make item_features MODE=scoring_test
@@ -77,8 +83,9 @@
 # make combine_features  MODE=scoring_test START=40 END=60
 # make combine_features  MODE=scoring_test START=60 END=80
 
-# make one_ranker_dataset
-# make train_one_ranker ALGO=lgbm_ranker
+make one_ranker_dataset
+make train_one_ranker ALGO=lgbm_ranker
+make train_one_ranker ALGO=cat_ranker
 
 # make eda EDA_MODE=class_dist
 
@@ -114,21 +121,21 @@
 # # eval submission, only for week_data & week_model w2
 # python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
-# TRAINING EVALUATION
-CLICK_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
-CART_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
-ORDER_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
-WEEK_DATA=w2
+# # TRAINING EVALUATION
+# CLICK_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
+# CART_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
+# ORDER_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
+# WEEK_DATA=w2
 
-python src/scoring/score_one_ranker.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score_one_ranker.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score_one_ranker.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+# python src/scoring/score_one_ranker.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+# python src/scoring/score_one_ranker.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+# python src/scoring/score_one_ranker.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# # make submission
+# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-# eval submission, only for week_data & week_model w2
-python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+# # eval submission, only for week_data & week_model w2
+# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
 # make train ALGO=lgbm_classifier
 # make train ALGO=cat_ranker

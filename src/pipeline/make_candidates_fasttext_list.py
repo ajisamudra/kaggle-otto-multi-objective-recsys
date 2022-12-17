@@ -16,13 +16,13 @@ from src.utils.constants import (
     get_processed_scoring_train_candidates_dir,
     get_processed_scoring_test_candidates_dir,
 )
-from src.utils.word2vec import load_annoy_idx_word2vec_embedding
+from src.utils.fasttext import load_annoy_idx_fasttext_skipgram_wdw20_embedding
 from src.utils.logger import get_logger
 
 logging = get_logger()
 
 
-def suggest_word2vec(
+def suggest_fasttext(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
@@ -46,7 +46,7 @@ def suggest_word2vec(
     return result_series
 
 
-def generate_candidates_word2vec(
+def generate_candidates_matrix_fact(
     name: str, input_path: Path, output_path: Path, embedding: AnnoyIndex
 ):
     if name == "train":
@@ -77,8 +77,8 @@ def generate_candidates_word2vec(
         gc.collect()
 
         # retrieve matrix factorization candidates
-        candidates_series = suggest_word2vec(
-            n_candidate=20,
+        candidates_series = suggest_fasttext(
+            n_candidate=40,
             ses2aids=ses2aids,
             ses2types=ses2types,
             embedding=embedding,
@@ -92,7 +92,7 @@ def generate_candidates_word2vec(
                 candidates_series_tmp.add_suffix(f"_{event}"), columns=["labels"]
             ).reset_index()
 
-            filepath = output_path / f"{name}_{ix}_{event}_word2vec_list.parquet"
+            filepath = output_path / f"{name}_{ix}_{event}_fasttext_list.parquet"
             logging.info(f"save chunk {ix} to: {filepath}")
             candidate_list_df.to_parquet(f"{filepath}")
 
@@ -108,18 +108,18 @@ def generate_candidates_word2vec(
 def main(mode: str):
 
     if mode in ["training_train", "training_test"]:
-        logging.info("read local word2vec index")
-        embedding = load_annoy_idx_word2vec_embedding()
+        logging.info("read local fasttext index")
+        embedding = load_annoy_idx_fasttext_skipgram_wdw20_embedding()
     else:
-        logging.info("read scoring word2vec index")
-        embedding = load_annoy_idx_word2vec_embedding(mode="scoring")
+        logging.info("read scoring fasttext index")
+        embedding = load_annoy_idx_fasttext_skipgram_wdw20_embedding(mode="scoring")
 
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()
         output_path = get_processed_training_train_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_matrix_fact(
             name="train",
             input_path=input_path,
             output_path=output_path,
@@ -131,7 +131,7 @@ def main(mode: str):
         output_path = get_processed_training_test_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_matrix_fact(
             name="test",
             input_path=input_path,
             output_path=output_path,
@@ -143,7 +143,7 @@ def main(mode: str):
         output_path = get_processed_scoring_train_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_matrix_fact(
             name="train",
             input_path=input_path,
             output_path=output_path,
@@ -155,7 +155,7 @@ def main(mode: str):
         output_path = get_processed_scoring_test_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_matrix_fact(
             name="test",
             input_path=input_path,
             output_path=output_path,

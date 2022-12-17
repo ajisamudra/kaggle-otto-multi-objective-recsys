@@ -10,8 +10,14 @@ split_into_chunks:
 candidate_list:
 	python src/pipeline/make_candidates_list.py --mode $(MODE)
 
+candidate_matrix_fact_list:
+	python src/pipeline/make_candidates_matrix_factorization_list.py --mode $(MODE)
+
 candidate_word2vec_list:
 	python src/pipeline/make_candidates_word2vec_list.py --mode $(MODE)
+
+candidate_fasttext_list:
+	python src/pipeline/make_candidates_fasttext_list.py --mode $(MODE)
 
 candidate_rows:
 	python src/pipeline/make_candidates_rows.py --mode $(MODE)

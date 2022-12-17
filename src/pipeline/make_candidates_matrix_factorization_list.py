@@ -26,7 +26,7 @@ def suggest_matrix_fact(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
-    matrix_fact_idx: AnnoyIndex,
+    embedding: AnnoyIndex,
 ):
     sessions = []
     candidates = []
@@ -34,7 +34,7 @@ def suggest_matrix_fact(
         # unique_aids = set(aids)
         unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
-        mf_candidate = matrix_fact_idx.get_nns_by_item(unique_aids[0], n=n_candidate)
+        mf_candidate = embedding.get_nns_by_item(unique_aids[0], n=n_candidate)
 
         # append to list result
         sessions.append(session)
@@ -47,7 +47,7 @@ def suggest_matrix_fact(
 
 
 def generate_candidates_matrix_fact(
-    name: str, input_path: Path, output_path: Path, matrix_fact_idx: AnnoyIndex
+    name: str, input_path: Path, output_path: Path, embedding: AnnoyIndex
 ):
     if name == "train":
         n = CFG.N_train
@@ -81,7 +81,7 @@ def generate_candidates_matrix_fact(
             n_candidate=20,
             ses2aids=ses2aids,
             ses2types=ses2types,
-            matrix_fact_idx=matrix_fact_idx,
+            embedding=embedding,
         )
 
         for event in ["clicks", "carts", "orders"]:
@@ -109,10 +109,10 @@ def main(mode: str):
 
     if mode in ["training_train", "training_test"]:
         logging.info("read local matrix factorization index")
-        matrix_fact_idx = load_annoy_idx_matrix_fact_embedding()
+        embedding = load_annoy_idx_matrix_fact_embedding()
     else:
         logging.info("read scoring matrix factorization index")
-        matrix_fact_idx = load_annoy_idx_matrix_fact_embedding(mode="scoring")
+        embedding = load_annoy_idx_matrix_fact_embedding(mode="scoring")
 
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()
@@ -123,7 +123,7 @@ def main(mode: str):
             name="train",
             input_path=input_path,
             output_path=output_path,
-            matrix_fact_idx=matrix_fact_idx,
+            embedding=embedding,
         )
 
     elif mode == "training_test":
@@ -135,7 +135,7 @@ def main(mode: str):
             name="test",
             input_path=input_path,
             output_path=output_path,
-            matrix_fact_idx=matrix_fact_idx,
+            embedding=embedding,
         )
 
     elif mode == "scoring_train":
@@ -147,7 +147,7 @@ def main(mode: str):
             name="train",
             input_path=input_path,
             output_path=output_path,
-            matrix_fact_idx=matrix_fact_idx,
+            embedding=embedding,
         )
 
     elif mode == "scoring_test":
@@ -159,7 +159,7 @@ def main(mode: str):
             name="test",
             input_path=input_path,
             output_path=output_path,
-            matrix_fact_idx=matrix_fact_idx,
+            embedding=embedding,
         )
 
 

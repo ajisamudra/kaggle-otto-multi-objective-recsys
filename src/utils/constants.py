@@ -6,8 +6,8 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 
 
 class CFG:
-    N_test = 80
-    N_train = 30
+    N_test = 160
+    N_train = 60
 
 
 ### Create directory
@@ -72,6 +72,7 @@ def get_local_word2vec_dir() -> Path:
     path = ROOT_DIR / "data" / "processed" / "local-validation" / "word2vec"
     return path
 
+
 def get_scoring_fasttext_dir() -> Path:
     path = ROOT_DIR / "data" / "processed" / "full-data" / "fasttext"
     return path
@@ -80,6 +81,7 @@ def get_scoring_fasttext_dir() -> Path:
 def get_local_fasttext_dir() -> Path:
     path = ROOT_DIR / "data" / "processed" / "local-validation" / "fasttext"
     return path
+
 
 ### Data/Processed Dir
 

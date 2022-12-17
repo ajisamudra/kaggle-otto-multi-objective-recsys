@@ -22,13 +22,30 @@ logging = get_logger()
 # so for each session, there's N-1 additional rows
 
 
+def get_ses2candidates(df: pd.DataFrame) -> dict:
+    """
+    session | labels
+    123_clicks | [aid1, aid2]
+    123_orders | [aid1, aid2, aid3]
+    """
+
+    df["session"] = df["session"].apply(lambda x: int(x.split("_")[0]))
+    ses2candidates = dict(zip(df["session"], df["labels"]))
+
+    return ses2candidates
+
+
 def pivot_candidates_list_to_rows(
-    cand_df: pd.DataFrame,
-    cand2_df: pd.DataFrame,
+    unique_sessions: list,
+    covisit_ses2candidates: dict,
+    fasttext_ses2candidates: dict,
+    word2vec_ses2candidates: dict,
+    matrix_fact_ses2candidates: dict,
     is_train: bool,
     include_all_gt: bool,
     drop_zero_positive_sample: bool,
     ses2truth: dict = {},
+    downsample: int = 1,
 ):
     """
     cand_df
@@ -37,12 +54,6 @@ def pivot_candidates_list_to_rows(
     123_carts | [aid1, aid2, aid3]
     123_orders | [aid1, aid2, aid3]
     """
-
-    # dict of session and labels
-    # logging.info("create ses2candidates")
-    ses2candidates = dict(zip(cand_df["session"], cand_df["labels"]))
-    ses2candidates_word2vec = dict(zip(cand2_df["session"], cand2_df["labels"]))
-    unique_sessions = list(cand_df["session"].values)
 
     sessions = []
     candidates = []
@@ -65,10 +76,16 @@ def pivot_candidates_list_to_rows(
 
         # get candidates for specific session
         # covisitation candidates
-        cands = list(ses2candidates[session])
+        cands = list(covisit_ses2candidates[session])
+        # fasttext candidates
+        fasttext_cands = list(fasttext_ses2candidates[session])
+        cands.extend(fasttext_cands)
         # word2vec candidates
-        word2vec_cands = list(ses2candidates_word2vec[session])
+        word2vec_cands = list(word2vec_ses2candidates[session])
         cands.extend(word2vec_cands)
+        # matrix fact candidates
+        matrix_fact_cands = list(matrix_fact_ses2candidates[session])
+        cands.extend(matrix_fact_cands)
         # drop duplicate
         cands = set(cands)
 
@@ -103,6 +120,7 @@ def pivot_candidates(
     input_path: Path,
     output_path: Path,
     df_truth: pd.DataFrame = pd.DataFrame(),
+    downsample: int = 1,
 ):
     """
     df_truth
@@ -123,29 +141,37 @@ def pivot_candidates(
         for event in ["clicks", "carts", "orders"]:
             # candidate #1 covisitation
             filepath = f"{input_path}/{name}_{ix}_{event}_list.parquet"
-            cand1_df = pd.read_parquet(filepath)
-            # drop event in session
-            # logging.info("create prediction session column")
-            cand1_df["session"] = cand1_df["session"].apply(
-                lambda x: int(x.split("_")[0])
-            )
+            cand_df = pd.read_parquet(filepath)
+            covisit_ses2candidates = get_ses2candidates(cand_df)
+            unique_sessions = list(cand_df["session"].values)
 
-            # candidate #2 word2vec
-            filepath = f"{input_path}/{name}_{ix}_{event}_word2vec_list.parquet"
-            cand2_df = pd.read_parquet(filepath)
-            # drop event in session
-            # logging.info("create prediction session column")
-            cand2_df["session"] = cand2_df["session"].apply(
-                lambda x: int(x.split("_")[0])
-            )
-
+            del cand_df
             gc.collect()
 
-            # input df as follow
-            # session | labels
-            # A_clicks | [aid1, aid2]
-            # A_carts | [aid1, aid2]
-            # A_orders  | [aid1, aid2]
+            # candidate #2 fasttext
+            filepath = f"{input_path}/{name}_{ix}_{event}_fasttext_list.parquet"
+            cand_df = pd.read_parquet(filepath)
+            fasttext_ses2candidates = get_ses2candidates(cand_df)
+
+            del cand_df
+            gc.collect()
+
+            # candidate #3 word2vec
+            filepath = f"{input_path}/{name}_{ix}_{event}_word2vec_list.parquet"
+            cand_df = pd.read_parquet(filepath)
+            word2vec_ses2candidates = get_ses2candidates(cand_df)
+
+            del cand_df
+            gc.collect()
+
+            # candidate #3 matrix factorization
+            filepath = f"{input_path}/{name}_{ix}_{event}_matrix_fact_list.parquet"
+            cand_df = pd.read_parquet(filepath)
+            matrix_fact_ses2candidates = get_ses2candidates(cand_df)
+
+            del cand_df
+            gc.collect()
+
             ses2truth = {}
             if is_train:
                 # logging.info("create ses2truth")
@@ -159,10 +185,14 @@ def pivot_candidates(
 
             # logging.info(f"start pivoting candidate")
             df_output = pivot_candidates_list_to_rows(
-                cand_df=cand1_df,
-                cand2_df=cand2_df,
+                unique_sessions=unique_sessions,
+                covisit_ses2candidates=covisit_ses2candidates,
+                word2vec_ses2candidates=word2vec_ses2candidates,
+                fasttext_ses2candidates=fasttext_ses2candidates,
+                matrix_fact_ses2candidates=matrix_fact_ses2candidates,
                 is_train=is_train,
                 include_all_gt=include_all_gt,
+                downsample=downsample,
                 drop_zero_positive_sample=drop_zero_positive_sample,
                 ses2truth=ses2truth,
             )
@@ -172,7 +202,7 @@ def pivot_candidates(
             df_output.to_parquet(f"{filepath}")
             logging.info(f"output df shape {df_output.shape}")
 
-            del cand1_df, cand2_df, df_output
+            del df_output
             gc.collect()
 
 
