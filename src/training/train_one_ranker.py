@@ -300,24 +300,21 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     perf_path = f"{filepath}/performance_metric.json"
     write_json(filepath=perf_path, data=performance)
 
-    #     if eval == 1:
-    #         # perform scoring
-    #         scoring(
-    #             artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
-    #         )
-    #         # append unique_model_names for make & eval submission
-    #         unique_model_names.append(unique_model_name)
+    if eval == 1:
+        for EVENT in events:
+            # perform scoring
+            scoring(
+                artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
+            )
 
-    # if eval == 1:
-    #     # make submission
-    #     # append unique_model_names for make & eval submission
-    #     make_submission(
-    #         click_model=unique_model_names[2],
-    #         cart_model=unique_model_names[1],
-    #         order_model=unique_model_names[0],
-    #         week_data="w2",
-    #         week_model="w2",
-    #     )
+        # make submission
+        make_submission(
+            click_model=unique_model_name,
+            cart_model=unique_model_name,
+            order_model=unique_model_name,
+            week_data="w2",
+            week_model="w2",
+        )
 
     logging.info("complete training models!")
     logging.info("=========== SUMMARY ===========")
@@ -328,16 +325,16 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         )
     logging.info("============= END =============")
 
-    # if eval == 1:
-    #     # eval submission
-    #     logging.info("start eval submission")
-    #     eval_submission(
-    #         click_model=unique_model_names[2],
-    #         cart_model=unique_model_names[1],
-    #         order_model=unique_model_names[0],
-    #         week_data="w2",
-    #         week_model="w2",
-    #     )
+    if eval == 1:
+        # eval submission
+        logging.info("start eval submission")
+        eval_submission(
+            click_model=unique_model_name,
+            cart_model=unique_model_name,
+            order_model=unique_model_name,
+            week_data="w2",
+            week_model="w2",
+        )
 
 
 @click.command()
