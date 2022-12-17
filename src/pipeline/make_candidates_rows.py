@@ -3,6 +3,7 @@ import pandas as pd
 from tqdm import tqdm
 import gc
 from pathlib import Path
+import random
 from src.utils.constants import (
     CFG,
     get_processed_training_train_candidates_dir,
@@ -45,7 +46,7 @@ def pivot_candidates_list_to_rows(
     include_all_gt: bool,
     drop_zero_positive_sample: bool,
     ses2truth: dict = {},
-    downsample: int = 1,
+    ratio_negative_sample: int = 1,
 ):
     """
     cand_df
@@ -98,6 +99,24 @@ def pivot_candidates_list_to_rows(
         session_ls = [session for i in range(len(cands))]
         cands_ls = cands
 
+        if ratio_negative_sample > 1:
+            # ratio * num positive samples
+            n_negative = ratio_negative_sample * sum(label_ls)
+            positive_aids = [aid for i, aid in enumerate(cands_ls) if label_ls[i] == 1]
+            negative_aids = [aid for i, aid in enumerate(cands_ls) if label_ls[i] == 0]
+            sampled_negative_aids = random.sample(negative_aids, n_negative)
+            positive_labels = [1 for i in positive_aids]
+            negative_labels = [0 for i in sampled_negative_aids]
+
+            # add positive + sampled negative sample
+            positive_aids.extend(sampled_negative_aids)
+            positive_labels.extend(negative_labels)
+
+            # create final list
+            cands = positive_aids
+            label_ls = positive_labels
+            session_ls = [session for i in range(len(cands))]
+
         sessions.extend(session_ls)
         candidates.extend(cands_ls)
         labels.extend(label_ls)
@@ -120,7 +139,7 @@ def pivot_candidates(
     input_path: Path,
     output_path: Path,
     df_truth: pd.DataFrame = pd.DataFrame(),
-    downsample: int = 1,
+    ratio_negative_sample: int = 1,
 ):
     """
     df_truth
@@ -192,7 +211,7 @@ def pivot_candidates(
                 matrix_fact_ses2candidates=matrix_fact_ses2candidates,
                 is_train=is_train,
                 include_all_gt=include_all_gt,
-                downsample=downsample,
+                ratio_negative_sample=ratio_negative_sample,
                 drop_zero_positive_sample=drop_zero_positive_sample,
                 ses2truth=ses2truth,
             )
@@ -228,6 +247,7 @@ def main(mode: str):
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
+            ratio_negative_sample=20,
         )
 
     elif mode == "training_test":

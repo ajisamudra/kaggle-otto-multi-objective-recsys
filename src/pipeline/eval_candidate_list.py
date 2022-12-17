@@ -26,7 +26,7 @@ def concat_candidates(
     matrix_fact_ses2candidates: dict,
 ):
     labels = []
-    for session in tqdm(unique_sessions):
+    for session in unique_sessions:
         # get candidates for specific session
         # covisitation candidates
         cands = list(covisit_ses2candidates[session])

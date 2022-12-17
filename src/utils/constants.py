@@ -6,8 +6,8 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 
 
 class CFG:
-    N_test = 160
-    N_train = 60
+    N_test = 80
+    N_train = 30
 
 
 ### Create directory

@@ -19,6 +19,9 @@ candidate_word2vec_list:
 candidate_fasttext_list:
 	python src/pipeline/make_candidates_fasttext_list.py --mode $(MODE)
 
+candidate_list_eval:
+	python src/pipeline/eval_candidate_list.py --mode $(MODE)
+
 candidate_rows:
 	python src/pipeline/make_candidates_rows.py --mode $(MODE)
 
