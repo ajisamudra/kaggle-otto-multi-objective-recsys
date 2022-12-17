@@ -10,7 +10,7 @@ from src.utils.constants import (
     check_directory,
     get_data_output_dir,
 )
-from src.utils.word2vec import load_annoy_idx_word2vec_embedding
+from src.utils.word2vec import load_annoy_idx_word2vec_wdw30_embedding
 from src.metrics.submission_evaluation import measure_recall
 from src.utils.logger import get_logger
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     # candidate generation
     logging.info("read matrix fact index")
-    matrix_fact_idx = load_annoy_idx_word2vec_embedding()
+    matrix_fact_idx = load_annoy_idx_word2vec_wdw30_embedding()
 
     logging.info("Here are size of our 3 co-visitation matrices:")
     # logging.info(f"{len(top_20_clicks)}, {len(top_15_buy2buy)}, {len(top_15_buys)}")
@@ -195,7 +195,7 @@ if __name__ == "__main__":
 # [2022-12-13 09:33:55,958] {submission_evaluation.py:92} INFO - Overall Recall@100 = 0.6099673920349341
 # [2022-12-13 09:33:55,958] {submission_evaluation.py:93} INFO - =============
 
-# covisit + word2vec 20wdw 5negative retrieval
+# covisit + word2vec cbow 20wdw 5negative retrieval
 # [2022-12-16 14:06:09,775] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.3212786438901578
 # [2022-12-16 14:06:09,775] {submission_evaluation.py:84} INFO - clicks hits@20 = 56404 / gt@20 = 175561
 # [2022-12-16 14:06:09,776] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.3212786438901578
@@ -220,3 +220,29 @@ if __name__ == "__main__":
 # [2022-12-16 14:06:18,640] {submission_evaluation.py:91} INFO - =============
 # [2022-12-16 14:06:18,640] {submission_evaluation.py:92} INFO - Overall Recall@40 = 0.2947471400878284
 # [2022-12-16 14:06:18,640] {submission_evaluation.py:93} INFO - =============
+
+# covisit + word2vec skipgram 30wdw 5negative retrieval
+# [2022-12-18 01:12:18,000] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.3727990977083844
+# [2022-12-18 01:12:18,001] {submission_evaluation.py:84} INFO - clicks hits@20 = 65446 / gt@20 = 175553
+# [2022-12-18 01:12:18,001] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.3727990977083844
+# [2022-12-18 01:12:19,439] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.43476485442215823
+# [2022-12-18 01:12:19,439] {submission_evaluation.py:84} INFO - carts hits@20 = 17546 / gt@20 = 57496
+# [2022-12-18 01:12:19,439] {submission_evaluation.py:85} INFO - carts recall@20 = 0.3051690552386253
+# [2022-12-18 01:12:20,951] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.45387482192377165
+# [2022-12-18 01:12:20,951] {submission_evaluation.py:84} INFO - orders hits@20 = 9596 / gt@20 = 31058
+# [2022-12-18 01:12:20,951] {submission_evaluation.py:85} INFO - orders recall@20 = 0.30897031360680016
+# [2022-12-18 01:12:20,951] {submission_evaluation.py:91} INFO - =============
+# [2022-12-18 01:12:20,951] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.3142128145065061
+# [2022-12-18 01:12:20,951] {submission_evaluation.py:93} INFO - =============
+# [2022-12-18 01:12:23,765] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@40 = 0.41811874476653776
+# [2022-12-18 01:12:23,766] {submission_evaluation.py:84} INFO - clicks hits@40 = 73402 / gt@40 = 175553
+# [2022-12-18 01:12:23,766] {submission_evaluation.py:85} INFO - clicks recall@40 = 0.41811874476653776
+# [2022-12-18 01:12:26,121] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@40 = 0.46488816628820456
+# [2022-12-18 01:12:26,122] {submission_evaluation.py:84} INFO - carts hits@40 = 19123 / gt@40 = 57496
+# [2022-12-18 01:12:26,122] {submission_evaluation.py:85} INFO - carts recall@40 = 0.3325970502295812
+# [2022-12-18 01:12:28,356] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@40 = 0.4784588351989086
+# [2022-12-18 01:12:28,356] {submission_evaluation.py:84} INFO - orders hits@40 = 10299 / gt@40 = 31058
+# [2022-12-18 01:12:28,356] {submission_evaluation.py:85} INFO - orders recall@40 = 0.33160538347607704
+# [2022-12-18 01:12:28,356] {submission_evaluation.py:91} INFO - =============
+# [2022-12-18 01:12:28,356] {submission_evaluation.py:92} INFO - Overall Recall@40 = 0.3405542196311744
+# [2022-12-18 01:12:28,356] {submission_evaluation.py:93} INFO - =============

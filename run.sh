@@ -1,15 +1,15 @@
 # make split_into_chunks MODE=training_train
-make candidate_list MODE=training_train
+# make candidate_list MODE=training_train
 # make candidate_word2vec_list MODE=training_train
 # make candidate_fasttext_list MODE=training_train
 # make candidate_matrix_fact_list MODE=training_train
-make candidate_rows MODE=training_train
-make session_features MODE=training_train
-make item_features MODE=training_train
-make session_item_features MODE=training_train
-make item_hour_features MODE=training_train
-make item_weekday_features MODE=training_train
-make session_representation_items MODE=training_train
+# make candidate_rows MODE=training_train
+# make session_features MODE=training_train
+# make item_features MODE=training_train
+# make session_item_features MODE=training_train
+# make item_hour_features MODE=training_train
+# make item_weekday_features MODE=training_train
+# make session_representation_items MODE=training_train
 make item_covisitation_features MODE=training_train START=0 END=30
 make matrix_factorization_features MODE=training_train START=0 END=30
 make word2vec_features START=0 END=30
