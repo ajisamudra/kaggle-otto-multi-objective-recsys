@@ -77,7 +77,7 @@ def generate_candidates_covisitation(
             logging.info(f"start of suggesting {event}")
             if event == "clicks":
                 candidates_list = suggest_clicks(
-                    n_candidate=80,
+                    n_candidate=40,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     top_clicks=top_clicks,
@@ -85,7 +85,7 @@ def generate_candidates_covisitation(
                 )
             elif event == "carts":
                 candidates_list = suggest_carts(
-                    n_candidate=80,
+                    n_candidate=40,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     top_carts=top_carts,
@@ -94,7 +94,7 @@ def generate_candidates_covisitation(
                 )
             elif event == "orders":
                 candidates_list = suggest_buys(
-                    n_candidate=80,
+                    n_candidate=40,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     top_orders=top_orders,

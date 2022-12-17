@@ -20,12 +20,14 @@ logging = get_logger()
 
 def concat_candidates(
     unique_sessions: list,
+    event: str,
     covisit_ses2candidates: dict,
     fasttext_ses2candidates: dict,
     word2vec_ses2candidates: dict,
     matrix_fact_ses2candidates: dict,
 ):
     labels = []
+    sessions = []
     for session in unique_sessions:
         # get candidates for specific session
         # covisitation candidates
@@ -44,11 +46,13 @@ def concat_candidates(
         # convert back to list
         cands = list(cands)
         labels.append(cands)
+        sessions.append(f"{session}_{event}")
 
     # save as df
     data = {
-        "session": unique_sessions,
+        "session": sessions,
         "labels": labels,
+        "raw_session": unique_sessions,
     }
 
     # save as pl dataframe
@@ -69,7 +73,7 @@ def eval_candidate_list(
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     df_pred = pl.DataFrame()
-    for ix in tqdm(range(n)):
+    for ix in tqdm(range(40)):
         for event in ["clicks", "carts", "orders"]:
             # candidate #1 covisitation
             filepath = f"{input_path}/{name}_{ix}_{event}_list.parquet"
@@ -107,6 +111,7 @@ def eval_candidate_list(
             # concat candidates, output as df_chunk
             df_chunk = concat_candidates(
                 unique_sessions=unique_sessions,
+                event=event,
                 covisit_ses2candidates=covisit_ses2candidates,
                 fasttext_ses2candidates=fasttext_ses2candidates,
                 word2vec_ses2candidates=word2vec_ses2candidates,
@@ -118,16 +123,18 @@ def eval_candidate_list(
     logging.info("convert to pandas")
     df_pred = df_pred.to_pandas()
     logging.info(df_pred.shape)
-    df_pred.columns = ["session_type", "labels"]
+    df_pred.columns = ["session_type", "labels", "raw_session"]
     df_pred["labels"] = df_pred.labels.apply(lambda x: " ".join(map(str, x)))
     logging.info(df_pred.head())
+    lucky_session = list(df_pred["raw_session"].unique())
 
     logging.info("start computing metrics")
     # COMPUTE METRIC
     # read ground truth
     df_truth = pd.read_parquet(gt_path)
+    df_truth = df_truth[df_truth.session.isin(lucky_session)]
     measure_recall(
-        df_pred=df_pred, df_truth=df_truth, Ks=[20, 40, 80, 100, 120, 140, 160]
+        df_pred=df_pred, df_truth=df_truth, Ks=[20, 40, 50, 60, 80, 100, 120, 140, 160]
     )
 
 
