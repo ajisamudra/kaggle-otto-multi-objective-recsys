@@ -103,19 +103,24 @@ def pivot_candidates_list_to_rows(
             # ratio * num positive samples
             n_negative = ratio_negative_sample * sum(label_ls)
             positive_aids = [aid for i, aid in enumerate(cands_ls) if label_ls[i] == 1]
-            negative_aids = [aid for i, aid in enumerate(cands_ls) if label_ls[i] == 0]
-            sampled_negative_aids = random.sample(negative_aids, n_negative)
-            positive_labels = [1 for i in positive_aids]
-            negative_labels = [0 for i in sampled_negative_aids]
+            if n_negative < len(cands) - len(positive_aids):
+                negative_aids = [
+                    aid for i, aid in enumerate(cands_ls) if label_ls[i] == 0
+                ]
+                sampled_negative_aids = random.sample(negative_aids, n_negative)
+                positive_labels = [1 for i in positive_aids]
+                negative_labels = [0 for i in sampled_negative_aids]
 
-            # add positive + sampled negative sample
-            positive_aids.extend(sampled_negative_aids)
-            positive_labels.extend(negative_labels)
+                # add positive + sampled negative sample
+                positive_aids.extend(sampled_negative_aids)
+                positive_labels.extend(negative_labels)
 
-            # create final list
-            cands = positive_aids
-            label_ls = positive_labels
-            session_ls = [session for i in range(len(cands))]
+                # create final list
+                cands_ls = positive_aids
+                label_ls = positive_labels
+                session_ls = [session for i in range(len(cands_ls))]
+
+            # else: # will take all negative samples
 
         sessions.extend(session_ls)
         candidates.extend(cands_ls)
