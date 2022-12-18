@@ -217,9 +217,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                 for i in range(CFG.N_train):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
-                    df_chunk = df_chunk.to_pandas()
-                    df_chunk = downsample(df_chunk)
-                    df_chunk = pl.from_pandas(df_chunk)
+                    # df_chunk = df_chunk.to_pandas()
+                    # df_chunk = downsample(df_chunk)
+                    # df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
                 # for i in range(10):
@@ -235,9 +235,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                 for i in range(CFG.N_train - 10):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
-                    df_chunk = df_chunk.to_pandas()
-                    df_chunk = downsample(df_chunk)
-                    df_chunk = pl.from_pandas(df_chunk)
+                    # df_chunk = df_chunk.to_pandas()
+                    # df_chunk = downsample(df_chunk)
+                    # df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
                 # for i in range(10):
@@ -251,9 +251,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                 for i in range(int(CFG.N_train / 10)):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
-                    df_chunk = df_chunk.to_pandas()
-                    df_chunk = downsample(df_chunk)
-                    df_chunk = pl.from_pandas(df_chunk)
+                    # df_chunk = df_chunk.to_pandas()
+                    # df_chunk = downsample(df_chunk)
+                    # df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
                 # for i in range(3):

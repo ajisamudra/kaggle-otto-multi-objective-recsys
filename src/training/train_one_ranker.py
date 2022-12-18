@@ -34,7 +34,7 @@ from src.metrics.model_evaluation import (
 )
 
 # for enabling training + scoring
-from src.scoring.score import scoring
+from src.scoring.score_one_ranker import scoring
 from src.scoring.make_submission import make_submission
 from src.scoring.eval_submission import eval_submission
 
@@ -121,9 +121,9 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     for i in range(2):
         filepath = f"{input_path}/train_{i}_one_ranker_combined.parquet"
         df_chunk = pl.read_parquet(filepath)
-        df_chunk = df_chunk.to_pandas()
-        df_chunk = downsample(df_chunk)
-        df_chunk = pl.from_pandas(df_chunk)
+        # df_chunk = df_chunk.to_pandas()
+        # df_chunk = downsample(df_chunk)
+        # df_chunk = pl.from_pandas(df_chunk)
         train_df = pl.concat([train_df, df_chunk])
 
     logging.info(f"train shape {train_df.shape}")
