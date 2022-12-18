@@ -3,23 +3,21 @@ from src.utils.constants import get_scoring_word2vec_dir, get_local_word2vec_dir
 from annoy import AnnoyIndex
 from gensim.models import KeyedVectors
 
+#### BEST PERFORMING
 
 VECTOR = 32
 NTREE = 15
-WINDOW = 20
+WINDOW = 50
 NEGATIVE = 5
-
 
 def load_word2vec_embedding(mode: str = "local"):
 
     if mode == "local":
         emd_path = get_local_word2vec_dir()
-        filepath = f"{emd_path}/word2vec_local_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
+        filepath = f"{emd_path}/word2vec_local_skipgram_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
     else:
         emd_path = get_scoring_word2vec_dir()
-        filepath = (
-            f"{emd_path}/word2vec_scoring_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
-        )
+        filepath = f"{emd_path}/word2vec_scoring_skipgram_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
 
     # load keyed vectors
     kvectors = KeyedVectors.load(filepath, mmap="r")
@@ -30,12 +28,10 @@ def load_annoy_idx_word2vec_embedding(mode: str = "local"):
 
     if mode == "local":
         emd_path = get_local_word2vec_dir()
-        filepath = f"{emd_path}/word2vec_local_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
+        filepath = f"{emd_path}/word2vec_local_skipgram_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
     else:
         emd_path = get_scoring_word2vec_dir()
-        filepath = (
-            f"{emd_path}/word2vec_scoring_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
-        )
+        filepath = f"{emd_path}/word2vec_scoring_skipgram_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
 
     # load keyed vectors
     kvectors = KeyedVectors.load(filepath, mmap="r")
@@ -52,6 +48,8 @@ def load_annoy_idx_word2vec_embedding(mode: str = "local"):
 
     return index
 
+
+###### EXPERIMENTs
 
 def load_annoy_idx_word2vec_wdw30_embedding(mode: str = "local"):
 
