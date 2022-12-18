@@ -10,6 +10,7 @@ NTREE = 15
 WINDOW = 50
 NEGATIVE = 5
 
+
 def load_word2vec_embedding(mode: str = "local"):
 
     if mode == "local":
@@ -51,6 +52,7 @@ def load_annoy_idx_word2vec_embedding(mode: str = "local"):
 
 ###### EXPERIMENTs
 
+
 def load_annoy_idx_word2vec_wdw30_embedding(mode: str = "local"):
 
     if mode == "local":
@@ -84,6 +86,31 @@ def load_annoy_idx_word2vec_wdw50_embedding(mode: str = "local"):
     else:
         emd_path = get_scoring_word2vec_dir()
         filepath = f"{emd_path}/word2vec_scoring_skipgram_vec{VECTOR}_wdw50_neg5.kv"
+
+    # load keyed vectors
+    kvectors = KeyedVectors.load(filepath, mmap="r")
+
+    # create annoy index for search nn
+    aid2idx = {aid: i for i, aid in enumerate(kvectors.index_to_key)}
+    index = AnnoyIndex(VECTOR, "euclidean")
+
+    for aid, idx in aid2idx.items():
+        index.add_item(aid, kvectors.vectors[idx])
+
+    # build annoy index
+    index.build(NTREE)
+
+    return index
+
+
+def load_annoy_idx_word2vec_cbow_wdw50_embedding(mode: str = "local"):
+
+    if mode == "local":
+        emd_path = get_local_word2vec_dir()
+        filepath = f"{emd_path}/word2vec_local_cbow_vec{VECTOR}_wdw50_neg5.kv"
+    else:
+        emd_path = get_scoring_word2vec_dir()
+        filepath = f"{emd_path}/word2vec_scoring_cbow_vec{VECTOR}_wdw50_neg5.kv"
 
     # load keyed vectors
     kvectors = KeyedVectors.load(filepath, mmap="r")
