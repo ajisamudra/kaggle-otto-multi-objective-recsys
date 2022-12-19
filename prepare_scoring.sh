@@ -1,8 +1,8 @@
 # make split_into_chunks MODE=scoring_test
-make candidate_list MODE=scoring_test
+# make candidate_list MODE=scoring_test
 make candidate_word2vec_list MODE=scoring_test
-make candidate_fasttext_list MODE=scoring_test
-make candidate_matrix_fact_list MODE=scoring_test
+# make candidate_fasttext_list MODE=scoring_test
+# make candidate_matrix_fact_list MODE=scoring_test
 make candidate_rows MODE=scoring_test
 # make session_features MODE=scoring_test
 # make item_features MODE=scoring_test
@@ -30,3 +30,4 @@ make combine_features  MODE=scoring_test START=15 END=20
 make combine_features  MODE=scoring_test START=20 END=40
 make combine_features  MODE=scoring_test START=40 END=60
 make combine_features  MODE=scoring_test START=60 END=80
+./run_scoring.sh
