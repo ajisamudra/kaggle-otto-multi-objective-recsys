@@ -78,7 +78,7 @@ def generate_candidates_word2vec(
 
         # retrieve matrix factorization candidates
         candidates_series = suggest_word2vec(
-            n_candidate=20,
+            n_candidate=CFG.word2vec_candidates,
             ses2aids=ses2aids,
             ses2types=ses2types,
             embedding=embedding,

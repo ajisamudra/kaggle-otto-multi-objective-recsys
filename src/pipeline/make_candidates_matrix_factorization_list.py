@@ -78,7 +78,7 @@ def generate_candidates_matrix_fact(
 
         # retrieve matrix factorization candidates
         candidates_series = suggest_matrix_fact(
-            n_candidate=20,
+            n_candidate=CFG.matrix_factorization_candidates,
             ses2aids=ses2aids,
             ses2types=ses2types,
             embedding=embedding,

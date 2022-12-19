@@ -134,7 +134,7 @@ def eval_candidate_list(
     df_truth = pd.read_parquet(gt_path)
     df_truth = df_truth[df_truth.session.isin(lucky_session)]
     measure_recall(
-        df_pred=df_pred, df_truth=df_truth, Ks=[20, 40, 60, 80, 100, 120, 140, 160]
+        df_pred=df_pred, df_truth=df_truth, Ks=[20, 40, 60, 80, 100, 120, 140, 130, 150]
     )
 
 
@@ -268,3 +268,5 @@ if __name__ == "__main__":
 # [2022-12-18 20:52:52,800] {submission_evaluation.py:91} INFO - =============
 # [2022-12-18 20:52:52,800] {submission_evaluation.py:92} INFO - Overall Recall@140 = 0.6095523087825132
 # [2022-12-18 20:52:52,800] {submission_evaluation.py:93} INFO - =============
+
+# strategy covisit 40 fasttext 20 word2vec 50 matrix fact 10

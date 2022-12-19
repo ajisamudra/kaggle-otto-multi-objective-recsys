@@ -18,10 +18,11 @@
 
 
 # make split_into_chunks MODE=training_test
-# make candidate_list MODE=training_test
-# make candidate_word2vec_list MODE=training_test
-# make candidate_fasttext_list MODE=training_test
-# make candidate_matrix_fact_list MODE=training_test
+make candidate_list MODE=training_test
+make candidate_word2vec_list MODE=training_test
+make candidate_fasttext_list MODE=training_test
+make candidate_matrix_fact_list MODE=training_test
+make candidate_list_eval=training_test
 # make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
@@ -98,8 +99,8 @@
 # make score_and_eval
 # make train ALGO=lgbm_ranker
 # make train ALGO=lgbm_classifier
-make train ALGO=cat_classifier
-# make train ALGO=cat_ranker
+# make train ALGO=cat_classifier
+make train ALGO=cat_ranker
 
 
 # # # LB 0.564 CV 0.562 Fea 99

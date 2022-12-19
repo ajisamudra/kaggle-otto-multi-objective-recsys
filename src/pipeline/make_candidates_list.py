@@ -94,7 +94,7 @@ def generate_candidates_covisitation(
                 )
             elif event == "orders":
                 candidates_list = suggest_buys(
-                    n_candidate=40,
+                    n_candidate=CFG.covisit_candidates,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     top_orders=top_orders,
