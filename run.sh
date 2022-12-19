@@ -88,7 +88,7 @@
 # make train ALGO=cat_ranker
 # make one_ranker_dataset
 # make train_one_ranker ALGO=lgbm_ranker
-make train_one_ranker ALGO=cat_ranker
+# make train_one_ranker ALGO=cat_ranker
 
 # make eda EDA_MODE=class_dist
 
@@ -98,7 +98,7 @@ make train_one_ranker ALGO=cat_ranker
 # make score_and_eval
 # make train ALGO=lgbm_ranker
 # make train ALGO=lgbm_classifier
-# make train ALGO=cat_classifier
+make train ALGO=cat_classifier
 # make train ALGO=cat_ranker
 
 

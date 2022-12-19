@@ -16,9 +16,7 @@ from src.utils.constants import (
     get_processed_scoring_train_word2vec_features_dir,
     get_processed_scoring_test_word2vec_features_dir,
 )
-from src.utils.word2vec import (
-    load_word2vec_embedding,
-)
+from src.utils.word2vec import load_word2vec_embedding, load_word2vec_cbow_embedding
 from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
@@ -142,6 +140,7 @@ def gen_word2vec_features(
     ses_representation_path: Path,
     output_path: Path,
     word2vec_embedding: KeyedVectors,
+    word2vec_cbow_embedding: KeyedVectors,
 ):
     """
     session representation aids
@@ -191,20 +190,42 @@ def gen_word2vec_features(
             "max_weighted_log_duration_event_in_session_aid"
         ].to_list()
 
-        logging.info("calculating distances in embedding word2vec")
+        logging.info("calculating distances in embedding word2vec skipgram")
         (
-            word2vec_last_event_cosine_distances,
-            word2vec_last_event_euclidean_distances,
-            word2vec_max_recency_cosine_distances,
-            word2vec_max_recency_euclidean_distances,
-            word2vec_max_weighted_recency_cosine_distances,
-            word2vec_max_weighted_recency_euclidean_distances,
-            word2vec_max_duration_cosine_distances,
-            word2vec_max_duration_euclidean_distances,
-            word2vec_max_weighted_duration_cosine_distances,
-            word2vec_max_weighted_duration_euclidean_distances,
+            word2vec_skipgram_last_event_cosine_distances,
+            word2vec_skipgram_last_event_euclidean_distances,
+            word2vec_skipgram_max_recency_cosine_distances,
+            word2vec_skipgram_max_recency_euclidean_distances,
+            word2vec_skipgram_max_weighted_recency_cosine_distances,
+            word2vec_skipgram_max_weighted_recency_euclidean_distances,
+            word2vec_skipgram_max_duration_cosine_distances,
+            word2vec_skipgram_max_duration_euclidean_distances,
+            word2vec_skipgram_max_weighted_duration_cosine_distances,
+            word2vec_skipgram_max_weighted_duration_euclidean_distances,
         ) = calculate_distance_metrics(
             embedding=word2vec_embedding,
+            candidate_aids=candidate_aids,
+            last_event_aids=last_event_aids,
+            max_recency_aids=max_recency_aids,
+            max_weighted_recency_aids=max_weighted_recency_aids,
+            max_duration_aids=max_duration_aids,
+            max_weighted_duration_aids=max_weighted_duration_aids,
+        )
+
+        logging.info("calculating distances in embedding word2vec cbow")
+        (
+            word2vec_cbow_last_event_cosine_distances,
+            word2vec_cbow_last_event_euclidean_distances,
+            word2vec_cbow_max_recency_cosine_distances,
+            word2vec_cbow_max_recency_euclidean_distances,
+            word2vec_cbow_max_weighted_recency_cosine_distances,
+            word2vec_cbow_max_weighted_recency_euclidean_distances,
+            word2vec_cbow_max_duration_cosine_distances,
+            word2vec_cbow_max_duration_euclidean_distances,
+            word2vec_cbow_max_weighted_duration_cosine_distances,
+            word2vec_cbow_max_weighted_duration_euclidean_distances,
+        ) = calculate_distance_metrics(
+            embedding=word2vec_cbow_embedding,
             candidate_aids=candidate_aids,
             last_event_aids=last_event_aids,
             max_recency_aids=max_recency_aids,
@@ -217,16 +238,26 @@ def gen_word2vec_features(
         output_data = {
             "session": sessions,
             "candidate_aid": candidate_aids,
-            "word2vec_last_event_cosine_distance": word2vec_last_event_cosine_distances,
-            "word2vec_last_event_euclidean_distance": word2vec_last_event_euclidean_distances,
-            "word2vec_max_recency_cosine_distance": word2vec_max_recency_cosine_distances,
-            "word2vec_max_recency_euclidean_distance": word2vec_max_recency_euclidean_distances,
-            "word2vec_max_weighted_recency_cosine_distance": word2vec_max_weighted_recency_cosine_distances,
-            "word2vec_max_weighted_recency_euclidean_distance": word2vec_max_weighted_recency_euclidean_distances,
-            "word2vec_max_duration_cosine_distance": word2vec_max_duration_cosine_distances,
-            "word2vec_max_duration_euclidean_distance": word2vec_max_duration_euclidean_distances,
-            "word2vec_max_weighted_duration_cosine_distance": word2vec_max_weighted_duration_cosine_distances,
-            "word2vec_max_weighted_duration_euclidean_distance": word2vec_max_weighted_duration_euclidean_distances,
+            "word2vec_skipgram_last_event_cosine_distance": word2vec_skipgram_last_event_cosine_distances,
+            "word2vec_skipgram_last_event_euclidean_distance": word2vec_skipgram_last_event_euclidean_distances,
+            "word2vec_skipgram_max_recency_cosine_distance": word2vec_skipgram_max_recency_cosine_distances,
+            "word2vec_skipgram_max_recency_euclidean_distance": word2vec_skipgram_max_recency_euclidean_distances,
+            "word2vec_skipgram_max_weighted_recency_cosine_distance": word2vec_skipgram_max_weighted_recency_cosine_distances,
+            "word2vec_skipgram_max_weighted_recency_euclidean_distance": word2vec_skipgram_max_weighted_recency_euclidean_distances,
+            "word2vec_skipgram_max_duration_cosine_distance": word2vec_skipgram_max_duration_cosine_distances,
+            "word2vec_skipgram_max_duration_euclidean_distance": word2vec_skipgram_max_duration_euclidean_distances,
+            "word2vec_skipgram_max_weighted_duration_cosine_distance": word2vec_skipgram_max_weighted_duration_cosine_distances,
+            "word2vec_skipgram_max_weighted_duration_euclidean_distance": word2vec_skipgram_max_weighted_duration_euclidean_distances,
+            "word2vec_cbow_last_event_cosine_distance": word2vec_cbow_last_event_cosine_distances,
+            "word2vec_cbow_last_event_euclidean_distance": word2vec_cbow_last_event_euclidean_distances,
+            "word2vec_cbow_max_recency_cosine_distance": word2vec_cbow_max_recency_cosine_distances,
+            "word2vec_cbow_max_recency_euclidean_distance": word2vec_cbow_max_recency_euclidean_distances,
+            "word2vec_cbow_max_weighted_recency_cosine_distance": word2vec_cbow_max_weighted_recency_cosine_distances,
+            "word2vec_cbow_max_weighted_recency_euclidean_distance": word2vec_cbow_max_weighted_recency_euclidean_distances,
+            "word2vec_cbow_max_duration_cosine_distance": word2vec_cbow_max_duration_cosine_distances,
+            "word2vec_cbow_max_duration_euclidean_distance": word2vec_cbow_max_duration_euclidean_distances,
+            "word2vec_cbow_max_weighted_duration_cosine_distance": word2vec_cbow_max_weighted_duration_cosine_distances,
+            "word2vec_cbow_max_weighted_duration_euclidean_distance": word2vec_cbow_max_weighted_duration_euclidean_distances,
         }
 
         output_df = pl.DataFrame(output_data)
@@ -257,13 +288,12 @@ def make_word2vec_features(
     if mode in ["training_train", "training_test"]:
         logging.info("read local word2vec embedding")
         word2vec_embedding = load_word2vec_embedding()
-        # embedding_cart_order = load_matrix_fact_order_cart_embedding()
-        # embedding_buy2buy = load_matrix_fact_buy2buy_embedding()
+        word2vec_cbow_embedding = load_word2vec_cbow_embedding()
+
     else:
         logging.info("read scoring word2vec embedding")
         word2vec_embedding = load_word2vec_embedding(mode="scoring")
-        # embedding_cart_order = load_matrix_fact_order_cart_embedding(mode="scoring")
-        # embedding_buy2buy = load_matrix_fact_buy2buy_embedding(mode="scoring")
+        word2vec_cbow_embedding = load_word2vec_cbow_embedding(mode="scoring")
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
@@ -275,6 +305,7 @@ def make_word2vec_features(
             ses_representation_path=ses_representation_path,
             output_path=output_path,
             word2vec_embedding=word2vec_embedding,
+            word2vec_cbow_embedding=word2vec_cbow_embedding,
         )
 
 

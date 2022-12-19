@@ -16,10 +16,7 @@ from src.utils.constants import (
     get_processed_scoring_train_fasttext_features_dir,
     get_processed_scoring_test_fasttext_features_dir,
 )
-from src.utils.fasttext import (
-    load_fasttext_skipgram_embedding,
-    load_fasttext_cbow_embedding,
-)
+from src.utils.fasttext import load_fasttext_skipgram_embedding
 from src.utils.memory import freemem
 from src.utils.logger import get_logger
 
@@ -143,7 +140,7 @@ def gen_fasttext_features(
     ses_representation_path: Path,
     output_path: Path,
     fasttext_skipgram_embedding: KeyedVectors,
-    fasttext_cbow_embedding: KeyedVectors,
+    # fasttext_cbow_embedding: KeyedVectors,
 ):
     """
     session representation aids
@@ -215,27 +212,27 @@ def gen_fasttext_features(
             max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
-        logging.info("calculating distances in embedding fasttext cbow")
-        (
-            fasttext_cbow_last_event_cosine_distances,
-            fasttext_cbow_last_event_euclidean_distances,
-            fasttext_cbow_max_recency_cosine_distances,
-            fasttext_cbow_max_recency_euclidean_distances,
-            fasttext_cbow_max_weighted_recency_cosine_distances,
-            fasttext_cbow_max_weighted_recency_euclidean_distances,
-            fasttext_cbow_max_duration_cosine_distances,
-            fasttext_cbow_max_duration_euclidean_distances,
-            fasttext_cbow_max_weighted_duration_cosine_distances,
-            fasttext_cbow_max_weighted_duration_euclidean_distances,
-        ) = calculate_distance_metrics(
-            embedding=fasttext_cbow_embedding,
-            candidate_aids=candidate_aids,
-            last_event_aids=last_event_aids,
-            max_recency_aids=max_recency_aids,
-            max_weighted_recency_aids=max_weighted_recency_aids,
-            max_duration_aids=max_duration_aids,
-            max_weighted_duration_aids=max_weighted_duration_aids,
-        )
+        # logging.info("calculating distances in embedding fasttext cbow")
+        # (
+        #     fasttext_cbow_last_event_cosine_distances,
+        #     fasttext_cbow_last_event_euclidean_distances,
+        #     fasttext_cbow_max_recency_cosine_distances,
+        #     fasttext_cbow_max_recency_euclidean_distances,
+        #     fasttext_cbow_max_weighted_recency_cosine_distances,
+        #     fasttext_cbow_max_weighted_recency_euclidean_distances,
+        #     fasttext_cbow_max_duration_cosine_distances,
+        #     fasttext_cbow_max_duration_euclidean_distances,
+        #     fasttext_cbow_max_weighted_duration_cosine_distances,
+        #     fasttext_cbow_max_weighted_duration_euclidean_distances,
+        # ) = calculate_distance_metrics(
+        #     embedding=fasttext_cbow_embedding,
+        #     candidate_aids=candidate_aids,
+        #     last_event_aids=last_event_aids,
+        #     max_recency_aids=max_recency_aids,
+        #     max_weighted_recency_aids=max_weighted_recency_aids,
+        #     max_duration_aids=max_duration_aids,
+        #     max_weighted_duration_aids=max_weighted_duration_aids,
+        # )
 
         # save features
         output_data = {
@@ -251,16 +248,16 @@ def gen_fasttext_features(
             "fasttext_skipgram_max_duration_euclidean_distance": fasttext_skipgram_max_duration_euclidean_distances,
             "fasttext_skipgram_max_weighted_duration_cosine_distance": fasttext_skipgram_max_weighted_duration_cosine_distances,
             "fasttext_skipgram_max_weighted_duration_euclidean_distance": fasttext_skipgram_max_weighted_duration_euclidean_distances,
-            "fasttext_cbow_last_event_cosine_distance": fasttext_cbow_last_event_cosine_distances,
-            "fasttext_cbow_last_event_euclidean_distance": fasttext_cbow_last_event_euclidean_distances,
-            "fasttext_cbow_max_recency_cosine_distance": fasttext_cbow_max_recency_cosine_distances,
-            "fasttext_cbow_max_recency_euclidean_distance": fasttext_cbow_max_recency_euclidean_distances,
-            "fasttext_cbow_max_weighted_recency_cosine_distance": fasttext_cbow_max_weighted_recency_cosine_distances,
-            "fasttext_cbow_max_weighted_recency_euclidean_distance": fasttext_cbow_max_weighted_recency_euclidean_distances,
-            "fasttext_cbow_max_duration_cosine_distance": fasttext_cbow_max_duration_cosine_distances,
-            "fasttext_cbow_max_duration_euclidean_distance": fasttext_cbow_max_duration_euclidean_distances,
-            "fasttext_cbow_max_weighted_duration_cosine_distance": fasttext_cbow_max_weighted_duration_cosine_distances,
-            "fasttext_cbow_max_weighted_duration_euclidean_distance": fasttext_cbow_max_weighted_duration_euclidean_distances,
+            # "fasttext_cbow_last_event_cosine_distance": fasttext_cbow_last_event_cosine_distances,
+            # "fasttext_cbow_last_event_euclidean_distance": fasttext_cbow_last_event_euclidean_distances,
+            # "fasttext_cbow_max_recency_cosine_distance": fasttext_cbow_max_recency_cosine_distances,
+            # "fasttext_cbow_max_recency_euclidean_distance": fasttext_cbow_max_recency_euclidean_distances,
+            # "fasttext_cbow_max_weighted_recency_cosine_distance": fasttext_cbow_max_weighted_recency_cosine_distances,
+            # "fasttext_cbow_max_weighted_recency_euclidean_distance": fasttext_cbow_max_weighted_recency_euclidean_distances,
+            # "fasttext_cbow_max_duration_cosine_distance": fasttext_cbow_max_duration_cosine_distances,
+            # "fasttext_cbow_max_duration_euclidean_distance": fasttext_cbow_max_duration_euclidean_distances,
+            # "fasttext_cbow_max_weighted_duration_cosine_distance": fasttext_cbow_max_weighted_duration_cosine_distances,
+            # "fasttext_cbow_max_weighted_duration_euclidean_distance": fasttext_cbow_max_weighted_duration_euclidean_distances,
         }
 
         output_df = pl.DataFrame(output_data)
@@ -291,11 +288,11 @@ def make_fasttext_features(
     if mode in ["training_train", "training_test"]:
         logging.info("read local fasttext embedding")
         fasttext_skipgram_embedding = load_fasttext_skipgram_embedding()
-        fasttext_cbow_embedding = load_fasttext_cbow_embedding()
+        # fasttext_cbow_embedding = load_fasttext_cbow_embedding()
     else:
         logging.info("read scoring fasttext embedding")
         fasttext_skipgram_embedding = load_fasttext_skipgram_embedding(mode="scoring")
-        fasttext_cbow_embedding = load_fasttext_cbow_embedding(mode="scoring")
+        # fasttext_cbow_embedding = load_fasttext_cbow_embedding(mode="scoring")
 
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
@@ -307,7 +304,7 @@ def make_fasttext_features(
             ses_representation_path=ses_representation_path,
             output_path=output_path,
             fasttext_skipgram_embedding=fasttext_skipgram_embedding,
-            fasttext_cbow_embedding=fasttext_cbow_embedding,
+            # fasttext_cbow_embedding=fasttext_cbow_embedding,
         )
 
 
