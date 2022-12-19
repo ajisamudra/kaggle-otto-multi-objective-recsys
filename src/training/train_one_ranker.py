@@ -88,118 +88,124 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     else:
         raise NotImplementedError("week not implemented! (w1/w2)")
 
-    unique_model_names = []
     performance, hyperparams = {}, {}
     logging.info("init ensemble one ranker")
     ensemble_model = EnsembleModels()
     feature_importances = []
-    model: Union[ClassifierModel, RankingModel]
-    hyperparams = {}
-    if algo == "lgbm_ranker":
-        hyperparams = {
-            "n_estimators": 1000,
-            # "learning_rate": 0.03683453215722998,
-            # "max_depth": 7,
-            # "num_leaves": 78,
-            # "min_data_in_leaf": 1154,
-            # "feature_fraction": 0.7977584122891811,
-            # "bagging_fraction": 0.712445779238389,
-        }
-    elif algo == "cat_ranker":
-        hyperparams = {"n_estimators": 1000}
+    selected_features = []
+    for IX in tqdm(range(n)):
+        model: Union[ClassifierModel, RankingModel]
+        hyperparams = {}
+        if algo == "lgbm_ranker":
+            hyperparams = {
+                "n_estimators": 1000,
+                # "learning_rate": 0.03683453215722998,
+                # "max_depth": 7,
+                # "num_leaves": 78,
+                # "min_data_in_leaf": 1154,
+                # "feature_fraction": 0.7977584122891811,
+                # "bagging_fraction": 0.712445779238389,
+            }
+        elif algo == "cat_ranker":
+            hyperparams = {"n_estimators": 1000}
 
-    if algo == "lgbm_ranker":
-        model = LGBRanker(**hyperparams)
-    elif algo == "cat_ranker":
-        model = CATRanker(**hyperparams)
-    else:
-        raise NotImplementedError("algorithm not implemented! (lgbm_ranker/cat_ranker)")
+        if algo == "lgbm_ranker":
+            model = LGBRanker(**hyperparams)
+        elif algo == "cat_ranker":
+            model = CATRanker(**hyperparams)
+        else:
+            raise NotImplementedError(
+                "algorithm not implemented! (lgbm_ranker/cat_ranker)"
+            )
 
-    logging.info(f"read training data for one ranker")
-    train_df = pl.DataFrame()
+        logging.info(f"read training data for one ranker")
+        train_df = pl.DataFrame()
 
-    for i in range(2):
-        filepath = f"{input_path}/train_{i}_one_ranker_combined.parquet"
-        df_chunk = pl.read_parquet(filepath)
-        # df_chunk = df_chunk.to_pandas()
-        # df_chunk = downsample(df_chunk)
-        # df_chunk = pl.from_pandas(df_chunk)
-        train_df = pl.concat([train_df, df_chunk])
+        for i in range(2):
+            idx_data = (IX * 2) + i  # 0,1 | 2,3 | 4,5
+            filepath = f"{input_path}/train_{idx_data}_one_ranker_combined.parquet"
+            df_chunk = pl.read_parquet(filepath)
+            # df_chunk = df_chunk.to_pandas()
+            # df_chunk = downsample(df_chunk)
+            # df_chunk = pl.from_pandas(df_chunk)
+            train_df = pl.concat([train_df, df_chunk])
 
-    logging.info(f"train shape {train_df.shape}")
-    # logging.info(f"val shape {val_df.shape}")
-    # sort data based on session & label
-    train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
-    train_df = train_df.to_pandas()
-    # replace inf with 0
-    # and make sure there's no None
-    train_df = train_df.replace([np.inf, -np.inf], 0)
-    train_df = train_df.fillna(0)
+        logging.info(f"train shape {train_df.shape}")
+        # logging.info(f"val shape {val_df.shape}")
+        # sort data based on session & label
+        train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
+        train_df = train_df.to_pandas()
+        # replace inf with 0
+        # and make sure there's no None
+        train_df = train_df.replace([np.inf, -np.inf], 0)
+        train_df = train_df.fillna(0)
 
-    selected_features = list(train_df.columns)
-    selected_features.remove("session")
-    selected_features.remove("candidate_aid")
-    selected_features.remove(TARGET)
+        selected_features = list(train_df.columns)
+        selected_features.remove("session")
+        selected_features.remove("candidate_aid")
+        selected_features.remove(TARGET)
 
-    X = train_df[selected_features]
-    group = train_df["session"]
-    y = train_df[TARGET]
+        X = train_df[selected_features]
+        group = train_df["session"]
+        y = train_df[TARGET]
 
-    del train_df
-    gc.collect()
+        del train_df
+        gc.collect()
 
-    skgfold = StratifiedGroupKFold(n_splits=5)
-    train_idx, val_idx = [], []
+        skgfold = StratifiedGroupKFold(n_splits=5)
+        train_idx, val_idx = [], []
 
-    for tidx, vidx in skgfold.split(X, y, groups=group):
-        train_idx, val_idx = tidx, vidx
+        for tidx, vidx in skgfold.split(X, y, groups=group):
+            train_idx, val_idx = tidx, vidx
 
-    X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
-    y_train, y_val = y[train_idx], y[val_idx]
-    group_train, group_val = group[train_idx], group[val_idx]
+        X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
+        y_train, y_val = y[train_idx], y[val_idx]
+        group_train, group_val = group[train_idx], group[val_idx]
 
-    del X, y, group
-    gc.collect()
+        del X, y, group
+        gc.collect()
 
-    # calculate num samples per group
-    logging.info("calculate num samples per group")
-    n_group_train = list(group_train.value_counts())
-    n_group_val = list(group_val.value_counts())
+        # calculate num samples per group
+        logging.info("calculate num samples per group")
+        n_group_train = list(group_train.value_counts())
+        n_group_val = list(group_val.value_counts())
 
-    logging.info("distribution of n_candidate in train")
-    logging.info(group_train.value_counts().value_counts())
-    logging.info("distribution of n_candidate in val")
-    logging.info(group_val.value_counts().value_counts())
+        logging.info("distribution of n_candidate in train")
+        logging.info(group_train.value_counts().value_counts())
+        logging.info("distribution of n_candidate in val")
+        logging.info(group_val.value_counts().value_counts())
 
-    logging.info(f"train shape {X_train.shape} sum groups {sum(n_group_train)}")
-    logging.info(f"val shape {X_val.shape} sum groups {sum(n_group_val)}")
-    logging.info(f"y_train {np.mean(y_train)} | y_val {np.mean(y_val)}")
+        logging.info(f"train shape {X_train.shape} sum groups {sum(n_group_train)}")
+        logging.info(f"val shape {X_val.shape} sum groups {sum(n_group_val)}")
+        logging.info(f"y_train {np.mean(y_train)} | y_val {np.mean(y_val)}")
 
-    if algo == "lgbm_ranker":
-        model.fit(
-            X_train=X_train,
-            X_val=X_val,
-            y_train=y_train,
-            y_val=y_val,
-            group_train=n_group_train,
-            group_val=n_group_val,
-            eval_at=20,
-        )
-    elif algo == "cat_ranker":
-        model.fit(
-            X_train=X_train,
-            X_val=X_val,
-            y_train=y_train,
-            y_val=y_val,
-            group_train=group_train,
-            group_val=group_val,
-        )
+        if algo == "lgbm_ranker":
+            model.fit(
+                X_train=X_train,
+                X_val=X_val,
+                y_train=y_train,
+                y_val=y_val,
+                group_train=n_group_train,
+                group_val=n_group_val,
+                eval_at=20,
+            )
+        elif algo == "cat_ranker":
+            model.fit(
+                X_train=X_train,
+                X_val=X_val,
+                y_train=y_train,
+                y_val=y_val,
+                group_train=group_train,
+                group_val=group_val,
+            )
 
-    hyperparams = model.get_params()
-    ensemble_model.append(model)
+        hyperparams = model.get_params()
+        ensemble_model.append(model)
+        # save feature importance
+        feature_importances.append(model.feature_importances_)
 
-    del X_train, X_val, y_train, y_val, group_train, group_val
-    gc.collect()
+        del X_train, X_val, y_train, y_val, group_train, group_val
+        gc.collect()
 
     event_val_roc_aucs = []
     event_val_pr_aucs = []
@@ -245,7 +251,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         y_test = test_df[TARGET]
 
         # predict val
-        y_proba = model.predict(X_test)
+        y_proba = ensemble_model.predict(X_test)
         roc_auc = roc_auc_score(y_true=y_test, y_score=y_proba)
         pr_auc = average_precision_score(y_true=y_test, y_score=y_proba)
         event_val_roc_aucs.append(roc_auc)
@@ -261,9 +267,6 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         # save to dict per event
         performance[f"{EVENT}_val_roc_auc"] = roc_auc
         performance[f"{EVENT}_val_pr_auc"] = pr_auc
-
-    # save feature importance
-    feature_importances.append(model.feature_importances_)
 
     # save artifacts to
     current_date = datetime.datetime.now().strftime("%Y-%m-%d")  # get current date
