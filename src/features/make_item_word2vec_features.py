@@ -22,6 +22,8 @@ from src.utils.logger import get_logger
 
 logging = get_logger()
 
+VECT_SIZE = 32
+
 
 def vectorized_cosine_distance(vectors1: np.ndarray, vectors2: np.ndarray):
     """
@@ -49,8 +51,16 @@ def calculate_distance_metrics(
     vectors1 = []
     vectors2 = []
     for source, target in zip(candidate_aids, last_event_aids):
-        vector1 = embedding.get_vector(source)
-        vector2 = embedding.get_vector(target)
+        # vector1 = embedding.get_vector(source)
+        # vector2 = embedding.get_vector(target)
+        try:
+            vector1 = embedding.get_vector(source)
+        except KeyError:
+            vector1 = [0 for _ in range(VECT_SIZE)]
+        try:
+            vector2 = embedding.get_vector(target)
+        except KeyError:
+            vector2 = [0 for _ in range(VECT_SIZE)]
         vectors1.append(vector1)
         vectors2.append(vector2)
 
@@ -66,7 +76,10 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_recency_aids:
-        vector2 = embedding.get_vector(target)
+        try:
+            vector2 = embedding.get_vector(target)
+        except KeyError:
+            vector2 = [0 for _ in range(VECT_SIZE)]
         vectors2.append(vector2)
 
     # convert list to array 2d
@@ -79,7 +92,10 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_weighted_recency_aids:
-        vector2 = embedding.get_vector(target)
+        try:
+            vector2 = embedding.get_vector(target)
+        except KeyError:
+            vector2 = [0 for _ in range(VECT_SIZE)]
         vectors2.append(vector2)
 
     # convert list to array 2d
@@ -94,7 +110,10 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_duration_aids:
-        vector2 = embedding.get_vector(target)
+        try:
+            vector2 = embedding.get_vector(target)
+        except KeyError:
+            vector2 = [0 for _ in range(VECT_SIZE)]
         vectors2.append(vector2)
 
     # convert list to array 2d
@@ -107,7 +126,10 @@ def calculate_distance_metrics(
 
     vectors2 = []
     for target in max_weighted_duration_aids:
-        vector2 = embedding.get_vector(target)
+        try:
+            vector2 = embedding.get_vector(target)
+        except KeyError:
+            vector2 = [0 for _ in range(VECT_SIZE)]
         vectors2.append(vector2)
 
     # convert list to array 2d
