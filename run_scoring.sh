@@ -18,10 +18,15 @@
 # CART_MODEL="2022-12-18_carts_cat_ranker_63198_93923"
 # ORDER_MODEL="2022-12-18_orders_cat_ranker_79367_96784"
 
-# CV 0.5681765240808944 Fea 172 LB 0.579
-CLICK_MODEL="2022-12-18_clicks_cat_ranker_44864_89643"
-CART_MODEL="2022-12-18_carts_cat_ranker_63198_93923"
-ORDER_MODEL="2022-12-18_orders_cat_ranker_79367_96784"
+# CV 0.5670441199234523 Fea 172 LB XX
+CLICK_MODEL="2022-12-20_clicks_lgbm_classifier_46744_89740"
+CART_MODEL="2022-12-20_carts_lgbm_classifier_63895_93925"
+ORDER_MODEL="2022-12-20_orders_lgbm_classifier_79792_97018"
+
+# CV 0.5686940699602498 Fea 172 LB XX
+CLICK_MODEL="2022-12-20_clicks_cat_ranker_42966_88609"
+CART_MODEL="2022-12-20_carts_cat_ranker_62107_93343"
+ORDER_MODEL="2022-12-20_orders_cat_ranker_78471_96474"
 WEEK_DATA=w1
 
 # # perform scoring
