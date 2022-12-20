@@ -15,10 +15,14 @@ def load_word2vec_embedding(mode: str = "local"):
 
     if mode == "local":
         emd_path = get_local_word2vec_dir()
-        filepath = f"{emd_path}/word2vec_local_skipgram_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
+        filepath = (
+            f"{emd_path}/word2vec_local_skipgram_vec64_wdw{WINDOW}_neg{NEGATIVE}.kv"
+        )
     else:
         emd_path = get_scoring_word2vec_dir()
-        filepath = f"{emd_path}/word2vec_scoring_skipgram_vec{VECTOR}_wdw{WINDOW}_neg{NEGATIVE}.kv"
+        filepath = (
+            f"{emd_path}/word2vec_scoring_skipgram_vec64_wdw{WINDOW}_neg{NEGATIVE}.kv"
+        )
 
     # load keyed vectors
     kvectors = KeyedVectors.load(filepath, mmap="r")
@@ -66,6 +70,7 @@ def load_annoy_idx_word2vec_vect64_wdw50_embedding(mode: str = "local"):
     index.build(NTREE)
 
     return index
+
 
 def load_annoy_idx_word2vec_embedding(mode: str = "local"):
 
@@ -197,6 +202,7 @@ def load_annoy_idx_word2vec_wdw70_embedding(mode: str = "local"):
     index.build(NTREE)
 
     return index
+
 
 def load_annoy_idx_word2vec_dropn1_vect64_wdw50_embedding(mode: str = "local"):
 

@@ -8,10 +8,10 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 class CFG:
     N_test = 80
     N_train = 30
-    covisit_candidates = 40
-    fasttext_candidates = 20
-    word2vec_candidates = 50
-    matrix_factorization_candidates = 10
+    covisit_candidates = 60
+    fasttext_candidates = 0
+    word2vec_candidates = 60
+    matrix_factorization_candidates = 0
 
 
 ### Create directory
