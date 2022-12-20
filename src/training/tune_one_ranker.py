@@ -116,7 +116,7 @@ def cross_validation_ap_score(
     for _ in range(k):
         train_df = pl.DataFrame()
 
-        for i in range(2):
+        for i in range(1):
             filepath = f"{input_path}/train_{i}_one_ranker_combined.parquet"
             df_chunk = pl.read_parquet(filepath)
             train_df = pl.concat([train_df, df_chunk])
@@ -193,19 +193,19 @@ def cross_validation_ap_score(
             test_df = pl.DataFrame()
             df_chunk = pl.DataFrame()
             if EVENT == "orders":
-                for i in range(8):
+                for i in range(5):
                     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     test_df = pl.concat([test_df, df_chunk])
 
             elif EVENT == "carts":
-                for i in range(6):
+                for i in range(3):
                     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     test_df = pl.concat([test_df, df_chunk])
 
             else:
-                for i in range(3):
+                for i in range(1):
                     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     test_df = pl.concat([test_df, df_chunk])
