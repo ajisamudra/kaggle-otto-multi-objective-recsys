@@ -21,7 +21,7 @@ from src.utils.constants import (
 )
 
 from src.utils.constants import get_artifacts_training_dir
-from src.utils.memory import freemem
+from src.utils.memory import freemem, round_float_3decimals
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -113,6 +113,7 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
 
         filepath = f"{output_path}/test_{IX}_{EVENT}_scores.parquet"
         test_df = freemem(test_df)
+        test_df = round_float_3decimals(test_df)
         test_df.write_parquet(f"{filepath}")
 
         # logging.info(f"save prediction scores to: {filepath}")

@@ -17,7 +17,7 @@ from src.utils.constants import (
     get_processed_scoring_test_fasttext_features_dir,
 )
 from src.utils.fasttext import load_fasttext_skipgram_embedding
-from src.utils.memory import freemem
+from src.utils.memory import freemem, round_float_3decimals
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -264,6 +264,7 @@ def gen_fasttext_features(
         filepath = output_path / f"{name}_{ix}_{event}_fasttext_feas.parquet"
         logging.info(f"save chunk to: {filepath}")
         output_df = freemem(output_df)
+        output_df = round_float_3decimals(output_df)
         output_df.write_parquet(f"{filepath}")
         logging.info(f"output df shape {output_df.shape}")
 

@@ -18,7 +18,7 @@ from src.utils.constants import (
 from src.utils.matrix_factorization import (
     load_matrix_fact_embedding,
 )
-from src.utils.memory import freemem
+from src.utils.memory import freemem, round_float_3decimals
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -298,6 +298,7 @@ def gen_matrix_fact_features(
         filepath = output_path / f"{name}_{ix}_{event}_matrix_fact_feas.parquet"
         logging.info(f"save chunk to: {filepath}")
         output_df = freemem(output_df)
+        output_df = round_float_3decimals(output_df)
         output_df.write_parquet(f"{filepath}")
         logging.info(f"output df shape {output_df.shape}")
 

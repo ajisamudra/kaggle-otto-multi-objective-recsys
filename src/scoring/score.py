@@ -21,7 +21,7 @@ from src.utils.constants import (
 )
 
 from src.utils.constants import get_artifacts_training_dir
-from src.utils.memory import freemem
+from src.utils.memory import freemem, round_float_3decimals
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -61,25 +61,6 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         selected_features = test_df.columns
         selected_features.remove("session")
         selected_features.remove("candidate_aid")
-        # selected_features.remove("item_all_events_count")
-        # selected_features.remove("item_click_count")
-        # selected_features.remove("item_cart_count")
-        # selected_features.remove("item_order_count")
-        # selected_features.remove("item_click_to_cart_cvr")
-        # selected_features.remove("item_cart_to_order_cvr")
-        # selected_features.remove("itemXhour_all_events_count")
-        # selected_features.remove("itemXhour_click_count")
-        # selected_features.remove("itemXhour_cart_count")
-        # selected_features.remove("itemXhour_order_count")
-        # selected_features.remove("itemXhour_click_to_cart_cvr")
-        # selected_features.remove("itemXhour_cart_to_order_cvr")
-        # selected_features.remove("itemXweekday_all_events_count")
-        # selected_features.remove("itemXweekday_click_count")
-        # selected_features.remove("itemXweekday_cart_count")
-        # selected_features.remove("itemXweekday_order_count")
-        # selected_features.remove("itemXweekday_click_to_cart_cvr")
-        # selected_features.remove("itemXweekday_cart_to_order_cvr")
-
         selected_features.remove(TARGET)
 
         # select features
@@ -113,6 +94,7 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
 
         filepath = f"{output_path}/test_{IX}_{EVENT}_scores.parquet"
         test_df = freemem(test_df)
+        test_df = round_float_3decimals(test_df)
         test_df.write_parquet(f"{filepath}")
 
         # logging.info(f"save prediction scores to: {filepath}")

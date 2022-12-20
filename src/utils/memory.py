@@ -10,3 +10,11 @@ def freemem(df: pl.DataFrame):
             df = df.with_column(pl.col(col).cast(pl.Float32))
     gc.collect()
     return df
+
+
+def round_float_3decimals(df: pl.DataFrame):
+    for col in df.columns:
+        if df[col].dtype in [pl.Float64, pl.Float32]:
+            df = df.with_column(pl.col(col).apply(lambda x: round(x, 3)))
+    gc.collect()
+    return df
