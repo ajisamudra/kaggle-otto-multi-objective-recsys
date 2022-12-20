@@ -136,48 +136,6 @@ def cross_validation_ap_score(
         selected_features.remove("candidate_aid")
         selected_features.remove(TARGET)
 
-        # remove item features
-        selected_features.remove("matrix_fact_cart_order_last_event_cosine_distance")
-        selected_features.remove("matrix_fact_cart_order_last_event_euclidean_distance")
-        selected_features.remove("matrix_fact_cart_order_max_recency_cosine_distance")
-        selected_features.remove(
-            "matrix_fact_cart_order_max_recency_euclidean_distance"
-        )
-        selected_features.remove(
-            "matrix_fact_cart_order_max_weighted_recency_cosine_distance"
-        )
-        selected_features.remove(
-            "matrix_fact_cart_order_max_weighted_recency_euclidean_distance"
-        )
-        selected_features.remove("matrix_fact_cart_order_max_duration_cosine_distance")
-        selected_features.remove(
-            "matrix_fact_cart_order_max_duration_euclidean_distance"
-        )
-        selected_features.remove(
-            "matrix_fact_cart_order_max_weighted_duration_cosine_distance"
-        )
-        selected_features.remove(
-            "matrix_fact_cart_order_max_weighted_duration_euclidean_distance"
-        )
-        selected_features.remove("matrix_fact_buy2buy_last_event_cosine_distance")
-        selected_features.remove("matrix_fact_buy2buy_last_event_euclidean_distance")
-        selected_features.remove("matrix_fact_buy2buy_max_recency_cosine_distance")
-        selected_features.remove("matrix_fact_buy2buy_max_recency_euclidean_distance")
-        selected_features.remove(
-            "matrix_fact_buy2buy_max_weighted_recency_cosine_distance"
-        )
-        selected_features.remove(
-            "matrix_fact_buy2buy_max_weighted_recency_euclidean_distance"
-        )
-        selected_features.remove("matrix_fact_buy2buy_max_duration_cosine_distance")
-        selected_features.remove("matrix_fact_buy2buy_max_duration_euclidean_distance")
-        selected_features.remove(
-            "matrix_fact_buy2buy_max_weighted_duration_cosine_distance"
-        )
-        selected_features.remove(
-            "matrix_fact_buy2buy_max_weighted_duration_euclidean_distance"
-        )
-
         X = train_df[selected_features]
         group = train_df["session"]
         y = train_df[TARGET]
@@ -321,7 +279,7 @@ class ObjectiveLGBOneRankerModel:
             "n_estimators": trial.suggest_int(
                 "n_estimators", self.n_estimators, self.n_estimators
             ),
-            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.15),
+            "learning_rate": trial.suggest_float("learning_rate", 0.001, 0.01),
             "max_depth": trial.suggest_int("max_depth", 6, 12),
             "num_leaves": trial.suggest_int("num_leaves", 8, 128),
             "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 400, 1500),
@@ -333,6 +291,34 @@ class ObjectiveLGBOneRankerModel:
         model: Union[ClassifierModel, RankingModel]
         if self.algo == "lgbm_ranker":
             model = LGBRanker(**hyperparams)
+        # measure performance in CV
+        cv_ap = cross_validation_ap_score(model, k=self.k, algo=self.algo)
+
+        return cv_ap
+
+
+class ObjectiveCATOneRankerModel:
+    def __init__(self, algo: str, n_estimators: int, k: int):
+        self.n_estimators = n_estimators
+        self.algo = algo
+        self.k = k
+
+    def __call__(self, trial):
+        hyperparams = {
+            "n_estimators": trial.suggest_int(
+                "n_estimators", self.n_estimators, self.n_estimators
+            ),
+            "learning_rate": trial.suggest_float("learning_rate", 0.01, 0.3),
+            "max_depth": trial.suggest_int("depth", 6, 10),
+            "num_leaves": trial.suggest_float("l2_leaf_reg", 0, 1),
+            "min_data_in_leaf": trial.suggest_int("min_data_in_leaf", 100, 1000),
+            "feature_fraction": trial.suggest_float("max_leaves", 64, 200),
+            "random_state": 747,
+            "verbose": 0,
+        }
+        model: Union[ClassifierModel, RankingModel]
+        if self.algo == "cat_ranker":
+            model = CATRanker(**hyperparams)
         # measure performance in CV
         cv_ap = cross_validation_ap_score(model, k=self.k, algo=self.algo)
 

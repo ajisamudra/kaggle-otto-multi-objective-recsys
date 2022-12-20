@@ -35,14 +35,14 @@
 # make matrix_factorization_features MODE=training_test START=20 END=40
 # make matrix_factorization_features MODE=training_test START=40 END=60
 # make matrix_factorization_features MODE=training_test START=60 END=80
-make word2vec_features MODE=training_test START=3 END=40
-make word2vec_features MODE=training_test START=43 END=80
-# make fasttext_features MODE=training_test START=0 END=40
-# make fasttext_features MODE=training_test START=40 END=80
-make combine_features  MODE=training_test START=0 END=20
-make combine_features  MODE=training_test START=20 END=40
-make combine_features  MODE=training_test START=40 END=60
-make combine_features  MODE=training_test START=60 END=80
+# make word2vec_features MODE=training_test START=11 END=40
+# make word2vec_features MODE=training_test START=43 END=80
+# # make fasttext_features MODE=training_test START=0 END=40
+# # make fasttext_features MODE=training_test START=40 END=80
+# make combine_features  MODE=training_test START=0 END=20
+# make combine_features  MODE=training_test START=20 END=40
+# make combine_features  MODE=training_test START=40 END=60
+# make combine_features  MODE=training_test START=60 END=80
 
 # make split_into_chunks MODE=scoring_test
 # make candidate_list MODE=scoring_test
@@ -83,11 +83,12 @@ make combine_features  MODE=training_test START=60 END=80
 # make train_one_ranker ALGO=lgbm_ranker
 # make train_one_ranker ALGO=cat_ranker
 
-make train ALGO=cat_ranker
-make train ALGO=lgbm_classifier
-make one_ranker_dataset
-make train_one_ranker ALGO=cat_ranker
-# make train_one_ranker ALGO=lgbm_ranker
+# make train ALGO=cat_ranker
+# make train ALGO=lgbm_classifier
+# make one_ranker_dataset
+# make train_one_ranker ALGO=cat_ranker
+make train_one_ranker ALGO=lgbm_ranker
+python src/training/train_one_ranker.py --event all --n 3 --algo lgbm_ranker --week w2 --eval 1
 
 
 # make eda EDA_MODE=class_dist
