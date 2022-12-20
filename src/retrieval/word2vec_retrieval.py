@@ -10,7 +10,7 @@ from src.utils.constants import (
     check_directory,
     get_data_output_dir,
 )
-from src.utils.word2vec import load_annoy_idx_word2vec_dropn1_vect64_wdw50_embedding
+from src.utils.word2vec import load_annoy_idx_word2vec_vect64_wdw50_neg30_embedding
 from src.metrics.submission_evaluation import measure_recall
 from src.utils.logger import get_logger
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     # candidate generation
     logging.info("read matrix fact index")
-    matrix_fact_idx = load_annoy_idx_word2vec_dropn1_vect64_wdw50_embedding()
+    matrix_fact_idx = load_annoy_idx_word2vec_vect64_wdw50_neg30_embedding()
 
     logging.info("Here are size of our 3 co-visitation matrices:")
     # logging.info(f"{len(top_20_clicks)}, {len(top_15_buy2buy)}, {len(top_15_buys)}")
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     # COMPUTE METRIC
     test_labels = pd.read_parquet(DATA_DIR / "test_labels.parquet")
     test_labels = test_labels[test_labels.session.isin(lucky_sessions)]
-    measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 40, 50, 60, 70])
+    measure_recall(df_pred=pred_df, df_truth=test_labels, Ks=[20, 40, 60, 70])
 
 # covisit retrieval - ver 9
 # [2022-12-13 09:11:28,984] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.5260462058837938
@@ -428,6 +428,56 @@ if __name__ == "__main__":
 # [2022-12-19 21:30:25,603] {submission_evaluation.py:91} INFO - =============
 # [2022-12-19 21:30:25,603] {submission_evaluation.py:92} INFO - Overall Recall@70 = 0.37136202866213575
 # [2022-12-19 21:30:25,603] {submission_evaluation.py:93} INFO - =============
+
+# covisit + word2vec skipgram 50wdw 30 negative retrieval vec_size 64 - angular dist
+# [2022-12-20 18:05:34,346] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.3873399545291373
+# [2022-12-20 18:05:34,347] {submission_evaluation.py:84} INFO - clicks hits@20 = 67977 / gt@20 = 175497
+# [2022-12-20 18:05:34,347] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.3873399545291373
+# [2022-12-20 18:05:36,183] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.4499505386293092
+# [2022-12-20 18:05:36,183] {submission_evaluation.py:84} INFO - carts hits@20 = 18094 / gt@20 = 57626
+# [2022-12-20 18:05:36,183] {submission_evaluation.py:85} INFO - carts recall@20 = 0.3139902127511887
+# [2022-12-20 18:05:38,052] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.46002501898141784
+# [2022-12-20 18:05:38,053] {submission_evaluation.py:84} INFO - orders hits@20 = 9792 / gt@20 = 30900
+# [2022-12-20 18:05:38,053] {submission_evaluation.py:85} INFO - orders recall@20 = 0.3168932038834951
+# [2022-12-20 18:05:38,053] {submission_evaluation.py:91} INFO - =============
+# [2022-12-20 18:05:38,053] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.32306698160836744
+# [2022-12-20 18:05:38,053] {submission_evaluation.py:93} INFO - =============
+# [2022-12-20 18:05:41,262] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@40 = 0.43386496635270116
+# [2022-12-20 18:05:41,263] {submission_evaluation.py:84} INFO - clicks hits@40 = 76142 / gt@40 = 175497
+# [2022-12-20 18:05:41,263] {submission_evaluation.py:85} INFO - clicks recall@40 = 0.43386496635270116
+# [2022-12-20 18:05:44,073] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@40 = 0.4826938851900966
+# [2022-12-20 18:05:44,073] {submission_evaluation.py:84} INFO - carts hits@40 = 19851 / gt@40 = 57626
+# [2022-12-20 18:05:44,073] {submission_evaluation.py:85} INFO - carts recall@40 = 0.3444799222573144
+# [2022-12-20 18:05:46,745] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@40 = 0.4877095730893552
+# [2022-12-20 18:05:46,745] {submission_evaluation.py:84} INFO - orders hits@40 = 10573 / gt@40 = 30900
+# [2022-12-20 18:05:46,745] {submission_evaluation.py:85} INFO - orders recall@40 = 0.342168284789644
+# [2022-12-20 18:05:46,745] {submission_evaluation.py:91} INFO - =============
+# [2022-12-20 18:05:46,745] {submission_evaluation.py:92} INFO - Overall Recall@40 = 0.3520314441862509
+# [2022-12-20 18:05:46,745] {submission_evaluation.py:93} INFO - =============
+# [2022-12-20 18:05:51,060] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@60 = 0.46005914631019335
+# [2022-12-20 18:05:51,061] {submission_evaluation.py:84} INFO - clicks hits@60 = 80739 / gt@60 = 175497
+# [2022-12-20 18:05:51,061] {submission_evaluation.py:85} INFO - clicks recall@60 = 0.46005914631019335
+# [2022-12-20 18:05:54,157] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@60 = 0.5015429483097902
+# [2022-12-20 18:05:54,157] {submission_evaluation.py:84} INFO - carts hits@60 = 20862 / gt@60 = 57626
+# [2022-12-20 18:05:54,158] {submission_evaluation.py:85} INFO - carts recall@60 = 0.3620240863499115
+# [2022-12-20 18:05:59,365] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@60 = 0.5039239147869163
+# [2022-12-20 18:05:59,368] {submission_evaluation.py:84} INFO - orders hits@60 = 11047 / gt@60 = 30900
+# [2022-12-20 18:05:59,369] {submission_evaluation.py:85} INFO - orders recall@60 = 0.35750809061488675
+# [2022-12-20 18:05:59,370] {submission_evaluation.py:91} INFO - =============
+# [2022-12-20 18:05:59,370] {submission_evaluation.py:92} INFO - Overall Recall@60 = 0.3691179949049248
+# [2022-12-20 18:05:59,370] {submission_evaluation.py:93} INFO - =============
+# [2022-12-20 18:06:04,754] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@70 = 0.467369812589389
+# [2022-12-20 18:06:04,754] {submission_evaluation.py:84} INFO - clicks hits@70 = 82022 / gt@70 = 175497
+# [2022-12-20 18:06:04,754] {submission_evaluation.py:85} INFO - clicks recall@70 = 0.467369812589389
+# [2022-12-20 18:06:08,743] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@70 = 0.5057134048191754
+# [2022-12-20 18:06:08,744] {submission_evaluation.py:84} INFO - carts hits@70 = 21067 / gt@70 = 57626
+# [2022-12-20 18:06:08,744] {submission_evaluation.py:85} INFO - carts recall@70 = 0.3655815083469267
+# [2022-12-20 18:06:12,134] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@70 = 0.5078077626059122
+# [2022-12-20 18:06:12,134] {submission_evaluation.py:84} INFO - orders hits@70 = 11141 / gt@70 = 30900
+# [2022-12-20 18:06:12,134] {submission_evaluation.py:85} INFO - orders recall@70 = 0.3605501618122977
+# [2022-12-20 18:06:12,135] {submission_evaluation.py:91} INFO - =============
+# [2022-12-20 18:06:12,135] {submission_evaluation.py:92} INFO - Overall Recall@70 = 0.3727415308503955
+# [2022-12-20 18:06:12,135] {submission_evaluation.py:93} INFO - =============
 
 # covisit + word2vec skipgram 50wdw 5negative retrieval vec_size 64 - angular dist + dropn1
 # [2022-12-20 10:17:57,281] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.3845066891537708
