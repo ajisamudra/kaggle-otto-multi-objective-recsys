@@ -86,7 +86,7 @@ train_one_ranker:
 	python src/training/train_one_ranker.py --event all --n 1 --algo $(ALGO) --week w2 --eval 1
 
 tune_one_ranker:
-	python src/training/tune_one_ranker.py --event all --k 1 --algo lgbm_ranker --n_estimators 1000 --n_trial 15
+	python src/training/tune_one_ranker.py --event all --k 1 --algo $(ALGO) --n_estimators 1000 --n_trial 15
 
 # tune command
 ALGO="lgbm_classifier" # cat_classifier / lgbm_ranker / cat_ranker

@@ -19,9 +19,10 @@
 
 # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
-# make candidate_word2vec_list MODE=training_test
+make candidate_word2vec_list MODE=training_test
 # make candidate_fasttext_list MODE=training_test
 # make candidate_matrix_fact_list MODE=training_test
+make candidate_list_eval MODE=training_test
 # make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
@@ -87,8 +88,8 @@
 # make train ALGO=lgbm_classifier
 # make one_ranker_dataset
 # make train_one_ranker ALGO=cat_ranker
-make train_one_ranker ALGO=lgbm_ranker
-python src/training/train_one_ranker.py --event all --n 3 --algo lgbm_ranker --week w2 --eval 1
+# make train_one_ranker ALGO=lgbm_ranker
+# python src/training/train_one_ranker.py --event all --n 3 --algo lgbm_ranker --week w2 --eval 1
 
 
 # make eda EDA_MODE=class_dist

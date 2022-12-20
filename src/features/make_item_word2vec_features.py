@@ -22,7 +22,7 @@ from src.utils.logger import get_logger
 
 logging = get_logger()
 
-VECT_SIZE = 32
+VECT_SIZE = 64
 
 
 def vectorized_cosine_distance(vectors1: np.ndarray, vectors2: np.ndarray):
@@ -234,27 +234,27 @@ def gen_word2vec_features(
             max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
-        logging.info("calculating distances in embedding word2vec cbow")
-        (
-            word2vec_cbow_last_event_cosine_distances,
-            word2vec_cbow_last_event_euclidean_distances,
-            word2vec_cbow_max_recency_cosine_distances,
-            word2vec_cbow_max_recency_euclidean_distances,
-            word2vec_cbow_max_weighted_recency_cosine_distances,
-            word2vec_cbow_max_weighted_recency_euclidean_distances,
-            word2vec_cbow_max_duration_cosine_distances,
-            word2vec_cbow_max_duration_euclidean_distances,
-            word2vec_cbow_max_weighted_duration_cosine_distances,
-            word2vec_cbow_max_weighted_duration_euclidean_distances,
-        ) = calculate_distance_metrics(
-            embedding=word2vec_cbow_embedding,
-            candidate_aids=candidate_aids,
-            last_event_aids=last_event_aids,
-            max_recency_aids=max_recency_aids,
-            max_weighted_recency_aids=max_weighted_recency_aids,
-            max_duration_aids=max_duration_aids,
-            max_weighted_duration_aids=max_weighted_duration_aids,
-        )
+        # logging.info("calculating distances in embedding word2vec cbow")
+        # (
+        #     word2vec_cbow_last_event_cosine_distances,
+        #     word2vec_cbow_last_event_euclidean_distances,
+        #     word2vec_cbow_max_recency_cosine_distances,
+        #     word2vec_cbow_max_recency_euclidean_distances,
+        #     word2vec_cbow_max_weighted_recency_cosine_distances,
+        #     word2vec_cbow_max_weighted_recency_euclidean_distances,
+        #     word2vec_cbow_max_duration_cosine_distances,
+        #     word2vec_cbow_max_duration_euclidean_distances,
+        #     word2vec_cbow_max_weighted_duration_cosine_distances,
+        #     word2vec_cbow_max_weighted_duration_euclidean_distances,
+        # ) = calculate_distance_metrics(
+        #     embedding=word2vec_cbow_embedding,
+        #     candidate_aids=candidate_aids,
+        #     last_event_aids=last_event_aids,
+        #     max_recency_aids=max_recency_aids,
+        #     max_weighted_recency_aids=max_weighted_recency_aids,
+        #     max_duration_aids=max_duration_aids,
+        #     max_weighted_duration_aids=max_weighted_duration_aids,
+        # )
 
         # save matrix factorization features
         output_data = {
@@ -270,16 +270,16 @@ def gen_word2vec_features(
             "word2vec_skipgram_max_duration_euclidean_distance": word2vec_skipgram_max_duration_euclidean_distances,
             "word2vec_skipgram_max_weighted_duration_cosine_distance": word2vec_skipgram_max_weighted_duration_cosine_distances,
             "word2vec_skipgram_max_weighted_duration_euclidean_distance": word2vec_skipgram_max_weighted_duration_euclidean_distances,
-            "word2vec_cbow_last_event_cosine_distance": word2vec_cbow_last_event_cosine_distances,
-            "word2vec_cbow_last_event_euclidean_distance": word2vec_cbow_last_event_euclidean_distances,
-            "word2vec_cbow_max_recency_cosine_distance": word2vec_cbow_max_recency_cosine_distances,
-            "word2vec_cbow_max_recency_euclidean_distance": word2vec_cbow_max_recency_euclidean_distances,
-            "word2vec_cbow_max_weighted_recency_cosine_distance": word2vec_cbow_max_weighted_recency_cosine_distances,
-            "word2vec_cbow_max_weighted_recency_euclidean_distance": word2vec_cbow_max_weighted_recency_euclidean_distances,
-            "word2vec_cbow_max_duration_cosine_distance": word2vec_cbow_max_duration_cosine_distances,
-            "word2vec_cbow_max_duration_euclidean_distance": word2vec_cbow_max_duration_euclidean_distances,
-            "word2vec_cbow_max_weighted_duration_cosine_distance": word2vec_cbow_max_weighted_duration_cosine_distances,
-            "word2vec_cbow_max_weighted_duration_euclidean_distance": word2vec_cbow_max_weighted_duration_euclidean_distances,
+            # "word2vec_cbow_last_event_cosine_distance": word2vec_cbow_last_event_cosine_distances,
+            # "word2vec_cbow_last_event_euclidean_distance": word2vec_cbow_last_event_euclidean_distances,
+            # "word2vec_cbow_max_recency_cosine_distance": word2vec_cbow_max_recency_cosine_distances,
+            # "word2vec_cbow_max_recency_euclidean_distance": word2vec_cbow_max_recency_euclidean_distances,
+            # "word2vec_cbow_max_weighted_recency_cosine_distance": word2vec_cbow_max_weighted_recency_cosine_distances,
+            # "word2vec_cbow_max_weighted_recency_euclidean_distance": word2vec_cbow_max_weighted_recency_euclidean_distances,
+            # "word2vec_cbow_max_duration_cosine_distance": word2vec_cbow_max_duration_cosine_distances,
+            # "word2vec_cbow_max_duration_euclidean_distance": word2vec_cbow_max_duration_euclidean_distances,
+            # "word2vec_cbow_max_weighted_duration_cosine_distance": word2vec_cbow_max_weighted_duration_cosine_distances,
+            # "word2vec_cbow_max_weighted_duration_euclidean_distance": word2vec_cbow_max_weighted_duration_euclidean_distances,
         }
 
         output_df = pl.DataFrame(output_data)
