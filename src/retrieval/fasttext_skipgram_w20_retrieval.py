@@ -10,7 +10,7 @@ from src.utils.constants import (
     check_directory,
     get_data_output_dir,
 )
-from src.utils.fasttext import load_annoy_idx_fasttext_skipgram_wdw50_mn3_mx6_embedding
+from src.utils.fasttext import load_annoy_idx_fasttext_skipgram_wdw20_embedding
 from src.metrics.submission_evaluation import measure_recall
 from src.utils.logger import get_logger
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
 
     # candidate generation
     logging.info("read embedding index")
-    matrix_fact_idx = load_annoy_idx_fasttext_skipgram_wdw50_mn3_mx6_embedding()
+    matrix_fact_idx = load_annoy_idx_fasttext_skipgram_wdw20_embedding()
 
     logging.info("start of suggesting")
     logging.info("sort session by ts ascendingly")
@@ -212,7 +212,7 @@ if __name__ == "__main__":
 # [2022-12-16 14:06:18,640] {submission_evaluation.py:92} INFO - Overall Recall@40 = 0.2947471400878284
 # [2022-12-16 14:06:18,640] {submission_evaluation.py:93} INFO - =============
 
-# fasttext skipgram wdw 20 neg5 minn 3 maxn 6
+# fasttext skipgram wdw 20 neg5 minn 3 maxn 6 dist euclidean
 # 2022-12-17 13:08:07,103] {submission_evaluation.py:84} INFO - clicks hits@20 = 57116 / gt@20 = 175437
 # [2022-12-17 13:08:07,103] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.32556416263388
 # [2022-12-17 13:08:08,612] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.40693836452259297
@@ -248,6 +248,43 @@ if __name__ == "__main__":
 # [2022-12-17 13:08:27,603] {submission_evaluation.py:91} INFO - =============
 # [2022-12-17 13:08:27,603] {submission_evaluation.py:92} INFO - Overall Recall@60 = 0.32042457336999897
 # [2022-12-17 13:08:27,603] {submission_evaluation.py:93} INFO - =============
+
+# fasttext skipgram wdw 20 neg5 minn 3 maxn 6 dist angular
+# [2022-12-20 10:35:17,184] {submission_evaluation.py:84} INFO - clicks hits@20 = 57549 / gt@20 = 175600
+# [2022-12-20 10:35:17,184] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.3277277904328018
+# [2022-12-20 10:35:19,450] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.40470094606224977
+# [2022-12-20 10:35:19,451] {submission_evaluation.py:84} INFO - carts hits@20 = 16087 / gt@20 = 58260
+# [2022-12-20 10:35:19,451] {submission_evaluation.py:85} INFO - carts recall@20 = 0.2761242705115002
+# [2022-12-20 10:35:23,536] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.4226890151976901
+# [2022-12-20 10:35:23,537] {submission_evaluation.py:84} INFO - orders hits@20 = 8785 / gt@20 = 31232
+# [2022-12-20 10:35:23,537] {submission_evaluation.py:85} INFO - orders recall@20 = 0.28128201844262296
+# [2022-12-20 10:35:23,537] {submission_evaluation.py:91} INFO - =============
+# [2022-12-20 10:35:23,537] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.284379271262304
+# [2022-12-20 10:35:23,537] {submission_evaluation.py:93} INFO - =============
+# [2022-12-20 10:35:28,390] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@40 = 0.36702164009111615
+# [2022-12-20 10:35:28,390] {submission_evaluation.py:84} INFO - clicks hits@40 = 64449 / gt@40 = 175600
+# [2022-12-20 10:35:28,390] {submission_evaluation.py:85} INFO - clicks recall@40 = 0.36702164009111615
+# [2022-12-20 10:35:33,007] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@40 = 0.4311184954946002
+# [2022-12-20 10:35:34,950] {submission_evaluation.py:84} INFO - carts hits@40 = 17460 / gt@40 = 58260
+# [2022-12-20 10:35:35,021] {submission_evaluation.py:85} INFO - carts recall@40 = 0.2996910401647786
+# [2022-12-20 10:35:39,469] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@40 = 0.44446718430816307
+# [2022-12-20 10:35:39,469] {submission_evaluation.py:84} INFO - orders hits@40 = 9394 / gt@40 = 31232
+# [2022-12-20 10:35:39,470] {submission_evaluation.py:85} INFO - orders recall@40 = 0.30078125
+# [2022-12-20 10:35:39,470] {submission_evaluation.py:91} INFO - =============
+# [2022-12-20 10:35:39,470] {submission_evaluation.py:92} INFO - Overall Recall@40 = 0.3070782260585452
+# [2022-12-20 10:35:39,470] {submission_evaluation.py:93} INFO - =============
+# [2022-12-20 10:35:46,121] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@60 = 0.3879271070615034
+# [2022-12-20 10:35:46,122] {submission_evaluation.py:84} INFO - clicks hits@60 = 68120 / gt@60 = 175600
+# [2022-12-20 10:35:46,123] {submission_evaluation.py:85} INFO - clicks recall@60 = 0.3879271070615034
+# [2022-12-20 10:35:49,946] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@60 = 0.4452489002681301
+# [2022-12-20 10:35:49,947] {submission_evaluation.py:84} INFO - carts hits@60 = 18180 / gt@60 = 58260
+# [2022-12-20 10:35:49,947] {submission_evaluation.py:85} INFO - carts recall@60 = 0.3120494335736354
+# [2022-12-20 10:35:54,329] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@60 = 0.45545377820564803
+# [2022-12-20 10:35:54,329] {submission_evaluation.py:84} INFO - orders hits@60 = 9675 / gt@60 = 31232
+# [2022-12-20 10:35:54,330] {submission_evaluation.py:85} INFO - orders recall@60 = 0.30977843237704916
+# [2022-12-20 10:35:54,330] {submission_evaluation.py:91} INFO - =============
+# [2022-12-20 10:35:54,330] {submission_evaluation.py:92} INFO - Overall Recall@60 = 0.31827460020447046
+# [2022-12-20 10:35:54,330] {submission_evaluation.py:93} INFO - =============
 
 # fasttext skipgram wdw 50 neg5 minn 3 maxn 6
 # [2022-12-19 08:31:30,790] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.32436805314221584
