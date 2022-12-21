@@ -272,10 +272,6 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             # sort data based on session & label
             train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
             train_df = train_df.to_pandas()
-            # replace inf with 0
-            # and make sure there's no None
-            train_df = train_df.replace([np.inf, -np.inf], 0)
-            train_df = train_df.fillna(0)
 
             # val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
             # val_df = val_df.to_pandas()
@@ -452,14 +448,22 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             # perform scoring
             if algo == "lgbm_classifier":
                 # export treelite model
-                export_treelite_model(artifact=unique_model_name, event=EVENT, week_model="w2")
+                export_treelite_model(
+                    artifact=unique_model_name, event=EVENT, week_model="w2"
+                )
                 # scoring using treelite model
                 scoring_treelite(
-                    artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
+                    artifact=unique_model_name,
+                    event=EVENT,
+                    week_data="w2",
+                    week_model="w2",
                 )
             else:
                 scoring(
-                    artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
+                    artifact=unique_model_name,
+                    event=EVENT,
+                    week_data="w2",
+                    week_model="w2",
                 )
             # append unique_model_names for make & eval submission
             unique_model_names.append(unique_model_name)

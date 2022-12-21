@@ -2,6 +2,7 @@ import click
 import polars as pl
 from tqdm import tqdm
 import gc
+import numpy as np
 from pathlib import Path
 from src.utils.constants import (
     CFG,
@@ -151,6 +152,12 @@ def make_session_features(
 
     filepath = output_path / f"{name}_item_hour_feas.parquet"
     logging.info(f"save chunk to: {filepath}")
+    # replace inf with 0
+    # and make sure there's no None
+    df_output = df_output.to_pandas()
+    df_output = df_output.replace([np.inf, -np.inf], 0)
+    df_output = df_output.fillna(0)
+    df_output = pl.from_pandas(df_output)
     df_output.write_parquet(f"{filepath}")
     logging.info(f"output df shape {df_output.shape}")
 

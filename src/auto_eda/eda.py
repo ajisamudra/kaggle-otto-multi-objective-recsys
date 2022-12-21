@@ -230,9 +230,9 @@ def perform_eda(events: list, n: int, mode: str):
 
         if mode in ["all", "biserial"]:
             logging.info("start calculate biserial correlation")
-            df = df.replace([np.inf, -np.inf], 0)
-            df = df.fillna(0)
-            logging.info(df.isnull().sum())
+            # df = df.replace([np.inf, -np.inf], 0)
+            # df = df.fillna(0)
+            # logging.info(df.isnull().sum())
             # create artifact dir
             filepath = artifact_path / "biserial"
             check_directory(filepath)

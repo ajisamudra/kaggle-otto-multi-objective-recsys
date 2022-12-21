@@ -110,12 +110,6 @@ def cross_validation_ap_score(
         train_df = train_df.to_pandas()
         val_df = val_df.to_pandas()
 
-        # replace inf with 0
-        train_df = train_df.replace([np.inf, -np.inf], 0)
-        train_df = train_df.fillna(0)
-        val_df = val_df.replace([np.inf, -np.inf], 0)
-        val_df = val_df.fillna(0)
-
         selected_features = list(train_df.columns)
         selected_features.remove("session")
         selected_features.remove("candidate_aid")

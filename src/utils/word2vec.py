@@ -16,12 +16,12 @@ def load_word2vec_embedding(mode: str = "local"):
     if mode == "local":
         emd_path = get_local_word2vec_dir()
         filepath = (
-            f"{emd_path}/word2vec_local_skipgram_vec64_wdw{WINDOW}_neg{NEGATIVE}.kv"
+            f"{emd_path}/word2vec_local_skipgram_vec32_wdw{WINDOW}_neg{NEGATIVE}.kv"
         )
     else:
         emd_path = get_scoring_word2vec_dir()
         filepath = (
-            f"{emd_path}/word2vec_scoring_skipgram_vec64_wdw{WINDOW}_neg{NEGATIVE}.kv"
+            f"{emd_path}/word2vec_scoring_skipgram_vec32_wdw{WINDOW}_neg{NEGATIVE}.kv"
         )
 
     # load keyed vectors
@@ -33,11 +33,11 @@ def load_word2vec_cbow_embedding(mode: str = "local"):
 
     if mode == "local":
         emd_path = get_local_word2vec_dir()
-        filepath = f"{emd_path}/word2vec_local_cbow_vec64_wdw{WINDOW}_neg{NEGATIVE}.kv"
+        filepath = f"{emd_path}/word2vec_local_cbow_vec32_wdw{WINDOW}_neg{NEGATIVE}.kv"
     else:
         emd_path = get_scoring_word2vec_dir()
         filepath = (
-            f"{emd_path}/word2vec_scoring_cbow_vec64_wdw{WINDOW}_neg{NEGATIVE}.kv"
+            f"{emd_path}/word2vec_scoring_cbow_vec32_wdw{WINDOW}_neg{NEGATIVE}.kv"
         )
 
     # load keyed vectors

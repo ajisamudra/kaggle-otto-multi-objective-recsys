@@ -22,7 +22,7 @@ from src.utils.logger import get_logger
 
 logging = get_logger()
 
-VECT_SIZE = 64
+VECT_SIZE = 32
 
 
 def vectorized_cosine_distance(vectors1: np.ndarray, vectors2: np.ndarray):

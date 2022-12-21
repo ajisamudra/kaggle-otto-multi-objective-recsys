@@ -85,10 +85,6 @@ def scoring(artifact: str, event: str, week_data: str, week_model: str):
         # select features
         X_test = test_df[selected_features].to_pandas()
 
-        # replace inf with 0
-        X_test = X_test.replace([np.inf, -np.inf], 0)
-        X_test = X_test.fillna(0)
-
         # perform scoring
         # logging.info("perform scoring")
         scores = model.predict(X_test)

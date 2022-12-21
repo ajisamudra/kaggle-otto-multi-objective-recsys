@@ -125,8 +125,6 @@ def cross_validation_ap_score(
 
         train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
         train_df = train_df.to_pandas()
-        train_df = train_df.replace([np.inf, -np.inf], 0)
-        train_df = train_df.fillna(0)
 
         selected_features = list(train_df.columns)
         selected_features.remove("session")
@@ -211,10 +209,6 @@ def cross_validation_ap_score(
                     test_df = pl.concat([test_df, df_chunk])
 
             test_df = test_df.to_pandas()
-            # replace inf with 0
-            # and make sure there's no None
-            test_df = test_df.replace([np.inf, -np.inf], 0)
-            test_df = test_df.fillna(0)
 
             X_test = test_df[selected_features]
 
