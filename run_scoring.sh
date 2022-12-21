@@ -23,10 +23,31 @@
 # CART_MODEL="2022-12-20_carts_cat_ranker_62107_93343"
 # ORDER_MODEL="2022-12-20_orders_cat_ranker_78471_96474"
 
-# #sub3 CV 0.5670441199234523 Fea 172 recall@120 0.61464 LB 0.579 (better than sub1 sub2)
-CLICK_MODEL="2022-12-20_clicks_lgbm_classifier_46744_89740"
-CART_MODEL="2022-12-20_carts_lgbm_classifier_63895_93925"
-ORDER_MODEL="2022-12-20_orders_lgbm_classifier_79792_97018"
+# #sub3 CV 0.5670441199234523 Fea 172 recall@120 0.61464 LB 0.579 (better than sub1 sub2) feature wor2vec vect32
+# CLICK_MODEL="2022-12-20_clicks_lgbm_classifier_46744_89740"
+# CART_MODEL="2022-12-20_carts_lgbm_classifier_63895_93925"
+# ORDER_MODEL="2022-12-20_orders_lgbm_classifier_79792_97018"
+
+#sub4 CV 0.566384332228243 Fea 172 recall@120 0.61464 LB XXX feature wor2vec vect64
+CLICK_MODEL="2022-12-21_clicks_lgbm_classifier_44528_88096"
+CART_MODEL="2022-12-21_carts_lgbm_classifier_61299_92797"
+ORDER_MODEL="2022-12-21_orders_lgbm_classifier_78722_96235"
+WEEK_DATA=w1
+
+# # perform scoring
+# # week_data w2 means local validation
+# # week_data w1 means real test submission
+python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+#sub5 CV 0.5679821898665464 Fea 172 recall@120 0.61464 LB XXX feature wor2vec vect64
+CLICK_MODEL="2022-12-21_clicks_cat_ranker_41346_87071"
+CART_MODEL="2022-12-21_carts_cat_ranker_59583_92239"
+ORDER_MODEL="2022-12-21_orders_cat_ranker_77498_95714"
 WEEK_DATA=w1
 
 # # perform scoring
