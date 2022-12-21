@@ -11,6 +11,8 @@ from pathlib import Path
 from sklearn.utils import resample
 from sklearn.model_selection import train_test_split, StratifiedGroupKFold
 from sklearn.metrics import roc_auc_score, average_precision_score
+from src.training.export_treelite import export_treelite_model
+
 from src.utils.constants import (
     CFG,
     write_json,
@@ -35,6 +37,7 @@ from src.metrics.model_evaluation import (
 
 # for enabling training + scoring
 from src.scoring.score import scoring
+from src.scoring.score_treelite import scoring_treelite
 from src.scoring.make_submission import make_submission
 from src.scoring.eval_submission import eval_submission
 
@@ -447,9 +450,17 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
         if eval == 1:
             # perform scoring
-            scoring(
-                artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
-            )
+            if algo == "lgbm_classifier":
+                # export treelite model
+                export_treelite_model(artifact=unique_model_name, event=EVENT, week_model="w2")
+                # scoring using treelite model
+                scoring_treelite(
+                    artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
+                )
+            else:
+                scoring(
+                    artifact=unique_model_name, event=EVENT, week_data="w2", week_model="w2"
+                )
             # append unique_model_names for make & eval submission
             unique_model_names.append(unique_model_name)
 

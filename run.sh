@@ -19,10 +19,10 @@
 
 # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
-make candidate_word2vec_list MODE=training_test
+# make candidate_word2vec_list MODE=training_test
 # make candidate_fasttext_list MODE=training_test
 # make candidate_matrix_fact_list MODE=training_test
-make candidate_list_eval MODE=training_test
+# make candidate_list_eval MODE=training_test
 # make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
@@ -36,10 +36,10 @@ make candidate_list_eval MODE=training_test
 # make matrix_factorization_features MODE=training_test START=20 END=40
 # make matrix_factorization_features MODE=training_test START=40 END=60
 # make matrix_factorization_features MODE=training_test START=60 END=80
-# make word2vec_features MODE=training_test START=11 END=40
-# make word2vec_features MODE=training_test START=43 END=80
-# # make fasttext_features MODE=training_test START=0 END=40
-# # make fasttext_features MODE=training_test START=40 END=80
+# make word2vec_features MODE=training_test START=0 END=40
+# make word2vec_features MODE=training_test START=40 END=80
+# make fasttext_features MODE=training_test START=0 END=40
+# make fasttext_features MODE=training_test START=40 END=80
 # make combine_features  MODE=training_test START=0 END=20
 # make combine_features  MODE=training_test START=20 END=40
 # make combine_features  MODE=training_test START=40 END=60
@@ -110,11 +110,20 @@ make candidate_list_eval MODE=training_test
 # ORDER_MODEL="2022-12-10_orders_lgbm_classifier_67461_95720"
 # WEEK_DATA=w1
 
-# # TRAINING EVALUATION
-# CLICK_MODEL="2022-12-14_clicks_lgbm_classifier_34385_85767"
-# CART_MODEL="2022-12-14_carts_lgbm_classifier_53168_90510"
-# ORDER_MODEL="2022-12-14_orders_lgbm_classifier_71862_94801"
-# WEEK_DATA=w2
+# TRAINING EVALUATION
+CLICK_MODEL="2022-12-21_clicks_lgbm_classifier_44528_88096"
+CART_MODEL="2022-12-21_carts_lgbm_classifier_61299_92797"
+ORDER_MODEL="2022-12-21_orders_lgbm_classifier_78722_96235"
+WEEK_DATA=w2
+
+python src/training/export_treelite.py --event orders --week_model w2 --artifact $ORDER_MODEL
+# python src/training/export_treelite.py --event carts --week_model w2 --artifact $CART_MODEL
+# python src/training/export_treelite.py --event clicks --week_model w2 --artifact $CLICK_MODEL
+
+# python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+# python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+
 
 # # python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
 # # python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL

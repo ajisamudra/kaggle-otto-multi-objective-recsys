@@ -101,10 +101,21 @@ CLICK_MODEL="2022-12-09_clicks_lgbm_classifier_12209_69509"
 CART_MODEL="2022-12-09_carts_lgbm_classifier_8886_64070"
 ORDER_MODEL="2022-12-09_orders_lgbm_classifier_10050_64507"
 WEEK_DATA="w2" # w2 for validation / w1 for scoring
+
+export_treelite:
+	python src/training/export_treelite.py --event orders --week_model w2 --artifact $(ORDER_MODEL)
+	python src/training/export_treelite.py --event carts --week_model w2 --artifact $(CART_MODEL)
+	python src/training/export_treelite.py --event clicks --week_model w2 --artifact $(CLICK_MODEL)
+
 score:
 	python src/scoring/score.py --event orders --week_data $(WEEK_DATA) --week_model w2 --artifact $(ORDER_MODEL)
 	python src/scoring/score.py --event carts --week_data $(WEEK_DATA) --week_model w2 --artifact $(CART_MODEL)
 	python src/scoring/score.py --event clicks --week_data $(WEEK_DATA) --week_model w2 --artifact $(CLICK_MODEL)
+
+score_treelite:
+	python src/scoring/score_treelite.py --event orders --week_data $(WEEK_DATA) --week_model w2 --artifact $(ORDER_MODEL)
+	python src/scoring/score_treelite.py --event carts --week_data $(WEEK_DATA) --week_model w2 --artifact $(CART_MODEL)
+	python src/scoring/score_treelite.py --event clicks --week_data $(WEEK_DATA) --week_model w2 --artifact $(CLICK_MODEL)
 
 submission:
 	python src/scoring/make_submission.py --click_model $(CLICK_MODEL) --cart_model $(CART_MODEL) --order_model $(ORDER_MODEL) --week_data $(WEEK_DATA) --week_model w2
