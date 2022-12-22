@@ -117,3 +117,86 @@ def preprocess_events(data: pl.DataFrame):
     # END: event data preprocess
 
     return data
+
+
+def get_real_session_events(data: pl.DataFrame):
+    """
+    df input
+    session | type | ts | aid
+    123 | 0 | 12313 | AID1
+    123 | 1 | 12314 | AID1
+    123 | 2 | 12345 | AID1
+    """
+
+    # START: event data preprocess
+    cutoff = 1 * 60 * 60 * 2
+    # sort session & ts ascendingly
+    data = data.sort(["session", "ts"])
+
+    # shift ts per session & get duration between event
+    # num reversed chrono + session_len
+    data = data.with_columns(
+        [
+            pl.col("ts").shift(periods=-1).over("session").alias("next_ts"),
+            pl.col("session").count().over("session").alias("session_len"),
+        ]
+    )
+    data = data.with_columns(
+        [
+            (pl.col("next_ts") - pl.col("ts")).alias("duration_second"),
+        ]
+    )
+    data = data.with_columns(
+        [
+            pl.col("duration_second")
+            .over("session")
+            .shift()
+            .alias("shifted_duration_second"),
+        ]
+    )
+    data = data.with_columns(
+        [
+            # end of session will have duration second as the same as last 2 event
+            pl.col("duration_second")
+            .fill_null(pl.col("shifted_duration_second"))
+            .alias("duration_second")
+        ]
+    )
+    data = data.with_columns(
+        [
+            pl.when(pl.col("duration_second") > cutoff)
+            .then(1)
+            .otherwise(0)
+            .alias("real_session"),
+        ]
+    )
+    data = data.with_columns(
+        [pl.col("real_session").cumsum().over("session").alias("real_session_id")]
+    )
+    data = data.with_columns(
+        [
+            (pl.col("session") + pl.lit("_") + pl.col("real_session_id")).alias(
+                "real_session_id"
+            )
+        ]
+    )
+    data = data.with_columns(
+        [
+            pl.col("real_session_id")
+            .count()
+            .over("real_session_id")
+            .alias("real_session_len"),
+        ]
+    )
+
+    # drop cols
+    data = data.drop(
+        columns=[
+            "shifted_duration_second",
+            "next_ts",
+        ]
+    )
+
+    # END: event data preprocess
+
+    return data

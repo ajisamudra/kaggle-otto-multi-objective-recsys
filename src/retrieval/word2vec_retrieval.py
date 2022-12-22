@@ -10,7 +10,9 @@ from src.utils.constants import (
     check_directory,
     get_data_output_dir,
 )
-from src.utils.word2vec import load_annoy_idx_word2vec_vect64_wdw50_neg30_embedding
+from src.utils.word2vec import (
+    load_annoy_idx_word2vec_vect32_wdw50_neg5_real_session_embedding,
+)
 from src.metrics.submission_evaluation import measure_recall
 from src.utils.logger import get_logger
 
@@ -18,6 +20,55 @@ DATA_DIR = get_processed_local_validation_dir()
 logging = get_logger()
 
 ######### CANDIDATES GENERATION FUNCTION
+
+
+def suggest_word2vec_clicks(
+    n_candidate: int,
+    ses2aids: dict,
+    ses2types: dict,
+    word2vec_clicks: AnnoyIndex,
+):
+    """
+    covisit_click is dict of aid as key and list of suggested aid as value
+    """
+    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
+
+    sessions = []
+    candidates = []
+    for session, aids in tqdm(ses2aids.items()):
+        # unique_aids = set(aids)
+        unique_aids = list(dict.fromkeys(aids[::-1]))
+        types = ses2types[session]
+
+        # RERANK CANDIDATES USING WEIGHTS
+        if len(unique_aids) >= 20:
+            weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
+            aids_temp = Counter()
+            # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
+            for aid, w, t in zip(aids, weights, types):
+                aids_temp[aid] += w * type_weight_multipliers[t]
+            candidate = [k for k, v in aids_temp.most_common(20)]
+            mf_candidate = word2vec_clicks.get_nns_by_item(
+                unique_aids[0], n=n_candidate - 20
+            )
+            candidate.extend(mf_candidate)
+
+        else:
+            candidate = list(unique_aids)
+            mf_candidate = matrix_fact_idx.get_nns_by_item(
+                unique_aids[0], n=n_candidate - (len(candidate))
+            )
+            candidate.extend(mf_candidate)
+
+        # append to list result
+        sessions.append(session)
+        candidates.append(mf_candidate)
+
+    # output series
+    result_series = pd.Series(candidates, index=sessions)
+    result_series.index.name = "session"
+
+    return result_series
 
 
 def suggest_matrix_fact(
@@ -78,10 +129,7 @@ if __name__ == "__main__":
 
     # candidate generation
     logging.info("read matrix fact index")
-    matrix_fact_idx = load_annoy_idx_word2vec_vect64_wdw50_neg30_embedding()
-
-    logging.info("Here are size of our 3 co-visitation matrices:")
-    # logging.info(f"{len(top_20_clicks)}, {len(top_15_buy2buy)}, {len(top_15_buys)}")
+    matrix_fact_idx = load_annoy_idx_word2vec_vect32_wdw50_neg5_real_session_embedding()
 
     logging.info("start of suggesting clicks")
     logging.info("sort session by ts ascendingly")
@@ -306,6 +354,57 @@ if __name__ == "__main__":
 # [2022-12-19 08:45:03,925] {submission_evaluation.py:85} INFO - orders recall@70 = 0.3483041907745421
 # [2022-12-19 08:45:03,925] {submission_evaluation.py:91} INFO - =============
 # [2022-12-19 08:45:03,925] {submission_evaluation.py:92} INFO - Overall Recall@70 = 0.3604874048569562
+
+# covisit + word2vec skipgram 50wdw 5negative retrieval vec_size 32 + real session cutoff 2hr
+# 2022-12-22 21:12:32,295] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@20 = 0.3590799569370632
+# [2022-12-22 21:12:32,296] {submission_evaluation.py:84} INFO - clicks hits@20 = 63039 / gt@20 = 175557
+# [2022-12-22 21:12:32,296] {submission_evaluation.py:85} INFO - clicks recall@20 = 0.3590799569370632
+# [2022-12-22 21:12:33,945] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@20 = 0.42781815081914243
+# [2022-12-22 21:12:33,945] {submission_evaluation.py:84} INFO - carts hits@20 = 17248 / gt@20 = 57718
+# [2022-12-22 21:12:33,945] {submission_evaluation.py:85} INFO - carts recall@20 = 0.29883225336983266
+# [2022-12-22 21:12:36,071] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@20 = 0.4444481086299281
+# [2022-12-22 21:12:36,071] {submission_evaluation.py:84} INFO - orders hits@20 = 9367 / gt@20 = 31058
+# [2022-12-22 21:12:36,071] {submission_evaluation.py:85} INFO - orders recall@20 = 0.30159701204198597
+# [2022-12-22 21:12:36,071] {submission_evaluation.py:91} INFO - =============
+# [2022-12-22 21:12:36,071] {submission_evaluation.py:92} INFO - Overall Recall@20 = 0.30651587892984766
+# [2022-12-22 21:12:36,071] {submission_evaluation.py:93} INFO - =============
+# [2022-12-22 21:12:40,081] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@40 = 0.4032194671815991
+# [2022-12-22 21:12:40,082] {submission_evaluation.py:84} INFO - clicks hits@40 = 70788 / gt@40 = 175557
+# [2022-12-22 21:12:40,082] {submission_evaluation.py:85} INFO - clicks recall@40 = 0.4032194671815991
+# [2022-12-22 21:12:42,962] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@40 = 0.4587016968898009
+# [2022-12-22 21:12:42,964] {submission_evaluation.py:84} INFO - carts hits@40 = 18870 / gt@40 = 57718
+# [2022-12-22 21:12:42,964] {submission_evaluation.py:85} INFO - carts recall@40 = 0.32693440521154576
+# [2022-12-22 21:12:45,806] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@40 = 0.47101571948111
+# [2022-12-22 21:12:45,808] {submission_evaluation.py:84} INFO - orders hits@40 = 10104 / gt@40 = 31058
+# [2022-12-22 21:12:45,808] {submission_evaluation.py:85} INFO - orders recall@40 = 0.32532680790778545
+# [2022-12-22 21:12:45,808] {submission_evaluation.py:91} INFO - =============
+# [2022-12-22 21:12:45,808] {submission_evaluation.py:92} INFO - Overall Recall@40 = 0.3335983530262949
+# [2022-12-22 21:12:45,808] {submission_evaluation.py:93} INFO - =============
+# [2022-12-22 21:12:50,691] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@60 = 0.42956988328577045
+# [2022-12-22 21:12:50,691] {submission_evaluation.py:84} INFO - clicks hits@60 = 75414 / gt@60 = 175557
+# [2022-12-22 21:12:50,691] {submission_evaluation.py:85} INFO - clicks recall@60 = 0.42956988328577045
+# [2022-12-22 21:12:53,653] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@60 = 0.4765383502428261
+# [2022-12-22 21:12:53,653] {submission_evaluation.py:84} INFO - carts hits@60 = 19806 / gt@60 = 57718
+# [2022-12-22 21:12:53,653] {submission_evaluation.py:85} INFO - carts recall@60 = 0.3431511833396861
+# [2022-12-22 21:12:56,750] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@60 = 0.4872490446905911
+# [2022-12-22 21:12:56,750] {submission_evaluation.py:84} INFO - orders hits@60 = 10567 / gt@60 = 31058
+# [2022-12-22 21:12:56,751] {submission_evaluation.py:85} INFO - orders recall@60 = 0.34023440015454953
+# [2022-12-22 21:12:56,751] {submission_evaluation.py:91} INFO - =============
+# [2022-12-22 21:12:56,751] {submission_evaluation.py:92} INFO - Overall Recall@60 = 0.3500429834232126
+# [2022-12-22 21:12:56,751] {submission_evaluation.py:93} INFO - =============
+# [2022-12-22 21:13:00,898] {submission_evaluation.py:83} INFO - clicks mean_recall_per_sample@70 = 0.4373394396122057
+# [2022-12-22 21:13:00,898] {submission_evaluation.py:84} INFO - clicks hits@70 = 76778 / gt@70 = 175557
+# [2022-12-22 21:13:00,898] {submission_evaluation.py:85} INFO - clicks recall@70 = 0.4373394396122057
+# [2022-12-22 21:13:04,587] {submission_evaluation.py:83} INFO - carts mean_recall_per_sample@70 = 0.4809390512572721
+# [2022-12-22 21:13:04,587] {submission_evaluation.py:84} INFO - carts hits@70 = 20026 / gt@70 = 57718
+# [2022-12-22 21:13:04,587] {submission_evaluation.py:85} INFO - carts recall@70 = 0.34696281922450534
+# [2022-12-22 21:13:07,684] {submission_evaluation.py:83} INFO - orders mean_recall_per_sample@70 = 0.4908584256942733
+# [2022-12-22 21:13:07,684] {submission_evaluation.py:84} INFO - orders hits@70 = 10653 / gt@70 = 31058
+# [2022-12-22 21:13:07,684] {submission_evaluation.py:85} INFO - orders recall@70 = 0.3430034129692833
+# [2022-12-22 21:13:07,684] {submission_evaluation.py:91} INFO - =============
+# [2022-12-22 21:13:07,685] {submission_evaluation.py:92} INFO - Overall Recall@70 = 0.3536248375101421
+# [2022-12-22 21:13:07,685] {submission_evaluation.py:93} INFO - =============
+
 
 # covisit + word2vec skipgram 50wdw 5negative retrieval vec_size 64 - euclidean dist
 # [2022-12-19 21:24:47,021] {submission_evaluation.py:84} INFO - clicks hits@20 = 67466 / gt@20 = 175541
