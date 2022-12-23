@@ -135,6 +135,16 @@ score_treelite:
 	python src/scoring/score_treelite.py --event carts --week_data $(WEEK_DATA) --week_model w2 --artifact $(CART_MODEL)
 	python src/scoring/score_treelite.py --event clicks --week_data $(WEEK_DATA) --week_model w2 --artifact $(CLICK_MODEL)
 
+score_one_ranker_treelite:
+	python src/scoring/score_one_ranker_treelite.py --event orders --week_data $(WEEK_DATA) --week_model w2 --artifact $(ORDER_MODEL)
+	python src/scoring/score_one_ranker_treelite.py --event carts --week_data $(WEEK_DATA) --week_model w2 --artifact $(CART_MODEL)
+	python src/scoring/score_one_ranker_treelite.py --event clicks --week_data $(WEEK_DATA) --week_model w2 --artifact $(CLICK_MODEL)
+
+score_one_ranker:
+	python src/scoring/score_one_ranker_treelite.py --event orders --week_data $(WEEK_DATA) --week_model w2 --artifact $(ORDER_MODEL)
+	python src/scoring/score_one_ranker_treelite.py --event carts --week_data $(WEEK_DATA) --week_model w2 --artifact $(CART_MODEL)
+	python src/scoring/score_one_ranker_treelite.py --event clicks --week_data $(WEEK_DATA) --week_model w2 --artifact $(CLICK_MODEL)
+
 submission:
 	python src/scoring/make_submission.py --click_model $(CLICK_MODEL) --cart_model $(CART_MODEL) --order_model $(ORDER_MODEL) --week_data $(WEEK_DATA) --week_model w2
 
