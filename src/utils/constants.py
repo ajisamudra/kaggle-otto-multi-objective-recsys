@@ -8,7 +8,7 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 class CFG:
     N_test = 100
     N_train = 30
-    covisit_candidates = 60
+    covisit_candidates = 40
     fasttext_candidates = 20
     word2vec_candidates = 60
     matrix_factorization_candidates = 10
@@ -186,6 +186,7 @@ def get_processed_scoring_test_tmp_candidates_dir() -> Path:
     path = path / "scoring" / "test_tmp_candidates"
     check_directory(path)
     return path
+
 
 ### Data/Processed Dir: FEATURES
 

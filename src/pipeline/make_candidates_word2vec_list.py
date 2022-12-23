@@ -16,7 +16,7 @@ from src.utils.constants import (
     get_processed_scoring_train_candidates_dir,
     get_processed_scoring_test_candidates_dir,
 )
-from src.utils.word2vec import load_annoy_idx_word2vec_vect64_wdw50_embedding
+from src.utils.word2vec import load_annoy_idx_word2vec_embedding
 from src.utils.logger import get_logger
 
 logging = get_logger()
@@ -109,10 +109,10 @@ def main(mode: str):
 
     if mode in ["training_train", "training_test"]:
         logging.info("read local word2vec index")
-        embedding = load_annoy_idx_word2vec_vect64_wdw50_embedding()
+        embedding = load_annoy_idx_word2vec_embedding()
     else:
         logging.info("read scoring word2vec index")
-        embedding = load_annoy_idx_word2vec_vect64_wdw50_embedding(mode="scoring")
+        embedding = load_annoy_idx_word2vec_embedding(mode="scoring")
 
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()

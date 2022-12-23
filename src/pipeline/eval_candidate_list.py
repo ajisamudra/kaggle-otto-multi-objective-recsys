@@ -22,11 +22,11 @@ def concat_candidates(
     unique_sessions: list,
     event: str,
     covisit_ses2candidates: dict,
-    # fasttext_ses2candidates: dict,
-    # word2vec_ses2candidates: dict,
-    # matrix_fact_ses2candidates: dict,
-    popular_daily_ses2candidates: dict,
-    popular_hour_ses2candidates: dict,
+    fasttext_ses2candidates: dict,
+    word2vec_ses2candidates: dict,
+    matrix_fact_ses2candidates: dict,
+    # popular_daily_ses2candidates: dict,
+    # popular_hour_ses2candidates: dict,
     popular_datehour_ses2candidates: dict,
 ):
     labels = []
@@ -35,24 +35,24 @@ def concat_candidates(
         # get candidates for specific session
         # covisitation candidates
         cands = list(covisit_ses2candidates[session])
-        # popular hour
-        popular_hour_cands = list(popular_hour_ses2candidates[session])
-        cands.extend(popular_hour_cands)
+        # # popular hour
+        # popular_hour_cands = list(popular_hour_ses2candidates[session])
+        # cands.extend(popular_hour_cands)
+        # # popular daily
+        # popular_daily_cands = list(popular_daily_ses2candidates[session])
+        # cands.extend(popular_daily_cands)
+        # word2vec candidates
+        word2vec_cands = list(word2vec_ses2candidates[session])
+        cands.extend(word2vec_cands)
+        # fasttext candidates
+        fasttext_cands = list(fasttext_ses2candidates[session])
+        cands.extend(fasttext_cands)
+        # matrix fact candidates
+        matrix_fact_cands = list(matrix_fact_ses2candidates[session])
+        cands.extend(matrix_fact_cands)
         # popular datehour
         popular_datehour_cands = list(popular_datehour_ses2candidates[session])
         cands.extend(popular_datehour_cands)
-        # popular daily
-        popular_daily_cands = list(popular_daily_ses2candidates[session])
-        cands.extend(popular_daily_cands)
-        # # word2vec candidates
-        # word2vec_cands = list(word2vec_ses2candidates[session])
-        # cands.extend(word2vec_cands)
-        # # fasttext candidates
-        # fasttext_cands = list(fasttext_ses2candidates[session])
-        # cands.extend(fasttext_cands)
-        # # matrix fact candidates
-        # matrix_fact_cands = list(matrix_fact_ses2candidates[session])
-        # cands.extend(matrix_fact_cands)
         # drop duplicate
         # cands = set(cands)
         # convert back to list
@@ -96,39 +96,39 @@ def eval_candidate_list(
             del cand_df
             gc.collect()
 
-            # # candidate #2 fasttext
-            # filepath = f"{input_path}/{name}_{ix}_{event}_fasttext_list.parquet"
-            # cand_df = pd.read_parquet(filepath)
-            # fasttext_ses2candidates = get_ses2candidates(cand_df)
-
-            # del cand_df
-            # gc.collect()
-
-            # # candidate #3 word2vec
-            # filepath = f"{input_path}/{name}_{ix}_{event}_word2vec_list.parquet"
-            # cand_df = pd.read_parquet(filepath)
-            # word2vec_ses2candidates = get_ses2candidates(cand_df)
-
-            # del cand_df
-            # gc.collect()
-
-            # # candidate #3 matrix factorization
-            # filepath = f"{input_path}/{name}_{ix}_{event}_matrix_fact_list.parquet"
-            # cand_df = pd.read_parquet(filepath)
-            # matrix_fact_ses2candidates = get_ses2candidates(cand_df)
-
-            # del cand_df
-            # gc.collect()
-
-            # candidate #4 popular daily
-            filepath = f"{input_path}/{name}_{ix}_{event}_popular_daily_list.parquet"
+            # candidate #2 fasttext
+            filepath = f"{input_path}/{name}_{ix}_{event}_fasttext_list.parquet"
             cand_df = pd.read_parquet(filepath)
-            popular_daily_ses2candidates = get_ses2candidates(cand_df)
+            fasttext_ses2candidates = get_ses2candidates(cand_df)
 
-            # candidate #5 popular hour
-            filepath = f"{input_path}/{name}_{ix}_{event}_popular_hour_list.parquet"
+            del cand_df
+            gc.collect()
+
+            # candidate #3 word2vec
+            filepath = f"{input_path}/{name}_{ix}_{event}_word2vec_list.parquet"
             cand_df = pd.read_parquet(filepath)
-            popular_hour_ses2candidates = get_ses2candidates(cand_df)
+            word2vec_ses2candidates = get_ses2candidates(cand_df)
+
+            del cand_df
+            gc.collect()
+
+            # candidate #3 matrix factorization
+            filepath = f"{input_path}/{name}_{ix}_{event}_matrix_fact_list.parquet"
+            cand_df = pd.read_parquet(filepath)
+            matrix_fact_ses2candidates = get_ses2candidates(cand_df)
+
+            del cand_df
+            gc.collect()
+
+            # # candidate #4 popular daily
+            # filepath = f"{input_path}/{name}_{ix}_{event}_popular_daily_list.parquet"
+            # cand_df = pd.read_parquet(filepath)
+            # popular_daily_ses2candidates = get_ses2candidates(cand_df)
+
+            # # candidate #5 popular hour
+            # filepath = f"{input_path}/{name}_{ix}_{event}_popular_hour_list.parquet"
+            # cand_df = pd.read_parquet(filepath)
+            # popular_hour_ses2candidates = get_ses2candidates(cand_df)
 
             # candidate #6 popular datehour
             filepath = f"{input_path}/{name}_{ix}_{event}_popular_datehour_list.parquet"
@@ -143,11 +143,11 @@ def eval_candidate_list(
                 unique_sessions=unique_sessions,
                 event=event,
                 covisit_ses2candidates=covisit_ses2candidates,
-                # fasttext_ses2candidates=fasttext_ses2candidates,
-                # word2vec_ses2candidates=word2vec_ses2candidates,
-                # matrix_fact_ses2candidates=matrix_fact_ses2candidates,
-                popular_daily_ses2candidates=popular_daily_ses2candidates,
-                popular_hour_ses2candidates=popular_hour_ses2candidates,
+                fasttext_ses2candidates=fasttext_ses2candidates,
+                word2vec_ses2candidates=word2vec_ses2candidates,
+                matrix_fact_ses2candidates=matrix_fact_ses2candidates,
+                # popular_daily_ses2candidates=popular_daily_ses2candidates,
+                # popular_hour_ses2candidates=popular_hour_ses2candidates,
                 popular_datehour_ses2candidates=popular_datehour_ses2candidates,
             )
 
@@ -169,7 +169,7 @@ def eval_candidate_list(
     measure_recall(
         df_pred=df_pred,
         df_truth=df_truth,
-        Ks=[20, 60, 80, 100, 120],
+        Ks=[20, 40, 70, 100, 120, 130, 150],
     )
 
 
@@ -793,3 +793,6 @@ if __name__ == "__main__":
 # [2022-12-23 08:32:53,143] {submission_evaluation.py:91} INFO - =============
 # [2022-12-23 08:32:53,144] {submission_evaluation.py:92} INFO - Overall Recall@120 = 0.5997665784801833
 # [2022-12-23 08:32:53,144] {submission_evaluation.py:93} INFO - =============
+
+
+# strategy covisit 50 word2vec 50 fasttext 20 matrix fact 10 popular datehour 20 recall @150
