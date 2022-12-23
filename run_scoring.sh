@@ -38,7 +38,7 @@
 # CART_MODEL="2022-12-21_carts_cat_ranker_59583_92239"
 # ORDER_MODEL="2022-12-21_orders_cat_ranker_77498_95714"
 
-#sub6 CV 0.5667144769335394 Fea 172 recall@120 0.6248116 feature wor2vec vect32 LB XXX
+#sub6 CV 0.5667144769335394 Fea 172 recall@150 0.6248116 feature wor2vec vect32 LB 0.578
 CLICK_MODEL="2022-12-23_clicks_lgbm_classifier_46496_89386"
 CART_MODEL="2022-12-23_carts_lgbm_classifier_63946_93662"
 ORDER_MODEL="2022-12-23_orders_lgbm_classifier_79580_96565"
@@ -54,7 +54,7 @@ python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --wee
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-#sub7 CV 0.5681419681902891 Fea 172 recall@150 0.624811feature wor2vec vect32 LB XXX
+#sub7 CV 0.5681419681902891 Fea 172 recall@150 0.624811 feature wor2vec vect32 LB XXX
 CLICK_MODEL="2022-12-23_clicks_cat_ranker_43213_88370"
 CART_MODEL="2022-12-23_carts_cat_ranker_62356_93099"
 ORDER_MODEL="2022-12-23_orders_cat_ranker_78326_96000"
