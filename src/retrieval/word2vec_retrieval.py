@@ -11,7 +11,7 @@ from src.utils.constants import (
     get_data_output_dir,
 )
 from src.utils.word2vec import (
-    load_annoy_idx_word2vec_vect32_wdw50_neg5_real_session_embedding,
+    load_annoy_idx_word2vec_vect32_wdw30_neg10_real_session_embedding,
     load_annoy_idx_word2vec_cart_vect32_wdw45_neg5_real_session_embedding,
     load_annoy_idx_word2vec_buy_vect32_wdw15_neg7_embedding,
 )
@@ -80,7 +80,7 @@ if __name__ == "__main__":
 
     # candidate generation
     logging.info("read matrix fact index")
-    click_word2vec = load_annoy_idx_word2vec_vect32_wdw50_neg5_real_session_embedding()
+    click_word2vec = load_annoy_idx_word2vec_vect32_wdw30_neg10_real_session_embedding()
     # cart_word2vec = (
     #     load_annoy_idx_word2vec_cart_vect32_wdw45_neg5_real_session_embedding()
     # )
@@ -478,6 +478,9 @@ if __name__ == "__main__":
 # [2022-12-23 14:36:47,941] {submission_evaluation.py:91} INFO - =============
 # [2022-12-23 14:36:47,941] {submission_evaluation.py:92} INFO - Overall Recall@70 = 0.35394450191809457
 # [2022-12-23 14:36:47,941] {submission_evaluation.py:93} INFO - =============
+
+# covisit + word2vec skipgram 30 wdw 10 negative retrieval vec_size 32 + real session cutoff 1day
+
 
 # covisit + word2vec skipgram 50wdw 5negative retrieval vec_size 64 - euclidean dist
 # [2022-12-19 21:24:47,021] {submission_evaluation.py:84} INFO - clicks hits@20 = 67466 / gt@20 = 175541
