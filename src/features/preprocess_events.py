@@ -1,5 +1,10 @@
 import polars as pl
-from src.utils.date_function import get_hour_from_ts, get_weekday_from_ts
+from src.utils.date_function import (
+    get_hour_from_ts,
+    get_weekday_from_ts,
+    get_datehour_from_ts,
+    get_date_from_ts,
+)
 
 
 def preprocess_events(data: pl.DataFrame):
@@ -112,6 +117,32 @@ def preprocess_events(data: pl.DataFrame):
             "next_ts",
             "session_len",
         ]
+    )
+
+    # END: event data preprocess
+
+    return data
+
+
+def preprocess_ts(data: pl.DataFrame):
+    """
+    df input
+    session | type | ts | aid
+    123 | 0 | 12313 | AID1
+    123 | 1 | 12314 | AID1
+    123 | 2 | 12345 | AID1
+    """
+
+    # START: event data preprocess
+    # sort session & ts ascendingly
+    data = data.sort(["session", "ts"])
+    # add date, date-hour column from ts
+    data = data.with_columns(
+        [
+            pl.col("ts").apply(lambda x: get_datehour_from_ts(x)).alias("datehour"),
+            pl.col("ts").apply(lambda x: get_hour_from_ts(x)).alias("hour"),
+            pl.col("ts").apply(lambda x: get_date_from_ts(x)).alias("date"),
+        ],
     )
 
     # END: event data preprocess

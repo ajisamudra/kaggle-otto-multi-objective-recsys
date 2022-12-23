@@ -12,3 +12,11 @@ def get_weekday_from_ts(x):
 
 def get_datetime_from_ts(x):
     return datetime.utcfromtimestamp(x).strftime("%Y-%m-%d %H:%M:%S")
+
+
+def get_date_from_ts(x):
+    return datetime.utcfromtimestamp(x).strftime("%Y-%m-%d")
+
+
+def get_datehour_from_ts(x):
+    return datetime.utcfromtimestamp(x).strftime("%Y-%m-%d %H:00:00")

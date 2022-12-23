@@ -446,7 +446,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
         if eval == 1:
             # perform scoring
-            if algo == "lgbm_classifier":
+            if algo in ["lgbm_classifier", "lgbm_ranker"]:
                 # export treelite model
                 export_treelite_model(
                     artifact=unique_model_name, event=EVENT, week_model="w2"

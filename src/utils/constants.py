@@ -160,6 +160,33 @@ def get_processed_scoring_test_candidates_dir() -> Path:
     return path
 
 
+def get_processed_training_train_tmp_candidates_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_tmp_candidates"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_tmp_candidates_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_tmp_candidates"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_tmp_candidates_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_tmp_candidates"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_tmp_candidates_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_tmp_candidates"
+    check_directory(path)
+    return path
+
 ### Data/Processed Dir: FEATURES
 
 ### Data/Processed Dir: SESSION FEATURES

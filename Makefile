@@ -7,6 +7,15 @@ sample_last_week_data:
 split_into_chunks:
 	python src/preprocess/split_data_into_chunks.py --mode $(MODE)
 
+preprocess_popular_daily_candidate:
+	python src/preprocess/make_popular_daily_item_candidates.py --mode $(MODE)
+
+preprocess_popular_datehour_candidate:
+	python src/preprocess/make_popular_datehour_item_candidates.py --mode $(MODE)
+
+preprocess_popular_hour_candidate:
+	python src/preprocess/make_popular_hour_item_candidates.py --mode $(MODE)
+
 candidate_list:
 	python src/pipeline/make_candidates_list.py --mode $(MODE)
 
@@ -18,6 +27,15 @@ candidate_word2vec_list:
 
 candidate_fasttext_list:
 	python src/pipeline/make_candidates_fasttext_list.py --mode $(MODE)
+
+candidate_popular_daily_list:
+	python src/pipeline/make_candidates_popular_daily_list.py --mode $(MODE)
+
+candidate_popular_datehour_list:
+	python src/pipeline/make_candidates_popular_datehour_list.py --mode $(MODE)
+
+candidate_popular_hour_list:
+	python src/pipeline/make_candidates_popular_hour_list.py --mode $(MODE)
 
 candidate_list_eval:
 	python src/pipeline/eval_candidate_list.py --mode $(MODE)
