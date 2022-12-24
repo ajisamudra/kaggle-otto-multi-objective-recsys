@@ -554,6 +554,40 @@ def get_data_output_submission_dir(event: str, model: str, week_model: str) -> P
     return path
 
 
+def get_data_output_local_ensemble_submission_dir(
+    event: str, model: str, week_model: str
+) -> Path:
+    path = (
+        ROOT_DIR
+        / "data"
+        / "output"
+        / "training"
+        / "ensemble"
+        / event
+        / week_model
+        / model
+    )
+    check_directory(path)
+    return path
+
+
+def get_data_output_ensemble_submission_dir(
+    event: str, model: str, week_model: str
+) -> Path:
+    path = (
+        ROOT_DIR
+        / "data"
+        / "output"
+        / "scoring"
+        / "ensemble"
+        / event
+        / week_model
+        / model
+    )
+    check_directory(path)
+    return path
+
+
 ### Artifacts Dir: For training artifacts
 
 
