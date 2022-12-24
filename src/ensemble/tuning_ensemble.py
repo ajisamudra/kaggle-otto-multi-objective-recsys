@@ -179,15 +179,20 @@ class ObjectiveEnsemble:
     def __call__(self, trial):
         hyperparams = {
             "click_wgt_1": trial.suggest_float("click_wgt_1", 0.01, 0.99),
-            "click_wgt_2": trial.suggest_float("click_wgt_2", 0.01, 0.99),
             "cart_wgt_1": trial.suggest_float("cart_wgt_1", 0.01, 0.99),
-            "cart_wgt_2": trial.suggest_float("cart_wgt_2", 0.01, 0.99),
             "order_wgt_1": trial.suggest_float("order_wgt_1", 0.01, 0.99),
-            "order_wgt_2": trial.suggest_float("order_wgt_2", 0.01, 0.99),
-            "click_pow": trial.suggest_int("click_pow", 1, 8),
-            "cart_pow": trial.suggest_int("cart_pow", 1, 8),
-            "order_pow": trial.suggest_int("order_pow", 1, 8),
         }
+
+        wgts_2 = {
+            "click_wgt_2": 1 - hyperparams["click_wgt_1"],
+            "cart_wgt_2": 1 - hyperparams["cart_wgt_1"],
+            "order_wgt_2": 1 - hyperparams["order_wgt_1"],
+            "click_pow": 1,
+            "cart_pow": 1,
+            "order_pow": 1,
+        }
+
+        hyperparams.update(wgts_2)
 
         recall20 = measure_ensemble_scores(hyperparams)
 
@@ -240,27 +245,27 @@ def tune_ensemble():
     CONFIG = {
         "clicks_weights": [
             best_hyperparams["click_wgt_1"],
-            best_hyperparams["click_wgt_2"],
+            1 - best_hyperparams["click_wgt_1"],
         ],
         "carts_weights": [
             best_hyperparams["cart_wgt_1"],
-            best_hyperparams["cart_wgt_2"],
+            1 - best_hyperparams["cart_wgt_1"],
         ],
         "orders_weights": [
             best_hyperparams["order_wgt_1"],
-            best_hyperparams["order_wgt_2"],
+            1 - best_hyperparams["order_wgt_1"],
         ],
         "clicks_powers": [
-            best_hyperparams["click_pow"],
-            best_hyperparams["click_pow"],
+            1,
+            1,
         ],
         "carts_powers": [
-            best_hyperparams["cart_pow"],
-            best_hyperparams["cart_pow"],
+            1,
+            1,
         ],
         "orders_powers": [
-            best_hyperparams["order_pow"],
-            best_hyperparams["order_pow"],
+            1,
+            1,
         ],
     }
     CONFIG.update(CFG_MODEL)
