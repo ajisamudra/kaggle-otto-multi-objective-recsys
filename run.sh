@@ -19,7 +19,7 @@
 
 # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
-make candidate_word2vec_list MODE=training_test
+# make candidate_word2vec_list MODE=training_test
 # make preprocess_popular_daily_candidate MODE=training_test
 # make preprocess_popular_datehour_candidate MODE=training_test
 # make preprocess_popular_hour_candidate MODE=training_test
@@ -28,9 +28,9 @@ make candidate_word2vec_list MODE=training_test
 # make candidate_popular_datehour_list MODE=training_test
 # make candidate_popular_hour_list MODE=training_test
 
-make candidate_fasttext_list MODE=training_test
-make candidate_matrix_fact_list MODE=training_test
-make candidate_list_eval MODE=training_test
+# make candidate_fasttext_list MODE=training_test
+# make candidate_matrix_fact_list MODE=training_test
+# make candidate_list_eval MODE=training_test
 # make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
@@ -120,47 +120,47 @@ make candidate_list_eval MODE=training_test
 # ORDER_MODEL="2022-12-10_orders_lgbm_classifier_67461_95720"
 # WEEK_DATA=w1
 
-# # TRAINING EVALUATION
-# CLICK_MODEL="2022-12-21_clicks_lgbm_classifier_44528_88096"
-# CART_MODEL="2022-12-21_carts_lgbm_classifier_61299_92797"
-# ORDER_MODEL="2022-12-21_orders_lgbm_classifier_78722_96235"
-# WEEK_DATA=w2
+# TRAINING EVALUATION
+CLICK_MODEL="2022-12-20_clicks_cat_ranker_42966_88609"
+CART_MODEL="2022-12-20_carts_cat_ranker_62107_93343"
+ORDER_MODEL="2022-12-20_orders_cat_ranker_78471_96474"
+WEEK_DATA=w2
 
-# # python src/training/export_treelite.py --event orders --week_model w2 --artifact $ORDER_MODEL
-# # python src/training/export_treelite.py --event carts --week_model w2 --artifact $CART_MODEL
-# # python src/training/export_treelite.py --event clicks --week_model w2 --artifact $CLICK_MODEL
+python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-# python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-# python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
+# eval submission, only for week_data & week_model w2
+python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
-# # # python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-# # # python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-# # python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+# TRAINING EVALUATION
+CLICK_MODEL="2022-12-20_clicks_lgbm_classifier_46744_89740"
+CART_MODEL="2022-12-20_carts_lgbm_classifier_63895_93925"
+ORDER_MODEL="2022-12-20_orders_lgbm_classifier_79792_97018"
+WEEK_DATA=w2
 
-# # make submission
-# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+python src/training/export_treelite.py --event orders --week_model w2 --artifact $ORDER_MODEL
+python src/training/export_treelite.py --event carts --week_model w2 --artifact $CART_MODEL
+python src/training/export_treelite.py --event clicks --week_model w2 --artifact $CLICK_MODEL
 
-# # eval submission, only for week_data & week_model w2
-# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# # TRAINING EVALUATION
-# CLICK_MODEL="2022-12-21_clicks_cat_ranker_41346_87071"
-# CART_MODEL="2022-12-21_carts_cat_ranker_59583_92239"
-# ORDER_MODEL="2022-12-21_orders_cat_ranker_77498_95714"
-# WEEK_DATA=w2
-
-# python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-# python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+# # python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+# # python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
 # python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# # make submission
-# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-# # eval submission, only for week_data & week_model w2
-# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+# eval submission, only for week_data & week_model w2
+python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
+make train_one_ranker ALGO=lgbm_ranker
 
 # # TRAINING EVALUATION
 # CLICK_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"

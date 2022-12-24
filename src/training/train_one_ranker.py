@@ -297,14 +297,16 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
     perf_path = f"{filepath}/performance_metric.json"
     write_json(filepath=perf_path, data=performance)
 
+    if algo == "lgbm_ranker":
+        # export treelite model
+        export_treelite_model(
+            artifact=unique_model_name, event="one_ranker", week_model="w2"
+        )
+
     if eval == 1:
         for EVENT in events:
             # perform scoring
             if algo == "lgbm_ranker":
-                # export treelite model
-                export_treelite_model(
-                    artifact=unique_model_name, event=EVENT, week_model="w2"
-                )
                 scoring_treelite(
                     artifact=unique_model_name,
                     event=EVENT,
