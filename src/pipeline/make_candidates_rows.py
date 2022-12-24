@@ -42,6 +42,7 @@ def pivot_candidates_list_to_rows(
     fasttext_ses2candidates: dict,
     word2vec_ses2candidates: dict,
     matrix_fact_ses2candidates: dict,
+    popular_hour_ses2candidates: dict,
     is_train: bool,
     include_all_gt: bool,
     drop_zero_positive_sample: bool,
@@ -87,6 +88,9 @@ def pivot_candidates_list_to_rows(
         # matrix fact candidates
         matrix_fact_cands = list(matrix_fact_ses2candidates[session])
         cands.extend(matrix_fact_cands)
+        # popular hour candidates
+        popular_hour_cands = list(popular_hour_ses2candidates[session])
+        cands.extend(popular_hour_cands)
         # drop duplicate
         cands = set(cands)
 
@@ -196,6 +200,11 @@ def pivot_candidates(
             del cand_df
             gc.collect()
 
+            # candidate #5 popular hour
+            filepath = f"{input_path}/{name}_{ix}_{event}_popular_hour_list.parquet"
+            cand_df = pd.read_parquet(filepath)
+            popular_hour_ses2candidates = get_ses2candidates(cand_df)
+
             ses2truth = {}
             if is_train:
                 # logging.info("create ses2truth")
@@ -214,6 +223,7 @@ def pivot_candidates(
                 word2vec_ses2candidates=word2vec_ses2candidates,
                 fasttext_ses2candidates=fasttext_ses2candidates,
                 matrix_fact_ses2candidates=matrix_fact_ses2candidates,
+                popular_hour_ses2candidates=popular_hour_ses2candidates,
                 is_train=is_train,
                 include_all_gt=include_all_gt,
                 ratio_negative_sample=ratio_negative_sample,
