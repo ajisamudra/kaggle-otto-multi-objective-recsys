@@ -13,23 +13,17 @@ make item_hour_features MODE=scoring_test
 make item_weekday_features MODE=scoring_test
 make session_representation_items MODE=scoring_test
 
-make item_covisitation_features MODE=scoring_test START=0 END=20
-make item_covisitation_features MODE=scoring_test START=20 END=40
-make item_covisitation_features MODE=scoring_test START=40 END=60
-make item_covisitation_features MODE=scoring_test START=60 END=80
+make item_covisitation_features MODE=scoring_test START=0 END=50
+make item_covisitation_features MODE=scoring_test START=50 END=100
 
-make matrix_factorization_features MODE=scoring_test START=0 END=20
-make matrix_factorization_features MODE=scoring_test START=20 END=40
-make matrix_factorization_features MODE=scoring_test START=40 END=60
-make matrix_factorization_features MODE=scoring_test START=60 END=80
+make matrix_factorization_features MODE=scoring_test START=0 END=50
+make matrix_factorization_features MODE=scoring_test START=50 END=100
 
-make word2vec_features MODE=scoring_test START=0 END=40
-make word2vec_features MODE=scoring_test START=40 END=80
-make fasttext_features MODE=scoring_test START=0 END=40
-make fasttext_features MODE=scoring_test START=40 END=80
+make word2vec_features MODE=scoring_test START=0 END=50
+make word2vec_features MODE=scoring_test START=50 END=100
+make fasttext_features MODE=scoring_test START=0 END=50
+make fasttext_features MODE=scoring_test START=50 END=100
 
-make combine_features  MODE=scoring_test START=15 END=20
-make combine_features  MODE=scoring_test START=20 END=40
-make combine_features  MODE=scoring_test START=40 END=60
-make combine_features  MODE=scoring_test START=60 END=80
+make combine_features  MODE=scoring_test START=0 END=50
+make combine_features  MODE=scoring_test START=50 END=100
 # ./run_scoring.sh
