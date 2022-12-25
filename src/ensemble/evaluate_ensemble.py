@@ -22,27 +22,27 @@ TARGET = "label"
 
 
 def evaluate_ensemble():
-    N_test = 80
+    N_test = 100
     week_model = "w2"
     CONFIG = {
-        "clicks_models": [
-            "2022-12-20_clicks_cat_ranker_42966_88609",
-            "2022-12-20_clicks_lgbm_classifier_46744_89740",
-        ],
         "carts_models": [
-            "2022-12-20_carts_cat_ranker_62107_93343",
-            "2022-12-20_carts_lgbm_classifier_63895_93925",
+            "2022-12-23_carts_cat_ranker_62356_93099",
+            "2022-12-23_carts_lgbm_classifier_63946_93662",
         ],
-        "orders_models": [
-            "2022-12-20_orders_cat_ranker_78471_96474",
-            "2022-12-20_orders_lgbm_classifier_79792_97018",
-        ],
-        "clicks_weights": [0.6301655337446642, 0.3698344663],
-        "carts_weights": [0.3931567939633113, 0.606843206],
-        "orders_weights": [0.2236681400015059, 0.77633186],
-        "clicks_powers": [1, 1],
         "carts_powers": [1, 1],
+        "carts_weights": [0.6749021785428808, 0.3250978214571192],
+        "clicks_models": [
+            "2022-12-23_clicks_cat_ranker_43213_88370",
+            "2022-12-23_clicks_lgbm_classifier_46496_89386",
+        ],
+        "clicks_powers": [1, 1],
+        "clicks_weights": [0.9586760056794732, 0.0413239943205268],
+        "orders_models": [
+            "2022-12-23_orders_cat_ranker_78326_96000",
+            "2022-12-23_orders_lgbm_classifier_79580_96565",
+        ],
         "orders_powers": [1, 1],
+        "orders_weights": [0.32958933593021145, 0.6704106640697886],
     }
 
     events_model_name = []

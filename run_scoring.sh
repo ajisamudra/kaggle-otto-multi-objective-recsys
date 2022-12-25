@@ -49,7 +49,7 @@
 # ORDER_MODEL="2022-12-23_orders_cat_ranker_78326_96000"
 
 
-#sub8 CV YYY Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+#sub8 CV 0.5687338005167984 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
 CLICK_MODEL="2022-12-25_clicks_cat_ranker_45439_89900"
 CART_MODEL="2022-12-25_carts_cat_ranker_65389_94260"
 ORDER_MODEL="2022-12-25_orders_cat_ranker_80132_96912"
@@ -64,16 +64,16 @@ python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
 
-#sub9 CV YYY Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
-# CLICK_MODEL="2022-12-23_clicks_lgbm_classifier_46496_89386"
-# CART_MODEL="2022-12-23_carts_lgbm_classifier_63946_93662"
-# ORDER_MODEL="2022-12-23_orders_lgbm_classifier_79580_96565"
-# WEEK_DATA=w1
+# sub9 CV 0.567130953598196 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+CLICK_MODEL="2022-12-25_clicks_lgbm_classifier_48807_90926"
+CART_MODEL="2022-12-25_carts_lgbm_classifier_66769_94771"
+ORDER_MODEL="2022-12-25_orders_lgbm_classifier_81484_97385"
+WEEK_DATA=w1
 
-# # # perform scoring
-# python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-# python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-# python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+# # perform scoring
+python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# # make submission
-# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2

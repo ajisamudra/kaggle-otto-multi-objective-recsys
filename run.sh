@@ -99,8 +99,10 @@ make combine_features  MODE=training_test START=75 END=100
 # make train_one_ranker ALGO=lgbm_ranker
 # make train_one_ranker ALGO=cat_ranker
 
-make train ALGO=cat_ranker
-make train ALGO=lgbm_classifier
+# make train ALGO=cat_ranker
+# make train ALGO=lgbm_classifier
+python src/ensemble/evaluate_ensemble.py
+python src/ensemble/evaluate_ensemble_multi_retrieval.py
 make train ALGO=cat_classifier
 make train ALGO=lgbm_ranker
 
