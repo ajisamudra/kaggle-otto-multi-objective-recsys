@@ -25,7 +25,7 @@ from src.utils.logger import get_logger
 logging = get_logger()
 
 TARGET = "label"
-NTRIAL = 25
+NTRIAL = 15
 
 CFG_MODEL = {
     "clicks_models": [

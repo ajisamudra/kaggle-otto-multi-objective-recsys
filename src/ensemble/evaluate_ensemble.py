@@ -37,13 +37,14 @@ def evaluate_ensemble():
             "2022-12-20_orders_cat_ranker_78471_96474",
             "2022-12-20_orders_lgbm_classifier_79792_97018",
         ],
-        "clicks_weights": [0.5, 0.5],
-        "carts_weights": [0.5, 0.5],
-        "orders_weights": [0.5, 0.5],
+        "clicks_weights": [0.6301655337446642, 0.3698344663],
+        "carts_weights": [0.3931567939633113, 0.606843206],
+        "orders_weights": [0.2236681400015059, 0.77633186],
         "clicks_powers": [1, 1],
         "carts_powers": [1, 1],
         "orders_powers": [1, 1],
     }
+
     events_model_name = []
     pred_rows = 0
     for EVENT in ["clicks", "carts", "orders"]:

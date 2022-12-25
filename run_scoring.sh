@@ -54,7 +54,7 @@ python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --wee
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-#sub7 CV 0.5681419681902891 Fea 172 recall@150 0.624811 feature wor2vec vect32 LB XXX
+#sub7 CV 0.5681419681902891 Fea 172 recall@150 0.624811 feature wor2vec vect32 LB 0.579
 CLICK_MODEL="2022-12-23_clicks_cat_ranker_43213_88370"
 CART_MODEL="2022-12-23_carts_cat_ranker_62356_93099"
 ORDER_MODEL="2022-12-23_orders_cat_ranker_78326_96000"
@@ -69,3 +69,5 @@ python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w
 
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+#sub 8 recall!150 0.618513442429754
