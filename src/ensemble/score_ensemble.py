@@ -34,95 +34,99 @@ def score_ensemble():
             "2022-12-20_orders_cat_ranker_78471_96474",
             "2022-12-20_orders_lgbm_classifier_79792_97018",
         ],
-        "clicks_weights": [0.5, 0.5],
-        "carts_weights": [0.5, 0.5],
-        "orders_weights": [0.5, 0.5],
+        "clicks_weights": [0.6301655337446642, 0.3698344663],
+        "carts_weights": [0.3931567939633113, 0.606843206],
+        "orders_weights": [0.2236681400015059, 0.77633186],
         "clicks_powers": [1, 1],
         "carts_powers": [1, 1],
         "orders_powers": [1, 1],
     }
-    events_model_name = []
-    pred_rows = 0
-    for EVENT in ["clicks", "carts", "orders"]:
-        logging.info(f"start applying weights in event: {EVENT.upper()}")
-        ARTIFACTS = CONFIG[f"{EVENT}_models"]
-        WEIGHTS = CONFIG[f"{EVENT}_weights"]
-        POWERS = CONFIG[f"{EVENT}_powers"]
-        event_model_name = ""  # for accessing submission later
-        for i in tqdm(range(N_test)):
-            df_chunk = pl.DataFrame()
-            for ix in range(len(ARTIFACTS)):
-                input_path = get_data_output_submission_dir(
-                    event=EVENT, model=ARTIFACTS[ix], week_model=week_model
-                )
-                tmp_path = f"{input_path}/test_{i}_{EVENT}_scores.parquet"
-                df_tmp = pl.read_parquet(tmp_path)
-                # apply weights
-                df_tmp = df_tmp.with_columns(
-                    [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
-                )
-                df_chunk = pl.concat([df_chunk, df_tmp])
+    events_model_name = [
+        "2022-12-20_clicks_cat_ranker_42966_88609_2022-12-20_clicks_lgbm_classifier_46744_89740",
+        "2022-12-20_carts_cat_ranker_62107_93343_2022-12-20_carts_lgbm_classifier_63895_93925",
+        "2022-12-20_orders_cat_ranker_78471_96474_2022-12-20_orders_lgbm_classifier_79792_97018",
+    ]
+    # pred_rows = 0
+    # for EVENT in ["clicks", "carts", "orders"]:
+    #     logging.info(f"start applying weights in event: {EVENT.upper()}")
+    #     ARTIFACTS = CONFIG[f"{EVENT}_models"]
+    #     WEIGHTS = CONFIG[f"{EVENT}_weights"]
+    #     POWERS = CONFIG[f"{EVENT}_powers"]
+    #     event_model_name = ""  # for accessing submission later
+    #     for i in tqdm(range(N_test)):
+    #         df_chunk = pl.DataFrame()
+    #         for ix in range(len(ARTIFACTS)):
+    #             input_path = get_data_output_submission_dir(
+    #                 event=EVENT, model=ARTIFACTS[ix], week_model=week_model
+    #             )
+    #             tmp_path = f"{input_path}/test_{i}_{EVENT}_scores.parquet"
+    #             df_tmp = pl.read_parquet(tmp_path)
+    #             # apply weights
+    #             df_tmp = df_tmp.with_columns(
+    #                 [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
+    #             )
+    #             df_chunk = pl.concat([df_chunk, df_tmp])
 
-                del df_tmp
-                gc.collect()
+    #             del df_tmp
+    #             gc.collect()
 
-            # sum weightes scores per candidate aid
-            df_chunk = df_chunk.groupby(["session", "candidate_aid", "label"]).agg(
-                [pl.col("score").sum()]
-            )
+    #         # sum weightes scores per candidate aid
+    #         df_chunk = df_chunk.groupby(["session", "candidate_aid", "label"]).agg(
+    #             [pl.col("score").sum()]
+    #         )
 
-            # save weighted scores
-            event_model_name = "_".join(ARTIFACTS)
-            output_path = get_data_output_ensemble_submission_dir(
-                event=EVENT, model=event_model_name, week_model=week_model
-            )
+    #         # save weighted scores
+    #         event_model_name = "_".join(ARTIFACTS)
+    #         output_path = get_data_output_ensemble_submission_dir(
+    #             event=EVENT, model=event_model_name, week_model=week_model
+    #         )
 
-            tmp_path = f"{output_path}/test_{i}_{EVENT}_ensemble_scores.parquet"
-            df_chunk = freemem(df_chunk)
-            df_chunk = round_float_3decimals(df_chunk)
-            df_chunk.write_parquet(tmp_path)
+    #         tmp_path = f"{output_path}/test_{i}_{EVENT}_ensemble_scores.parquet"
+    #         df_chunk = freemem(df_chunk)
+    #         df_chunk = round_float_3decimals(df_chunk)
+    #         df_chunk.write_parquet(tmp_path)
 
-            # take top 20 candidate aid and save it as list
-            test_predictions = (
-                df_chunk.sort(["session", "score"], reverse=True)
-                .groupby("session")
-                .agg([pl.col("candidate_aid").limit(20).list().alias("labels")])
-            )
+    #         # take top 20 candidate aid and save it as list
+    #         test_predictions = (
+    #             df_chunk.sort(["session", "score"], reverse=True)
+    #             .groupby("session")
+    #             .agg([pl.col("candidate_aid").limit(20).list().alias("labels")])
+    #         )
 
-            del df_chunk
-            gc.collect()
+    #         del df_chunk
+    #         gc.collect()
 
-            test_predictions = test_predictions.select([pl.col(["session", "labels"])])
-            test_predictions = test_predictions.with_columns(
-                [(pl.col(["session"]) + f"_{EVENT}").alias("session_type")]
-            )
-            test_predictions = test_predictions.select(
-                [pl.col(["session_type", "labels"])]
-            )
-            test_predictions = test_predictions.with_columns(
-                [
-                    pl.col("labels")
-                    .apply(lambda x: " ".join(map(str, x)))
-                    .alias("labels")
-                ]
-            )
+    #         test_predictions = test_predictions.select([pl.col(["session", "labels"])])
+    #         test_predictions = test_predictions.with_columns(
+    #             [(pl.col(["session"]) + f"_{EVENT}").alias("session_type")]
+    #         )
+    #         test_predictions = test_predictions.select(
+    #             [pl.col(["session_type", "labels"])]
+    #         )
+    #         test_predictions = test_predictions.with_columns(
+    #             [
+    #                 pl.col("labels")
+    #                 .apply(lambda x: " ".join(map(str, x)))
+    #                 .alias("labels")
+    #             ]
+    #         )
 
-            output_path = get_data_output_ensemble_submission_dir(
-                event="submission", model=event_model_name, week_model=week_model
-            )
-            tmp_path = f"{output_path}/test_{i}_{EVENT}_submission.parquet"
-            test_predictions = freemem(test_predictions)
-            test_predictions.write_parquet(f"{tmp_path}")
+    #         output_path = get_data_output_ensemble_submission_dir(
+    #             event="submission", model=event_model_name, week_model=week_model
+    #         )
+    #         tmp_path = f"{output_path}/test_{i}_{EVENT}_submission.parquet"
+    #         test_predictions = freemem(test_predictions)
+    #         test_predictions.write_parquet(f"{tmp_path}")
 
-            pred_rows += test_predictions.shape[0]
+    #         pred_rows += test_predictions.shape[0]
 
-            del test_predictions
-            gc.collect()
+    #         del test_predictions
+    #         gc.collect()
 
-        events_model_name.append(event_model_name)
-        logging.info(f"ensemble calculation complete for {EVENT.upper()}!")
+    #     events_model_name.append(event_model_name)
+    #     logging.info(f"ensemble calculation complete for {EVENT.upper()}!")
 
-    logging.info(f"predictions rows {pred_rows}")
+    # logging.info(f"predictions rows {pred_rows}")
     logging.info("start collecting submission")
     df_pred = pl.DataFrame()
     for ix, EVENT in enumerate(["clicks", "carts", "orders"]):
@@ -139,9 +143,8 @@ def score_ensemble():
 
     # save final submission to csv
     logging.info("save submission to csv")
-    model_name = "_".join(events_model_name)
     sub_path = get_data_output_ensemble_submission_dir(
-        event="final_submission", model=model_name, week_model=week_model
+        event="final_submission", model=events_model_name[ix], week_model=week_model
     )
     filepath = f"{sub_path}/submission.csv"
     df_pred = freemem(df_pred)
