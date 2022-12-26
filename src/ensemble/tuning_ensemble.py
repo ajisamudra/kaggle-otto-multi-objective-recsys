@@ -110,7 +110,10 @@ def measure_ensemble_scores(hyperparams: dict):
                 df_tmp = pl.read_parquet(tmp_path)
                 # apply weights
                 df_tmp = df_tmp.with_columns(
-                    [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
+                    [
+                        (np.sign(pl.col("score")) * pow(pl.col("score"), POWERS[ix]))
+                        * WEIGHTS[ix]
+                    ]
                 )
                 df_chunk = pl.concat([df_chunk, df_tmp])
 
