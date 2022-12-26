@@ -1,6 +1,6 @@
 # python src/ensemble/tuning_ensemble.py
 # python src/ensemble/tuning_ensemble2.py
-python src/ensemble/score_ensemble.py
+# python src/ensemble/score_ensemble.py
 # python src/ensemble/tuning_ensemble3.py
 
 # # make split_into_chunks MODE=training_train
@@ -52,13 +52,13 @@ python src/ensemble/score_ensemble.py
 # make matrix_factorization_features MODE=training_test START=50 END=75
 # make matrix_factorization_features MODE=training_test START=75 END=100
 # # make word2vec_features MODE=training_test START=0 END=50
-make word2vec_features MODE=training_test START=54 END=100
-make fasttext_features MODE=training_test START=0 END=50
-make fasttext_features MODE=training_test START=50 END=100
-make combine_features  MODE=training_test START=0 END=25
-make combine_features  MODE=training_test START=25 END=50
-make combine_features  MODE=training_test START=50 END=75
-make combine_features  MODE=training_test START=75 END=100
+# make word2vec_features MODE=training_test START=50 END=100
+# make fasttext_features MODE=training_test START=0 END=50
+# make fasttext_features MODE=training_test START=50 END=100
+# make combine_features  MODE=training_test START=0 END=25
+# make combine_features  MODE=training_test START=25 END=50
+# make combine_features  MODE=training_test START=50 END=75
+# make combine_features  MODE=training_test START=75 END=100
 
 # make split_into_chunks MODE=scoring_test
 # make candidate_list MODE=scoring_test
@@ -101,15 +101,17 @@ make combine_features  MODE=training_test START=75 END=100
 
 # make train ALGO=cat_ranker
 # make train ALGO=lgbm_classifier
-python src/ensemble/evaluate_ensemble.py
-python src/ensemble/evaluate_ensemble_multi_retrieval.py
-make train ALGO=cat_classifier
-make train ALGO=lgbm_ranker
+# python src/ensemble/evaluate_ensemble.py
+# python src/ensemble/evaluate_ensemble_multi_retrieval.py
+python src/ensemble/tuning_ensemble.py
+# make train ALGO=cat_classifier
+# make train ALGO=lgbm_ranker
+# python src/ensemble/score_ensemble_multi_retrieval.py
 
 # make one_ranker_dataset
 # make train_one_ranker ALGO=cat_ranker
-# make train ALGO=lgbm_ranker
 # make train_one_ranker ALGO=lgbm_ranker
+# make train ALGO=lgbm_ranker
 # python src/training/train_one_ranker.py --event all --n 3 --algo lgbm_ranker --week w2 --eval 1
 
 

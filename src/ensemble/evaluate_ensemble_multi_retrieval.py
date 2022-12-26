@@ -45,7 +45,6 @@ def evaluate_ensemble():
         logging.info(f"start aggregating candidate aids in event: {EVENT.upper()}")
         ARTIFACTS = CONFIG[f"{EVENT}_models"]
         event_model_name = ""  # for accessing submission later
-        df_pred = pl.DataFrame()
         for i in tqdm(range(100)):
             # artifact#0
             if i <= 79:
@@ -55,11 +54,27 @@ def evaluate_ensemble():
                 tmp_path = f"{input_path}/test_{i}_{EVENT}_ensemble_scores.parquet"
                 df_tmp = pl.read_parquet(tmp_path)
                 df_tmp = df_tmp.select(["session", "candidate_aid", "score"])
-                # # apply weights
-                # df_tmp = df_tmp.with_columns(
-                #     [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
-                # )
-                df_pred = pl.concat([df_pred, df_tmp])
+                df_tmp = df_tmp.with_columns(
+                    [
+                        pl.col("score")
+                        .rank(reverse=True, method="ordinal")
+                        .over("session")
+                        .alias("rank")
+                    ]
+                )
+                # filter top 30 candidates
+                df_tmp = df_tmp.filter(pl.col("rank") <= 30)
+                df_tmp = df_tmp.select(["session", "candidate_aid", "score"])
+
+                input_path = get_data_output_local_ensemble_submission_dir(
+                    event=EVENT, model=ARTIFACTS[0], week_model=week_model
+                )
+                tmp_path = f"{input_path}/test_{i}_{EVENT}_ensemble_scores_topK.parquet"
+
+                df_tmp = freemem(df_tmp)
+                df_tmp.write_parquet(tmp_path)
+
+                # df_pred = pl.concat([df_pred, df_tmp])
                 del df_tmp
                 gc.collect()
 
@@ -70,14 +85,59 @@ def evaluate_ensemble():
             tmp_path = f"{input_path}/test_{i}_{EVENT}_ensemble_scores.parquet"
             df_tmp = pl.read_parquet(tmp_path)
             df_tmp = df_tmp.select(["session", "candidate_aid", "score"])
-            # # apply weights
-            # df_tmp = df_tmp.with_columns(
-            #     [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
-            # )
-            df_pred = pl.concat([df_pred, df_tmp])
+            df_tmp = df_tmp.with_columns(
+                [
+                    pl.col("score")
+                    .rank(reverse=True, method="ordinal")
+                    .over("session")
+                    .alias("rank")
+                ]
+            )
+            # filter top 30 candidates
+            df_tmp = df_tmp.filter(pl.col("rank") <= 30)
+            df_tmp = df_tmp.select(["session", "candidate_aid", "score"])
+            input_path = get_data_output_local_ensemble_submission_dir(
+                event=EVENT, model=ARTIFACTS[1], week_model=week_model
+            )
+            tmp_path = f"{input_path}/test_{i}_{EVENT}_ensemble_scores_topK.parquet"
+            df_tmp = freemem(df_tmp)
+            df_tmp.write_parquet(tmp_path)
+
+            # df_pred = pl.concat([df_pred, df_tmp])
 
             del df_tmp
             gc.collect()
+
+        df_pred = pl.DataFrame()
+        for i in tqdm(range(100)):
+            # artifact#0
+            if i <= 79:
+                input_path = get_data_output_local_ensemble_submission_dir(
+                    event=EVENT, model=ARTIFACTS[0], week_model=week_model
+                )
+                tmp_path = f"{input_path}/test_{i}_{EVENT}_ensemble_scores_topK.parquet"
+                df_tmp = pl.read_parquet(tmp_path)
+                df_tmp = df_tmp.select(["session", "candidate_aid", "score"])
+                df_pred = pl.concat([df_pred, df_tmp])
+                del df_tmp
+                gc.collect()
+
+            # artifact#1
+            input_path = get_data_output_local_ensemble_submission_dir(
+                event=EVENT, model=ARTIFACTS[1], week_model=week_model
+            )
+            tmp_path = f"{input_path}/test_{i}_{EVENT}_ensemble_scores_topK.parquet"
+            df_tmp = pl.read_parquet(tmp_path)
+            df_tmp = df_tmp.select(["session", "candidate_aid", "score"])
+            df_pred = pl.concat([df_pred, df_tmp])
+            del df_tmp
+            gc.collect()
+
+            # simple average each candidate aid
+            # to reduce num rows in df_pred
+            df_pred = df_pred.groupby(["session", "candidate_aid"]).agg(
+                [pl.col("score").mean()]
+            )
 
             # simple average each candidate aid
             # to reduce num rows in df_pred
