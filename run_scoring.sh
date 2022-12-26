@@ -77,3 +77,31 @@ python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --wee
 
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+#sub10 CV 0.5662789963494648 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+CLICK_MODEL="2022-12-26_clicks_cat_classifier_49243_90940"
+CART_MODEL="2022-12-26_carts_cat_classifier_67369_94709"
+ORDER_MODEL="2022-12-26_orders_cat_classifier_81621_97386"
+WEEK_DATA=w1
+
+# # perform scoring
+python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+#sub11 CV 0.5672425543156044 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+CLICK_MODEL="2022-12-26_clicks_lgbm_ranker_48370_89600"
+CART_MODEL="2022-12-26_carts_lgbm_ranker_66196_93867"
+ORDER_MODEL="2022-12-26_orders_lgbm_ranker_78372_95814"
+WEEK_DATA=w1
+
+# # perform scoring
+python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2

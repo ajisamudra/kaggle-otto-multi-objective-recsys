@@ -29,30 +29,66 @@ NTRIAL = 15
 
 CFG_MODEL = {
     "clicks_models": [
-        "2022-12-20_clicks_cat_ranker_42966_88609",
-        "2022-12-20_clicks_lgbm_classifier_46744_89740",
+        "2022-12-25_clicks_cat_ranker_45439_89900",
+        "2022-12-25_clicks_lgbm_classifier_48807_90926",
+        "2022-12-26_clicks_cat_classifier_49243_90940",
+        "2022-12-26_clicks_lgbm_ranker_48370_89600",
     ],
     "carts_models": [
-        "2022-12-20_carts_cat_ranker_62107_93343",
-        "2022-12-20_carts_lgbm_classifier_63895_93925",
+        "2022-12-25_carts_cat_ranker_65389_94260",
+        "2022-12-25_carts_lgbm_classifier_66769_94771",
+        "2022-12-26_carts_cat_classifier_67369_94709",
+        "2022-12-26_carts_lgbm_ranker_66196_93867",
     ],
     "orders_models": [
-        "2022-12-20_orders_cat_ranker_78471_96474",
-        "2022-12-20_orders_lgbm_classifier_79792_97018",
+        "2022-12-25_orders_cat_ranker_80132_96912",
+        "2022-12-25_orders_lgbm_classifier_81484_97385",
+        "2022-12-26_orders_cat_classifier_81621_97386",
+        "2022-12-26_orders_lgbm_ranker_78372_95814",
     ],
 }
 
 
 def measure_ensemble_scores(hyperparams: dict):
-    N_test = 80
+    N_test = 100
     week_model = "w2"
     CONFIG = {
-        "clicks_weights": [hyperparams["click_wgt_1"], hyperparams["click_wgt_2"]],
-        "carts_weights": [hyperparams["cart_wgt_1"], hyperparams["cart_wgt_2"]],
-        "orders_weights": [hyperparams["order_wgt_1"], hyperparams["order_wgt_2"]],
-        "clicks_powers": [hyperparams["click_pow"], hyperparams["click_pow"]],
-        "carts_powers": [hyperparams["cart_pow"], hyperparams["cart_pow"]],
-        "orders_powers": [hyperparams["order_pow"], hyperparams["order_pow"]],
+        "clicks_weights": [
+            hyperparams["click_wgt_1"],
+            hyperparams["click_wgt_2"],
+            hyperparams["click_wgt_3"],
+            hyperparams["click_wgt_4"],
+        ],
+        "carts_weights": [
+            hyperparams["cart_wgt_1"],
+            hyperparams["cart_wgt_2"],
+            hyperparams["cart_wgt_3"],
+            hyperparams["cart_wgt_4"],
+        ],
+        "orders_weights": [
+            hyperparams["order_wgt_1"],
+            hyperparams["order_wgt_2"],
+            hyperparams["order_wgt_3"],
+            hyperparams["order_wgt_4"],
+        ],
+        "clicks_powers": [
+            hyperparams["click_pow"],
+            hyperparams["click_pow"],
+            hyperparams["click_pow"],
+            hyperparams["click_pow"],
+        ],
+        "carts_powers": [
+            hyperparams["cart_pow"],
+            hyperparams["cart_pow"],
+            hyperparams["cart_pow"],
+            hyperparams["cart_pow"],
+        ],
+        "orders_powers": [
+            hyperparams["order_pow"],
+            hyperparams["order_pow"],
+            hyperparams["order_pow"],
+            hyperparams["order_pow"],
+        ],
     }
     CONFIG.update(CFG_MODEL)
     events_model_name = []
@@ -181,12 +217,18 @@ class ObjectiveEnsemble:
             "click_wgt_1": trial.suggest_float("click_wgt_1", 0.01, 0.99),
             "cart_wgt_1": trial.suggest_float("cart_wgt_1", 0.01, 0.99),
             "order_wgt_1": trial.suggest_float("order_wgt_1", 0.01, 0.99),
+            "click_wgt_2": trial.suggest_float("click_wgt_2", 0.01, 0.99),
+            "cart_wgt_2": trial.suggest_float("cart_wgt_2", 0.01, 0.99),
+            "order_wgt_2": trial.suggest_float("order_wgt_2", 0.01, 0.99),
+            "click_wgt_3": trial.suggest_float("click_wgt_3", 0.01, 0.99),
+            "cart_wgt_3": trial.suggest_float("cart_wgt_3", 0.01, 0.99),
+            "order_wgt_3": trial.suggest_float("order_wgt_3", 0.01, 0.99),
+            "click_wgt_4": trial.suggest_float("click_wgt_4", 0.01, 0.99),
+            "cart_wgt_4": trial.suggest_float("cart_wgt_4", 0.01, 0.99),
+            "order_wgt_4": trial.suggest_float("order_wgt_4", 0.01, 0.99),
         }
 
         wgts_2 = {
-            "click_wgt_2": 1 - hyperparams["click_wgt_1"],
-            "cart_wgt_2": 1 - hyperparams["cart_wgt_1"],
-            "order_wgt_2": 1 - hyperparams["order_wgt_1"],
             "click_pow": 1,
             "cart_pow": 1,
             "order_pow": 1,
@@ -202,12 +244,18 @@ class ObjectiveEnsemble:
 def tune_ensemble():
     logging.info("measure ensemble recall@20 before tuning")
     hyperparams = {
-        "click_wgt_1": 0.5,
-        "click_wgt_2": 0.5,
-        "cart_wgt_1": 0.5,
-        "cart_wgt_2": 0.5,
-        "order_wgt_1": 0.5,
-        "order_wgt_2": 0.5,
+        "click_wgt_1": 0.25,
+        "click_wgt_2": 0.25,
+        "click_wgt_3": 0.25,
+        "click_wgt_4": 0.25,
+        "cart_wgt_1": 0.25,
+        "cart_wgt_2": 0.25,
+        "cart_wgt_3": 0.25,
+        "cart_wgt_4": 0.25,
+        "order_wgt_1": 0.25,
+        "order_wgt_2": 0.25,
+        "order_wgt_3": 0.25,
+        "order_wgt_4": 0.25,
         "click_pow": 1,
         "cart_pow": 1,
         "order_pow": 1,
@@ -245,25 +293,37 @@ def tune_ensemble():
     CONFIG = {
         "clicks_weights": [
             best_hyperparams["click_wgt_1"],
-            1 - best_hyperparams["click_wgt_1"],
+            best_hyperparams["click_wgt_2"],
+            best_hyperparams["click_wgt_3"],
+            best_hyperparams["click_wgt_4"],
         ],
         "carts_weights": [
             best_hyperparams["cart_wgt_1"],
-            1 - best_hyperparams["cart_wgt_1"],
+            best_hyperparams["cart_wgt_2"],
+            best_hyperparams["cart_wgt_3"],
+            best_hyperparams["cart_wgt_4"],
         ],
         "orders_weights": [
             best_hyperparams["order_wgt_1"],
-            1 - best_hyperparams["order_wgt_1"],
+            best_hyperparams["order_wgt_2"],
+            best_hyperparams["order_wgt_3"],
+            best_hyperparams["order_wgt_4"],
         ],
         "clicks_powers": [
+            1,
+            1,
             1,
             1,
         ],
         "carts_powers": [
             1,
             1,
+            1,
+            1,
         ],
         "orders_powers": [
+            1,
+            1,
             1,
             1,
         ],
