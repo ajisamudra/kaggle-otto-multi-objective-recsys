@@ -262,7 +262,7 @@ def main(mode: str):
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
-            ratio_negative_sample=20,
+            ratio_negative_sample=10,
         )
 
     elif mode == "training_test":
