@@ -22,7 +22,7 @@ from src.utils.logger import get_logger
 logging = get_logger()
 
 
-def suggest_fasttext(
+def suggest_clicks_fasttext(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
@@ -35,6 +35,67 @@ def suggest_fasttext(
         unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
         mf_candidate = embedding.get_nns_by_item(unique_aids[0], n=n_candidate)
+
+        # append to list result
+        sessions.append(session)
+        candidates.append(mf_candidate)
+
+    # output series
+    result_series = pd.Series(candidates, index=sessions)
+    result_series.index.name = "session"
+    return result_series
+
+
+def suggest_orders_fasttext(
+    n_candidate: int,
+    ses2aids: dict,
+    ses2types: dict,
+    embedding: AnnoyIndex,
+):
+    sessions = []
+    candidates = []
+    for session, aids in tqdm(ses2aids.items()):
+        # unique_aids = set(aids)
+        # unique_aids = list(dict.fromkeys(aids[::-1]))
+        types = ses2types[session]
+
+        # get reverse aids and its types
+        reversed_aids = aids[::-1]
+        reversed_types = types[::-1]
+
+        carted_aids = [
+            aid for i, aid in enumerate(reversed_aids) if reversed_types[i] == 1
+        ]
+
+        # # last x aids
+        # if len(carted_aids) == 0:
+        #     last_x_aids = reversed_aids[:1]
+        # elif len(carted_aids) < 3:
+        #     last_x_aids = carted_aids[: len(carted_aids)]
+        # else:
+        #     last_x_aids = carted_aids[:3]
+        # # get query vector from last three aids
+        # query_vcts = []
+        # for aid in last_x_aids:
+        #     vct = []
+        #     try:
+        #         vct = embedding.get_item_vector(aid)
+        #     except KeyError:
+        #         continue
+        #     query_vcts.append(vct)
+        # query_vcts = np.array(query_vcts)
+        # query_vcts = np.mean(query_vcts, axis=0)
+
+        # mf_candidate = embedding.get_nns_by_vector(query_vcts, n=n_candidate)
+
+        # get last cart event
+        cart_idx = 0
+        try:
+            cart_idx = reversed_types.index(1)
+        except ValueError:
+            cart_idx = 0
+
+        mf_candidate = embedding.get_nns_by_item(reversed_aids[cart_idx], n=n_candidate)
 
         # append to list result
         sessions.append(session)
@@ -77,7 +138,16 @@ def generate_candidates_matrix_fact(
         gc.collect()
 
         # retrieve matrix factorization candidates
-        candidates_series = suggest_fasttext(
+        logging.info(f"retrieve candidate clicks")
+        clicks_candidates_series = suggest_clicks_fasttext(
+            n_candidate=CFG.fasttext_candidates,
+            ses2aids=ses2aids,
+            ses2types=ses2types,
+            embedding=embedding,
+        )
+
+        logging.info(f"retrieve candidate orders")
+        orders_candidates_series = suggest_orders_fasttext(
             n_candidate=CFG.fasttext_candidates,
             ses2aids=ses2aids,
             ses2types=ses2types,
@@ -86,7 +156,10 @@ def generate_candidates_matrix_fact(
 
         for event in ["clicks", "carts", "orders"]:
             logging.info(f"suggesting candidate {event}")
-            candidates_series_tmp = candidates_series.copy(deep=True)
+            if event in ["clicks", "carts"]:
+                candidates_series_tmp = clicks_candidates_series.copy(deep=True)
+            else:
+                candidates_series_tmp = orders_candidates_series
             logging.info("create candidates df")
             candidate_list_df = pd.DataFrame(
                 candidates_series_tmp.add_suffix(f"_{event}"), columns=["labels"]
