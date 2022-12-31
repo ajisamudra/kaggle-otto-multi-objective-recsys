@@ -299,7 +299,7 @@ def main(mode: str):
         pivot_candidates(
             name="test",
             is_train=True,
-            include_all_gt=True,
+            include_all_gt=False,
             drop_zero_positive_sample=True,
             input_path=input_path,
             output_path=output_path,

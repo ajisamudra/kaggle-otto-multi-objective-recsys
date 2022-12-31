@@ -19,7 +19,10 @@ preprocess_popular_datehour_candidate:
 preprocess_popular_hour_candidate:
 	python src/preprocess_v2/make_popular_hour_item_candidates.py --mode $(MODE)
 
-candidate_list:
+candidate_past_aids_list:
+	python src/pipeline_v2/make_candidates_past_aids_list.py --mode $(MODE)
+
+candidate_covisit_list:
 	python src/pipeline_v2/make_candidates_covisit_list.py --mode $(MODE)
 
 candidate_matrix_fact_list:

@@ -4,7 +4,7 @@ import numpy as np
 from tqdm import tqdm
 import gc
 from pathlib import Path
-from annoy import AnnoyIndex
+from collections import Counter
 from src.utils.constants import (
     CFG,
     get_processed_training_train_splitted_dir,
@@ -16,18 +16,18 @@ from src.utils.constants import (
     get_processed_scoring_train_candidates_dir,
     get_processed_scoring_test_candidates_dir,
 )
-from src.utils.word2vec import load_annoy_idx_word2vec_embedding
 from src.utils.logger import get_logger
 
 logging = get_logger()
 
 
-def suggest_clicks_word2vec(
+def suggest_past_aids(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
-    embedding: AnnoyIndex,
 ):
+    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
+
     sessions = []
     candidates = []
     ranks_list = []
@@ -35,85 +35,36 @@ def suggest_clicks_word2vec(
         # unique_aids = set(aids)
         unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
-        mf_candidate = embedding.get_nns_by_item(unique_aids[0], n=n_candidate + 1)
-        # drop first result which is the query aid
-        mf_candidate = mf_candidate[1:]
+
+        # RERANK CANDIDATES USING WEIGHTS
+        if len(unique_aids) >= 20:
+            weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
+            aids_temp = Counter()
+            # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
+            for aid, w, t in zip(aids, weights, types):
+                aids_temp[aid] += w * type_weight_multipliers[t]
+            candidate = [k for k, v in aids_temp.most_common(n_candidate)]
+
+        else:
+            candidate = list(unique_aids)[:n_candidate]
 
         # append to list result
-        rank_list = [i for i in range(n_candidate)]
+        rank_list = [i for i in range(len(candidate))]
         sessions.append(session)
-        candidates.append(mf_candidate)
+        candidates.append(candidate)
         ranks_list.append(rank_list)
 
     # output series
     result_series = pd.Series(candidates, index=sessions)
     result_series.index.name = "session"
+
     return result_series, ranks_list
 
 
-def suggest_orders_word2vec(
-    n_candidate: int,
-    ses2aids: dict,
-    ses2types: dict,
-    embedding: AnnoyIndex,
-):
-    sessions = []
-    candidates = []
-    for session, aids in tqdm(ses2aids.items()):
-        # unique_aids = set(aids)
-        # unique_aids = list(dict.fromkeys(aids[::-1]))
-        types = ses2types[session]
-
-        # get reverse aids and its types
-        reversed_aids = aids[::-1]
-        reversed_types = types[::-1]
-
-        carted_aids = [
-            aid for i, aid in enumerate(reversed_aids) if reversed_types[i] == 1
-        ]
-
-        # # last x aids
-        # if len(carted_aids) == 0:
-        #     last_x_aids = reversed_aids[:1]
-        # elif len(carted_aids) < 3:
-        #     last_x_aids = carted_aids[: len(carted_aids)]
-        # else:
-        #     last_x_aids = carted_aids[:3]
-        # # get query vector from last three aids
-        # query_vcts = []
-        # for aid in last_x_aids:
-        #     vct = []
-        #     try:
-        #         vct = embedding.get_item_vector(aid)
-        #     except KeyError:
-        #         continue
-        #     query_vcts.append(vct)
-        # query_vcts = np.array(query_vcts)
-        # query_vcts = np.mean(query_vcts, axis=0)
-
-        # mf_candidate = embedding.get_nns_by_vector(query_vcts, n=n_candidate)
-
-        # get last cart event
-        cart_idx = 0
-        try:
-            cart_idx = reversed_types.index(1)
-        except ValueError:
-            cart_idx = 0
-
-        mf_candidate = embedding.get_nns_by_item(reversed_aids[cart_idx], n=n_candidate)
-
-        # append to list result
-        sessions.append(session)
-        candidates.append(mf_candidate)
-
-    # output series
-    result_series = pd.Series(candidates, index=sessions)
-    result_series.index.name = "session"
-    return result_series
-
-
-def generate_candidates_word2vec(
-    name: str, input_path: Path, output_path: Path, embedding: AnnoyIndex
+def generate_candidates_past_aids(
+    name: str,
+    input_path: Path,
+    output_path: Path,
 ):
     if name == "train":
         n = CFG.N_train
@@ -142,33 +93,26 @@ def generate_candidates_word2vec(
         del df
         gc.collect()
 
-        # retrieve candidates
-        logging.info(f"retrieve candidate clicks")
-        clicks_candidates_series, ranks_list = suggest_clicks_word2vec(
-            n_candidate=CFG.word2vec_candidates,
+        candidates_list = pd.Series()
+        ranks_list = []
+
+        logging.info(f"retrieve past candidates")
+
+        candidates_list, ranks_list = suggest_past_aids(
+            n_candidate=CFG.past_candidates,
             ses2aids=ses2aids,
             ses2types=ses2types,
-            embedding=embedding,
         )
-
-        # logging.info(f"retrieve candidate orders")
-        # orders_candidates_series = suggest_orders_word2vec(
-        #     n_candidate=CFG.word2vec_candidates,
-        #     ses2aids=ses2aids,
-        #     ses2types=ses2types,
-        #     embedding=embedding,
-        # )
 
         for event in ["clicks", "carts", "orders"]:
             logging.info(f"suggesting candidate {event}")
-            candidates_series_tmp = clicks_candidates_series.copy(deep=True)
+            candidates_series_tmp = candidates_list.copy(deep=True)
             logging.info("create candidates df")
             candidate_list_df = pd.DataFrame(
                 candidates_series_tmp.add_suffix(f"_{event}"), columns=["labels"]
             ).reset_index()
             candidate_list_df["ranks"] = ranks_list
-
-            filepath = output_path / f"{name}_{ix}_{event}_word2vec_list.parquet"
+            filepath = output_path / f"{name}_{ix}_{event}_past_aids_list.parquet"
             logging.info(f"save chunk {ix} to: {filepath}")
             candidate_list_df.to_parquet(f"{filepath}")
 
@@ -183,23 +127,15 @@ def generate_candidates_word2vec(
 )
 def main(mode: str):
 
-    if mode in ["training_train", "training_test"]:
-        logging.info("read local word2vec index")
-        embedding = load_annoy_idx_word2vec_embedding()
-    else:
-        logging.info("read scoring word2vec index")
-        embedding = load_annoy_idx_word2vec_embedding(mode="scoring")
-
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()
         output_path = get_processed_training_train_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_past_aids(
             name="train",
             input_path=input_path,
             output_path=output_path,
-            embedding=embedding,
         )
 
     elif mode == "training_test":
@@ -207,11 +143,10 @@ def main(mode: str):
         output_path = get_processed_training_test_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_past_aids(
             name="test",
             input_path=input_path,
             output_path=output_path,
-            embedding=embedding,
         )
 
     elif mode == "scoring_train":
@@ -219,11 +154,10 @@ def main(mode: str):
         output_path = get_processed_scoring_train_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_past_aids(
             name="train",
             input_path=input_path,
             output_path=output_path,
-            embedding=embedding,
         )
 
     elif mode == "scoring_test":
@@ -231,11 +165,10 @@ def main(mode: str):
         output_path = get_processed_scoring_test_candidates_dir()
         logging.info(f"read input data from: {input_path}")
         logging.info(f"will save chunks data to: {output_path}")
-        generate_candidates_word2vec(
+        generate_candidates_past_aids(
             name="test",
             input_path=input_path,
             output_path=output_path,
-            embedding=embedding,
         )
 
 

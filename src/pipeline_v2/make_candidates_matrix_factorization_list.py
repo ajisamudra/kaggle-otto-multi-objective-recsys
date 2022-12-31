@@ -30,20 +30,25 @@ def suggest_clicks_matrix_fact(
 ):
     sessions = []
     candidates = []
+    ranks_list = []
     for session, aids in tqdm(ses2aids.items()):
         # unique_aids = set(aids)
         unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
-        mf_candidate = embedding.get_nns_by_item(unique_aids[0], n=n_candidate)
+        mf_candidate = embedding.get_nns_by_item(unique_aids[0], n=n_candidate + 1)
+        # drop first result which is the query aid
+        mf_candidate = mf_candidate[1:]
 
         # append to list result
+        rank_list = [i for i in range(n_candidate)]
         sessions.append(session)
         candidates.append(mf_candidate)
+        ranks_list.append(rank_list)
 
     # output series
     result_series = pd.Series(candidates, index=sessions)
     result_series.index.name = "session"
-    return result_series
+    return result_series, ranks_list
 
 
 def suggest_orders_matrix_fact(
@@ -137,32 +142,31 @@ def generate_candidates_matrix_fact(
         del df
         gc.collect()
 
-        # retrieve matrix factorization candidates
+        # retrieve candidates
         logging.info(f"retrieve candidate clicks")
-        clicks_candidates_series = suggest_clicks_matrix_fact(
-            n_candidate=CFG.matrix_factorization_candidates,
-            ses2aids=ses2aids,
-            ses2types=ses2types,
-            embedding=embedding,
-        )
-        logging.info(f"retrieve candidate orders")
-        orders_candidates_series = suggest_orders_matrix_fact(
+        clicks_candidates_series, ranks_list = suggest_clicks_matrix_fact(
             n_candidate=CFG.matrix_factorization_candidates,
             ses2aids=ses2aids,
             ses2types=ses2types,
             embedding=embedding,
         )
 
+        # logging.info(f"retrieve candidate orders")
+        # orders_candidates_series = suggest_orders_word2vec(
+        #     n_candidate=CFG.word2vec_candidates,
+        #     ses2aids=ses2aids,
+        #     ses2types=ses2types,
+        #     embedding=embedding,
+        # )
+
         for event in ["clicks", "carts", "orders"]:
             logging.info(f"suggesting candidate {event}")
-            if event in ["clicks", "carts"]:
-                candidates_series_tmp = clicks_candidates_series.copy(deep=True)
-            else:
-                candidates_series_tmp = orders_candidates_series
+            candidates_series_tmp = clicks_candidates_series.copy(deep=True)
             logging.info("create candidates df")
             candidate_list_df = pd.DataFrame(
                 candidates_series_tmp.add_suffix(f"_{event}"), columns=["labels"]
             ).reset_index()
+            candidate_list_df["ranks"] = ranks_list
 
             filepath = output_path / f"{name}_{ix}_{event}_matrix_fact_list.parquet"
             logging.info(f"save chunk {ix} to: {filepath}")

@@ -189,49 +189,49 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     cand_df = cand_df.fill_null(0)
 
-    # read matrix factorization features
-    matrix_fact_fea = pl.read_parquet(matrix_fact_path)
-    logging.info(
-        f"read sessionXmatrix_fact features with shape {matrix_fact_fea.shape}"
-    )
-    cand_df = cand_df.join(
-        matrix_fact_fea,
-        how="left",
-        left_on=["session", "candidate_aid"],
-        right_on=["session", "candidate_aid"],
-    )
-    logging.info(f"joined with sessionXmatrix_fact features! shape {cand_df.shape}")
+    # # read matrix factorization features
+    # matrix_fact_fea = pl.read_parquet(matrix_fact_path)
+    # logging.info(
+    #     f"read sessionXmatrix_fact features with shape {matrix_fact_fea.shape}"
+    # )
+    # cand_df = cand_df.join(
+    #     matrix_fact_fea,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "candidate_aid"],
+    # )
+    # logging.info(f"joined with sessionXmatrix_fact features! shape {cand_df.shape}")
 
-    del matrix_fact_fea
-    gc.collect()
+    # del matrix_fact_fea
+    # gc.collect()
 
-    # read word2vec features
-    word2vec_fea_df = pl.read_parquet(word2vec_path)
-    logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
-    cand_df = cand_df.join(
-        word2vec_fea_df,
-        how="left",
-        left_on=["session", "candidate_aid"],
-        right_on=["session", "candidate_aid"],
-    )
-    logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
+    # # read word2vec features
+    # word2vec_fea_df = pl.read_parquet(word2vec_path)
+    # logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
+    # cand_df = cand_df.join(
+    #     word2vec_fea_df,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "candidate_aid"],
+    # )
+    # logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
-    del word2vec_fea_df
-    gc.collect()
+    # del word2vec_fea_df
+    # gc.collect()
 
-    # read fasttext features
-    fasttext_fea_df = pl.read_parquet(fasttext_path)
-    logging.info(f"read sessionXfasttext features with shape {fasttext_fea_df.shape}")
-    cand_df = cand_df.join(
-        fasttext_fea_df,
-        how="left",
-        left_on=["session", "candidate_aid"],
-        right_on=["session", "candidate_aid"],
-    )
-    logging.info(f"joined with sessionXfasttext features! shape {cand_df.shape}")
+    # # read fasttext features
+    # fasttext_fea_df = pl.read_parquet(fasttext_path)
+    # logging.info(f"read sessionXfasttext features with shape {fasttext_fea_df.shape}")
+    # cand_df = cand_df.join(
+    #     fasttext_fea_df,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "candidate_aid"],
+    # )
+    # logging.info(f"joined with sessionXfasttext features! shape {cand_df.shape}")
 
-    del fasttext_fea_df
-    gc.collect()
+    # del fasttext_fea_df
+    # gc.collect()
 
     # read session-item features
     ses_aid_agg = pl.read_parquet(sfeaXaid_path)

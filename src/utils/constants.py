@@ -8,7 +8,8 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 class CFG:
     N_test = 100
     N_train = 30
-    covisit_candidates = 40
+    past_candidates = 20
+    covisit_candidates = 60
     fasttext_candidates = 20
     word2vec_candidates = 60
     matrix_factorization_candidates = 10
