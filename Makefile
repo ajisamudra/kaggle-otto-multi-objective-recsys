@@ -40,6 +40,9 @@ candidate_popular_datehour_list:
 candidate_popular_hour_list:
 	python src/pipeline_v2/make_candidates_popular_hour_list.py --mode $(MODE)
 
+candidate_popular_week_list:
+	python src/pipeline_v2/make_candidates_popular_week_list.py --mode $(MODE)
+
 candidate_list_eval:
 	python src/pipeline_v2/eval_candidate_list.py --mode $(MODE)
 
