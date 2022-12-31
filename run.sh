@@ -8,8 +8,10 @@
 # make candidate_word2vec_list MODE=training_train
 # make candidate_fasttext_list MODE=training_train
 # make candidate_matrix_fact_list MODE=training_train
-# make preprocess_popular_hour_candidate MODE=training_train
+make preprocess_popular_hour_candidate MODE=training_train
 # make candidate_popular_hour_list MODE=training_train
+make preprocess_popular_week_candidate MODE=training_train
+# make candidate_popular_week_list MODE=training_train
 # make candidate_rows MODE=training_train
 # make session_features MODE=training_train
 # make item_features MODE=training_train
@@ -26,19 +28,16 @@
 
 # # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
-# make preprocess_popular_daily_candidate MODE=training_test
-# make preprocess_popular_datehour_candidate MODE=training_test
-# make preprocess_popular_hour_candidate MODE=training_test
-
-# make candidate_popular_daily_list MODE=training_test
-# make candidate_popular_datehour_list MODE=training_test
+make preprocess_popular_hour_candidate MODE=training_test
 # make candidate_popular_hour_list MODE=training_test
+make preprocess_popular_week_candidate MODE=training_test
+# make candidate_popular_week_list MODE=training_test
 
 # make candidate_word2vec_list MODE=training_test
 # make candidate_fasttext_list MODE=training_test
 # make candidate_matrix_fact_list MODE=training_test
 # make candidate_list_eval MODE=training_test
-make candidate_rows MODE=training_test
+# make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
 # make session_item_features MODE=training_test
