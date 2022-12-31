@@ -26,19 +26,19 @@
 
 # # make split_into_chunks MODE=training_test
 # make candidate_list MODE=training_test
-# make candidate_word2vec_list MODE=training_test
-# # make preprocess_popular_daily_candidate MODE=training_test
-# # make preprocess_popular_datehour_candidate MODE=training_test
+# make preprocess_popular_daily_candidate MODE=training_test
+# make preprocess_popular_datehour_candidate MODE=training_test
 # make preprocess_popular_hour_candidate MODE=training_test
 
-# # make candidate_popular_daily_list MODE=training_test
-# # make candidate_popular_datehour_list MODE=training_test
+# make candidate_popular_daily_list MODE=training_test
+# make candidate_popular_datehour_list MODE=training_test
 # make candidate_popular_hour_list MODE=training_test
 
+# make candidate_word2vec_list MODE=training_test
 # make candidate_fasttext_list MODE=training_test
 # make candidate_matrix_fact_list MODE=training_test
 # make candidate_list_eval MODE=training_test
-# make candidate_rows MODE=training_test
+make candidate_rows MODE=training_test
 # make session_features MODE=training_test
 # make item_features MODE=training_test
 # make session_item_features MODE=training_test
@@ -103,9 +103,10 @@
 # make train ALGO=lgbm_classifier
 # python src/ensemble/evaluate_ensemble.py
 # python src/ensemble/evaluate_ensemble_multi_retrieval.py
-python src/ensemble/tuning_ensemble.py
+# python src/ensemble/tuning_ensemble.py
 # make train ALGO=cat_classifier
 # make train ALGO=lgbm_ranker
+# make train ALGO=lgbm_classifier
 # python src/ensemble/score_ensemble_multi_retrieval.py
 
 # make one_ranker_dataset

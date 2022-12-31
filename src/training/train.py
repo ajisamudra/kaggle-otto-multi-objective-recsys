@@ -235,7 +235,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
 
             elif EVENT == "carts":
                 train_df = pl.DataFrame()
-                for i in range(CFG.N_train - 10):
+                for i in range(CFG.N_train):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     # df_chunk = df_chunk.to_pandas()
@@ -251,7 +251,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                 #     df_chunk = pl.from_pandas(df_chunk)
                 #     val_df = pl.concat([val_df, df_chunk])
             else:
-                for i in range(int(CFG.N_train / 10)):
+                for i in range(int(CFG.N_train / 5)):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
                     # df_chunk = df_chunk.to_pandas()
