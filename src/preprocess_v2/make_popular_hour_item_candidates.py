@@ -71,13 +71,22 @@ def gen_popular_hour_item(data: pl.DataFrame):
 
     # agg for candidate list
     popular_click = popular_click.groupby("hour").agg(
-        [pl.col("aid").list().alias("labels")]
+        [
+            pl.col("aid").list().alias("labels"),
+            pl.col("click_rank").list().alias("ranks"),
+        ]
     )
     popular_cart = popular_cart.groupby("hour").agg(
-        [pl.col("aid").list().alias("labels")]
+        [
+            pl.col("aid").list().alias("labels"),
+            pl.col("cart_rank").list().alias("ranks"),
+        ]
     )
     popular_order = popular_order.groupby("hour").agg(
-        [pl.col("aid").list().alias("labels")]
+        [
+            pl.col("aid").list().alias("labels"),
+            pl.col("order_rank").list().alias("ranks"),
+        ]
     )
 
     return popular_click, popular_cart, popular_order
