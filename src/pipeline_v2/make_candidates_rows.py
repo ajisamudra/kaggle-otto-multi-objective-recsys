@@ -61,12 +61,18 @@ def pivot_candidates_list_to_rows(
     covisit_ses2candidates: dict,
     fasttext_ses2candidates: dict,
     word2vec_ses2candidates: dict,
+    word2vec_wgtd_rec_ses2candidates: dict,
+    word2vec_wgtd_dur_ses2candidates: dict,
+    word2vec_dur_ses2candidates: dict,
     matrix_fact_ses2candidates: dict,
     popular_week_ses2candidates: dict,
     # popular_hour_ses2candidates: dict,
     covisit_ses2cand_ranks: dict,
     fasttext_ses2cand_ranks: dict,
     word2vec_ses2cand_ranks: dict,
+    word2vec_wgtd_rec_ses2cand_ranks: dict,
+    word2vec_wgtd_dur_ses2cand_ranks: dict,
+    word2vec_dur_ses2cand_ranks: dict,
     matrix_fact_ses2cand_ranks: dict,
     popular_week_ses2cand_ranks: dict,
     # popular_hour_ses2cand_ranks: dict,
@@ -91,6 +97,9 @@ def pivot_candidates_list_to_rows(
     # candidate aid
     candidates_covisit = []
     candidates_word2vec = []
+    candidates_word2vec_wgtd_rec = []
+    candidates_word2vec_wgtd_dur = []
+    candidates_word2vec_dur = []
     candidates_fasttext = []
     candidates_popular_hour = []
     candidates_popular_week = []
@@ -99,6 +108,9 @@ def pivot_candidates_list_to_rows(
     # rank per candidate strategy
     ranks_covisit = []
     ranks_word2vec = []
+    ranks_word2vec_wgtd_rec = []
+    ranks_word2vec_wgtd_dur = []
+    ranks_word2vec_dur = []
     ranks_fasttext = []
     ranks_popular_hour = []
     ranks_popular_week = []
@@ -122,6 +134,9 @@ def pivot_candidates_list_to_rows(
         # placeholder for rank
         rank_covisit = []
         rank_word2vec = []
+        rank_word2vec_wgtd_rec = []
+        rank_word2vec_wgtd_dur = []
+        rank_word2vec_dur = []
         rank_fasttext = []
         # rank_popular_hour = []
         rank_popular_week = []
@@ -131,6 +146,9 @@ def pivot_candidates_list_to_rows(
         covisit_ranks = list(covisit_ses2cand_ranks[session])
         fasttext_ranks = list(fasttext_ses2cand_ranks[session])
         word2vec_ranks = list(word2vec_ses2cand_ranks[session])
+        word2vec_wgtd_rec_ranks = list(word2vec_wgtd_rec_ses2cand_ranks[session])
+        word2vec_wgtd_dur_ranks = list(word2vec_wgtd_dur_ses2cand_ranks[session])
+        word2vec_dur_ranks = list(word2vec_dur_ses2cand_ranks[session])
         matrix_fact_ranks = list(matrix_fact_ses2cand_ranks[session])
         popular_week_ranks = list(popular_week_ses2cand_ranks[session])
         # popular_hour_ranks = list(popular_hour_ses2cand_ranks[session])
@@ -153,6 +171,15 @@ def pivot_candidates_list_to_rows(
         rank_matrix_fact.extend(
             [len(matrix_fact_ranks) for i in range(len(covisit_cands))]
         )
+        rank_word2vec_wgtd_rec.extend(
+            [len(word2vec_wgtd_rec_ranks) for i in range(len(covisit_cands))]
+        )
+        rank_word2vec_wgtd_dur.extend(
+            [len(word2vec_wgtd_dur_ranks) for i in range(len(covisit_cands))]
+        )
+        rank_word2vec_dur.extend(
+            [len(word2vec_dur_ranks) for i in range(len(covisit_cands))]
+        )
 
         # fasttext candidates
         fasttext_cands = list(fasttext_ses2candidates[session])
@@ -171,6 +198,15 @@ def pivot_candidates_list_to_rows(
         rank_matrix_fact.extend(
             [len(matrix_fact_ranks) for i in range(len(fasttext_cands))]
         )
+        rank_word2vec_wgtd_rec.extend(
+            [len(word2vec_wgtd_rec_ranks) for i in range(len(fasttext_cands))]
+        )
+        rank_word2vec_wgtd_dur.extend(
+            [len(word2vec_wgtd_dur_ranks) for i in range(len(fasttext_cands))]
+        )
+        rank_word2vec_dur.extend(
+            [len(word2vec_dur_ranks) for i in range(len(fasttext_cands))]
+        )
 
         # word2vec candidates
         word2vec_cands = list(word2vec_ses2candidates[session])
@@ -188,6 +224,15 @@ def pivot_candidates_list_to_rows(
         )
         rank_matrix_fact.extend(
             [len(matrix_fact_ranks) for i in range(len(word2vec_cands))]
+        )
+        rank_word2vec_wgtd_rec.extend(
+            [len(word2vec_wgtd_rec_ranks) for i in range(len(word2vec_cands))]
+        )
+        rank_word2vec_wgtd_dur.extend(
+            [len(word2vec_wgtd_dur_ranks) for i in range(len(word2vec_cands))]
+        )
+        rank_word2vec_dur.extend(
+            [len(word2vec_dur_ranks) for i in range(len(word2vec_cands))]
         )
 
         # matrix fact candidates
@@ -209,6 +254,15 @@ def pivot_candidates_list_to_rows(
             [len(popular_week_ranks) for i in range(len(matrix_fact_cands))]
         )
         rank_matrix_fact.extend(matrix_fact_ranks)
+        rank_word2vec_wgtd_rec.extend(
+            [len(word2vec_wgtd_rec_ranks) for i in range(len(matrix_fact_cands))]
+        )
+        rank_word2vec_wgtd_dur.extend(
+            [len(word2vec_wgtd_dur_ranks) for i in range(len(matrix_fact_cands))]
+        )
+        rank_word2vec_dur.extend(
+            [len(word2vec_dur_ranks) for i in range(len(matrix_fact_cands))]
+        )
 
         # popular week candidates
         popular_week_cands = list(popular_week_ses2candidates[session])
@@ -231,28 +285,93 @@ def pivot_candidates_list_to_rows(
         rank_matrix_fact.extend(
             [len(matrix_fact_ranks) for i in range(len(popular_week_cands))]
         )
+        rank_word2vec_wgtd_rec.extend(
+            [len(word2vec_wgtd_rec_ranks) for i in range(len(popular_week_cands))]
+        )
+        rank_word2vec_wgtd_dur.extend(
+            [len(word2vec_wgtd_dur_ranks) for i in range(len(popular_week_cands))]
+        )
+        rank_word2vec_dur.extend(
+            [len(word2vec_dur_ranks) for i in range(len(popular_week_cands))]
+        )
 
-        # # popular hour candidates
-        # popular_hour_cands = list(popular_hour_ses2candidates[session])
-        # cands.extend(popular_hour_cands)
+        # word2vec weighted recency candidates
+        word2vec_wgtd_rec_cands = list(word2vec_wgtd_rec_ses2candidates[session])
+        cands.extend(word2vec_wgtd_rec_cands)
 
-        # # update rank for popular hour and fill max(rank) for each strategy
-        # rank_covisit.extend(
-        #     [len(covisit_ranks) for i in range(len(popular_hour_cands))]
-        # )
-        # rank_word2vec.extend(
-        #     [len(word2vec_ranks) for i in range(len(popular_hour_cands))]
-        # )
-        # rank_fasttext.extend(
-        #     [len(fasttext_ranks) for i in range(len(popular_hour_cands))]
-        # )
-        # rank_popular_hour.extend(popular_hour_ranks)
-        # rank_popular_week.extend(
-        #     [len(popular_hour_ranks) for i in range(len(popular_hour_cands))]
-        # )
-        # rank_matrix_fact.extend(
-        #     [len(matrix_fact_ranks) for i in range(len(popular_hour_cands))]
-        # )
+        # update rank for word2vec weighted recency and fill max(rank) for each strategy
+        rank_covisit.extend(
+            [len(covisit_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
+        )
+        rank_word2vec.extend(
+            [len(word2vec_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
+        )
+        rank_fasttext.extend(
+            [len(fasttext_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
+        )
+        rank_popular_week.extend(popular_week_ranks)
+        rank_matrix_fact.extend(
+            [len(matrix_fact_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
+        )
+        rank_word2vec_wgtd_rec.extend(word2vec_wgtd_rec_ranks)
+        rank_word2vec_wgtd_dur.extend(
+            [len(word2vec_wgtd_dur_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
+        )
+        rank_word2vec_dur.extend(
+            [len(word2vec_dur_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
+        )
+
+        # word2vec weighted duration candidates
+        word2vec_wgtd_dur_cands = list(word2vec_wgtd_dur_ses2candidates[session])
+        cands.extend(word2vec_wgtd_dur_cands)
+
+        # update rank for word2vec weighted duration and fill max(rank) for each strategy
+        rank_covisit.extend(
+            [len(covisit_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
+        )
+        rank_word2vec.extend(
+            [len(word2vec_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
+        )
+        rank_fasttext.extend(
+            [len(fasttext_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
+        )
+        rank_popular_week.extend(popular_week_ranks)
+        rank_matrix_fact.extend(
+            [len(matrix_fact_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
+        )
+        rank_word2vec_wgtd_rec.extend(
+            [len(word2vec_wgtd_rec_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
+        )
+        rank_word2vec_wgtd_dur.extend(word2vec_wgtd_dur_ranks)
+        rank_word2vec_dur.extend(
+            [len(word2vec_dur_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
+        )
+
+        # word2vec duration candidates
+        word2vec_dur_cands = list(word2vec_dur_ses2candidates[session])
+        cands.extend(word2vec_dur_cands)
+
+        # update rank for word2vec duration and fill max(rank) for each strategy
+        rank_covisit.extend(
+            [len(covisit_ranks) for i in range(len(word2vec_dur_cands))]
+        )
+        rank_word2vec.extend(
+            [len(word2vec_ranks) for i in range(len(word2vec_dur_cands))]
+        )
+        rank_fasttext.extend(
+            [len(fasttext_ranks) for i in range(len(word2vec_dur_cands))]
+        )
+        rank_popular_week.extend(popular_week_ranks)
+        rank_matrix_fact.extend(
+            [len(matrix_fact_ranks) for i in range(len(word2vec_dur_cands))]
+        )
+        rank_word2vec_wgtd_rec.extend(
+            [len(word2vec_wgtd_rec_ranks) for i in range(len(word2vec_dur_cands))]
+        )
+        rank_word2vec_wgtd_dur.extend(
+            [len(word2vec_wgtd_dur_ranks) for i in range(len(word2vec_dur_cands))]
+        )
+        rank_word2vec_dur.extend(word2vec_dur_ranks)
 
         # # drop duplicate
         # cands = set(cands)
@@ -279,10 +398,16 @@ def pivot_candidates_list_to_rows(
         matrix_fact_ls = [1 if c in matrix_fact_cands else 0 for c in cands]
         # popular_hour_ls = [1 if c in popular_hour_cands else 0 for c in cands]
         popular_week_ls = [1 if c in popular_week_cands else 0 for c in cands]
+        word2vec_wgtd_rec_ls = [1 if c in word2vec_wgtd_rec_cands else 0 for c in cands]
+        word2vec_wgtd_dur_ls = [1 if c in word2vec_wgtd_dur_cands else 0 for c in cands]
+        word2vec_dur_ls = [1 if c in word2vec_dur_cands else 0 for c in cands]
 
         # rank strategy retrieval
         rank_covisit_ls = rank_covisit
         rank_word2vec_ls = rank_word2vec
+        rank_word2vec_wgtd_rec_ls = rank_word2vec_wgtd_rec
+        rank_word2vec_wgtd_dur_ls = rank_word2vec_wgtd_dur
+        rank_word2vec_dur_ls = rank_word2vec_dur
         rank_fasttext_ls = rank_fasttext
         # rank_popular_hour_ls = rank_popular_hour
         rank_popular_week_ls = rank_popular_week
@@ -295,6 +420,9 @@ def pivot_candidates_list_to_rows(
 
         candidates_covisit.extend(covisit_ls)
         candidates_word2vec.extend(word2vec_ls)
+        candidates_word2vec_wgtd_rec.extend(word2vec_wgtd_rec_ls)
+        candidates_word2vec_wgtd_dur.extend(word2vec_wgtd_dur_ls)
+        candidates_word2vec_dur.extend(word2vec_dur_ls)
         candidates_fasttext.extend(fasttext_ls)
         # candidates_popular_hour.extend(popular_hour_ls)
         candidates_popular_week.extend(popular_week_ls)
@@ -302,6 +430,9 @@ def pivot_candidates_list_to_rows(
 
         ranks_covisit.extend(rank_covisit_ls)
         ranks_word2vec.extend(rank_word2vec_ls)
+        ranks_word2vec_wgtd_rec.extend(rank_word2vec_wgtd_rec_ls)
+        ranks_word2vec_wgtd_dur.extend(rank_word2vec_wgtd_dur_ls)
+        ranks_word2vec_dur.extend(rank_word2vec_dur_ls)
         ranks_fasttext.extend(rank_fasttext_ls)
         # ranks_popular_hour.extend(rank_popular_hour_ls)
         ranks_popular_week.extend(rank_popular_week_ls)
@@ -313,12 +444,18 @@ def pivot_candidates_list_to_rows(
         "candidate_aid": candidates,
         "retrieval_covisit": candidates_covisit,
         "retrieval_word2vec": candidates_word2vec,
+        "retrieval_word2vec_wgtd_rec": candidates_word2vec_wgtd_rec,
+        "retrieval_word2vec_wgtd_dur": candidates_word2vec_wgtd_dur,
+        "retrieval_word2vec_dur": candidates_word2vec_dur,
         "retrieval_fasttext": candidates_fasttext,
         # "retrieval_popular_hour": candidates_popular_hour,
         "retrieval_popular_week": candidates_popular_week,
         "retrieval_matrix_fact": candidates_matrix_fact,
         "rank_covisit": ranks_covisit,
         "rank_word2vec": ranks_word2vec,
+        "rank_word2vec_wgtd_rec": ranks_word2vec_wgtd_rec,
+        "rank_word2vec_wgtd_dur": ranks_word2vec_wgtd_dur,
+        "rank_word2vec_dur": ranks_word2vec_dur,
         "rank_fasttext": ranks_fasttext,
         # "rank_popular_hour": ranks_popular_hour,
         "rank_popular_week": ranks_popular_week,
@@ -333,12 +470,18 @@ def pivot_candidates_list_to_rows(
             pl.col("label").max(),
             pl.col("retrieval_covisit").max(),
             pl.col("retrieval_word2vec").max(),
+            pl.col("retrieval_word2vec_wgtd_rec").max(),
+            pl.col("retrieval_word2vec_wgtd_dur").max(),
+            pl.col("retrieval_word2vec_dur").max(),
             pl.col("retrieval_fasttext").max(),
             # pl.col("retrieval_popular_hour").max(),
             pl.col("retrieval_popular_week").max(),
             pl.col("retrieval_matrix_fact").max(),
             pl.col("rank_covisit").min(),
             pl.col("rank_word2vec").min(),
+            pl.col("rank_word2vec_wgtd_rec").min(),
+            pl.col("rank_word2vec_wgtd_dur").min(),
+            pl.col("rank_word2vec_dur").min(),
             pl.col("rank_fasttext").min(),
             # pl.col("rank_popular_hour").min(),
             pl.col("rank_popular_week").min(),
@@ -350,6 +493,34 @@ def pivot_candidates_list_to_rows(
     if ratio_negative_sample > 1:
         data = downsample(df=data.to_pandas(), negative_ratio=ratio_negative_sample)
         data = pl.from_pandas(data)
+
+    # create combined rank and ohe strategy
+    data = data.with_columns(
+        [
+            (
+                pl.col("retrieval_covisit")
+                + pl.col("retrieval_word2vec")
+                + pl.col("retrieval_word2vec_wgtd_rec")
+                + pl.col("retrieval_word2vec_wgtd_dur")
+                + pl.col("retrieval_word2vec_dur")
+                + pl.col("retrieval_fasttext")
+                + pl.col("retrieval_popular_week")
+                + pl.col("retrieval_matrix_fact")
+            ).alias("retrieval_combined"),
+            pl.min(
+                [
+                    "rank_covisit",
+                    "rank_word2vec",
+                    "rank_word2vec_wgtd_rec",
+                    "rank_word2vec_wgtd_dur",
+                    "rank_word2vec_dur",
+                    "rank_fasttext",
+                    "rank_popular_week",
+                    "rank_matrix_fact",
+                ]
+            ).alias("rank_combined"),
+        ]
+    )
 
     return data
 
@@ -410,7 +581,7 @@ def pivot_candidates(
             del cand_df
             gc.collect()
 
-            # candidate #3 matrix factorization
+            # candidate #4 matrix factorization
             filepath = f"{input_path}/{name}_{ix}_{event}_matrix_fact_list.parquet"
             cand_df = pd.read_parquet(filepath)
             matrix_fact_ses2candidates, matrix_fact_ses2cand_ranks = get_ses2candidates(
@@ -431,13 +602,37 @@ def pivot_candidates(
             del cand_df
             gc.collect()
 
-            # # candidate #6 popular hour
-            # filepath = f"{input_path}/{name}_{ix}_{event}_popular_hour_list.parquet"
-            # cand_df = pd.read_parquet(filepath)
-            # (
-            #     popular_hour_ses2candidates,
-            #     popular_hour_ses2cand_ranks,
-            # ) = get_ses2candidates(cand_df)
+            # candidate #6 word2vec weighted recency
+            filepath = f"{input_path}/{name}_{ix}_{event}_word2vec_weighted_recency_list.parquet"
+            cand_df = pd.read_parquet(filepath)
+            (
+                word2vec_wgtd_rec_ses2candidates,
+                word2vec_wgtd_rec_ses2cand_ranks,
+            ) = get_ses2candidates(cand_df)
+
+            del cand_df
+            gc.collect()
+
+            # candidate #7 word2vec duration
+            filepath = (
+                f"{input_path}/{name}_{ix}_{event}_word2vec_duration_list.parquet"
+            )
+            cand_df = pd.read_parquet(filepath)
+            (
+                word2vec_dur_ses2candidates,
+                word2vec_dur_ses2cand_ranks,
+            ) = get_ses2candidates(cand_df)
+
+            # candidate #8 word2vec weighted duration
+            filepath = f"{input_path}/{name}_{ix}_{event}_word2vec_weighted_duration_list.parquet"
+            cand_df = pd.read_parquet(filepath)
+            (
+                word2vec_wgtd_dur_ses2candidates,
+                word2vec_wgtd_dur_ses2cand_ranks,
+            ) = get_ses2candidates(cand_df)
+
+            del cand_df
+            gc.collect()
 
             ses2truth = {}
             if is_train:
@@ -458,12 +653,18 @@ def pivot_candidates(
                 fasttext_ses2candidates=fasttext_ses2candidates,
                 matrix_fact_ses2candidates=matrix_fact_ses2candidates,
                 popular_week_ses2candidates=popular_week_ses2candidates,
+                word2vec_wgtd_rec_ses2candidates=word2vec_wgtd_rec_ses2candidates,
+                word2vec_wgtd_dur_ses2candidates=word2vec_wgtd_dur_ses2candidates,
+                word2vec_dur_ses2candidates=word2vec_dur_ses2candidates,
                 # popular_hour_ses2candidates=popular_hour_ses2candidates,
                 covisit_ses2cand_ranks=covisit_ses2cand_ranks,
                 word2vec_ses2cand_ranks=word2vec_ses2cand_ranks,
                 fasttext_ses2cand_ranks=fasttext_ses2cand_ranks,
                 matrix_fact_ses2cand_ranks=matrix_fact_ses2cand_ranks,
                 popular_week_ses2cand_ranks=popular_week_ses2cand_ranks,
+                word2vec_wgtd_rec_ses2cand_ranks=word2vec_wgtd_rec_ses2cand_ranks,
+                word2vec_wgtd_dur_ses2cand_ranks=word2vec_wgtd_dur_ses2cand_ranks,
+                word2vec_dur_ses2cand_ranks=word2vec_dur_ses2cand_ranks,
                 # popular_hour_ses2cand_ranks=popular_hour_ses2cand_ranks,
                 is_train=is_train,
                 exclude_training_zero_positive=exclude_training_zero_positive,

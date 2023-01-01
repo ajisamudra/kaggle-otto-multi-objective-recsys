@@ -7,6 +7,9 @@ sample_last_week_data:
 split_into_chunks:
 	python src/preprocess_v2/split_data_into_chunks.py --mode $(MODE)
 
+preprocess_query_representation:
+	python src/preprocess_v2/make_query_representation.py --mode $(MODE)
+
 preprocess_popular_daily_candidate:
 	python src/preprocess_v2/make_popular_daily_item_candidates.py --mode $(MODE)
 
@@ -30,6 +33,15 @@ candidate_matrix_fact_list:
 
 candidate_word2vec_list:
 	python src/pipeline_v2/make_candidates_word2vec_list.py --mode $(MODE)
+
+candidate_word2vec_duration_list:
+	python src/pipeline_v2/make_candidates_word2vec_duration_list.py --mode $(MODE)
+
+candidate_word2vec_weighted_recency_list:
+	python src/pipeline_v2/make_candidates_word2vec_weighted_recency_list.py --mode $(MODE)
+
+candidate_word2vec_weighted_duration_list:
+	python src/pipeline_v2/make_candidates_word2vec_weighted_duration_list.py --mode $(MODE)
 
 candidate_fasttext_list:
 	python src/pipeline_v2/make_candidates_fasttext_list.py --mode $(MODE)
@@ -88,7 +100,7 @@ fasttext_features:
 	python src/features_v2/make_item_fasttext_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 combine_features:
-	python src/pipeline/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/pipeline_v2/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 remake_session_features: session_features combine_features
 remake_session_item_features: session_item_features combine_features

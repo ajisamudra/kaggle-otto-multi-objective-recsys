@@ -105,3 +105,15 @@ python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --wee
 
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+# Recall@170 0.626504 (n_cand 130) fea 142 without word2vec/fasttext/matrix fact distances
+# cat_ranker overall recall@20 0.569340758508474
+# CLICK_MODEL="2023-01-01_clicks_cat_ranker_60360_91190"
+# CART_MODEL="2023-01-01_carts_cat_ranker_74769_94383"
+# ORDER_MODEL="2023-01-01_orders_cat_ranker_86250_97127"
+
+# Recall@170 0.626504 (n_cand 130) fea 144 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
+# cat_ranker overall recall@20 0.5694135088803328
+# CLICK_MODEL="2023-01-01_clicks_cat_ranker_60425_91197"
+# CART_MODEL="2023-01-01_carts_cat_ranker_74776_94381"
+# ORDER_MODEL="2023-01-01_orders_cat_ranker_86246_97127"
