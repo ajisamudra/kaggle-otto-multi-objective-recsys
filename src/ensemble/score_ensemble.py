@@ -23,23 +23,44 @@ def score_ensemble():
     week_model = "w2"
     CONFIG = {
         "carts_models": [
-            "2022-12-23_carts_cat_ranker_62356_93099",
-            "2022-12-23_carts_lgbm_classifier_63946_93662",
+            "2022-12-25_carts_cat_ranker_65389_94260",
+            "2022-12-25_carts_lgbm_classifier_66769_94771",
+            "2022-12-26_carts_cat_classifier_67369_94709",
+            "2022-12-26_carts_lgbm_ranker_66196_93867",
         ],
-        "carts_powers": [1, 1],
-        "carts_weights": [0.6749021785428808, 0.3250978214571192],
+        "carts_powers": [1, 1, 1, 1],
+        "carts_weights": [
+            0.21217365264243337,
+            0.13146330225407726,
+            0.5424576834298213,
+            0.9647752025119785,
+        ],
         "clicks_models": [
-            "2022-12-23_clicks_cat_ranker_43213_88370",
-            "2022-12-23_clicks_lgbm_classifier_46496_89386",
+            "2022-12-25_clicks_cat_ranker_45439_89900",
+            "2022-12-25_clicks_lgbm_classifier_48807_90926",
+            "2022-12-26_clicks_cat_classifier_49243_90940",
+            "2022-12-26_clicks_lgbm_ranker_48370_89600",
         ],
-        "clicks_powers": [1, 1],
-        "clicks_weights": [0.9586760056794732, 0.0413239943205268],
+        "clicks_powers": [1, 1, 1, 1],
+        "clicks_weights": [
+            0.3077559158920544,
+            0.7141962809446453,
+            0.9794595914392629,
+            0.02759986680942235,
+        ],
         "orders_models": [
-            "2022-12-23_orders_cat_ranker_78326_96000",
-            "2022-12-23_orders_lgbm_classifier_79580_96565",
+            "2022-12-25_orders_cat_ranker_80132_96912",
+            "2022-12-25_orders_lgbm_classifier_81484_97385",
+            "2022-12-26_orders_cat_classifier_81621_97386",
+            "2022-12-26_orders_lgbm_ranker_78372_95814",
         ],
-        "orders_powers": [1, 1],
-        "orders_weights": [0.32958933593021145, 0.6704106640697886],
+        "orders_powers": [1, 1, 1, 1],
+        "orders_weights": [
+            0.6103638863604604,
+            0.9505596395979229,
+            0.8177860281174677,
+            0.05283426937328066,
+        ],
     }
     events_model_name = []
     pred_rows = 0
