@@ -16,13 +16,13 @@ from src.utils.constants import (
     get_processed_scoring_train_candidates_dir,
     get_processed_scoring_test_candidates_dir,
 )
-from src.utils.matrix_factorization import load_annoy_idx_matrix_fact_embedding
+from src.utils.fasttext import load_annoy_idx_fasttext_skipgram_wdw20_embedding
 from src.utils.logger import get_logger
 
 logging = get_logger()
 
 
-def suggest_clicks_matrix_fact(
+def suggest_clicks_fasttext(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
@@ -30,23 +30,28 @@ def suggest_clicks_matrix_fact(
 ):
     sessions = []
     candidates = []
+    ranks_list = []
     for session, aids in tqdm(ses2aids.items()):
         # unique_aids = set(aids)
         unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
-        mf_candidate = embedding.get_nns_by_item(unique_aids[0], n=n_candidate)
+        mf_candidate = embedding.get_nns_by_item(unique_aids[0], n=n_candidate + 1)
+        # drop first result which is the query aid
+        mf_candidate = mf_candidate[1:]
 
         # append to list result
+        rank_list = [i for i in range(n_candidate)]
         sessions.append(session)
         candidates.append(mf_candidate)
+        ranks_list.append(rank_list)
 
     # output series
     result_series = pd.Series(candidates, index=sessions)
     result_series.index.name = "session"
-    return result_series
+    return result_series, ranks_list
 
 
-def suggest_orders_matrix_fact(
+def suggest_orders_fasttext(
     n_candidate: int,
     ses2aids: dict,
     ses2types: dict,
@@ -139,32 +144,31 @@ def generate_candidates_matrix_fact(
 
         # retrieve matrix factorization candidates
         logging.info(f"retrieve candidate clicks")
-        clicks_candidates_series = suggest_clicks_matrix_fact(
-            n_candidate=CFG.matrix_factorization_candidates,
-            ses2aids=ses2aids,
-            ses2types=ses2types,
-            embedding=embedding,
-        )
-        logging.info(f"retrieve candidate orders")
-        orders_candidates_series = suggest_orders_matrix_fact(
-            n_candidate=CFG.matrix_factorization_candidates,
+        clicks_candidates_series, ranks_list = suggest_clicks_fasttext(
+            n_candidate=CFG.fasttext_candidates,
             ses2aids=ses2aids,
             ses2types=ses2types,
             embedding=embedding,
         )
 
+        # logging.info(f"retrieve candidate orders")
+        # orders_candidates_series = suggest_orders_fasttext(
+        #     n_candidate=CFG.fasttext_candidates,
+        #     ses2aids=ses2aids,
+        #     ses2types=ses2types,
+        #     embedding=embedding,
+        # )
+
         for event in ["clicks", "carts", "orders"]:
             logging.info(f"suggesting candidate {event}")
-            if event in ["clicks", "carts"]:
-                candidates_series_tmp = clicks_candidates_series.copy(deep=True)
-            else:
-                candidates_series_tmp = orders_candidates_series
+            candidates_series_tmp = clicks_candidates_series.copy(deep=True)
             logging.info("create candidates df")
             candidate_list_df = pd.DataFrame(
                 candidates_series_tmp.add_suffix(f"_{event}"), columns=["labels"]
             ).reset_index()
+            candidate_list_df["ranks"] = ranks_list
 
-            filepath = output_path / f"{name}_{ix}_{event}_matrix_fact_list.parquet"
+            filepath = output_path / f"{name}_{ix}_{event}_fasttext_list.parquet"
             logging.info(f"save chunk {ix} to: {filepath}")
             candidate_list_df.to_parquet(f"{filepath}")
 
@@ -180,11 +184,11 @@ def generate_candidates_matrix_fact(
 def main(mode: str):
 
     if mode in ["training_train", "training_test"]:
-        logging.info("read local matrix factorization index")
-        embedding = load_annoy_idx_matrix_fact_embedding()
+        logging.info("read local fasttext index")
+        embedding = load_annoy_idx_fasttext_skipgram_wdw20_embedding()
     else:
-        logging.info("read scoring matrix factorization index")
-        embedding = load_annoy_idx_matrix_fact_embedding(mode="scoring")
+        logging.info("read scoring fasttext index")
+        embedding = load_annoy_idx_fasttext_skipgram_wdw20_embedding(mode="scoring")
 
     if mode == "training_train":
         input_path = get_processed_training_train_splitted_dir()

@@ -60,6 +60,11 @@ def pivot_candidates_list_to_rows(
     sessions = []
     candidates = []
     labels = []
+    candidates_covisit = []
+    candidates_word2vec = []
+    candidates_fasttext = []
+    candidates_popular_hour = []
+    candidates_matrix_fact = []
 
     logging.info(
         f"pivot in train_mode: {is_train} | include_all_gt: {include_all_gt} | drop_zero_positive_sample: {drop_zero_positive_sample}"
@@ -78,6 +83,7 @@ def pivot_candidates_list_to_rows(
 
         # get candidates for specific session
         # covisitation candidates
+        covisit_cands = list(covisit_ses2candidates[session])
         cands = list(covisit_ses2candidates[session])
         # fasttext candidates
         fasttext_cands = list(fasttext_ses2candidates[session])
@@ -100,6 +106,11 @@ def pivot_candidates_list_to_rows(
 
         # check whether it's in truths
         label_ls = [1 if c in truths else 0 for c in cands]
+        covisit_ls = [1 if c in covisit_cands else 0 for c in cands]
+        fasttext_ls = [1 if c in fasttext_cands else 0 for c in cands]
+        word2vec_ls = [1 if c in word2vec_cands else 0 for c in cands]
+        matrix_fact_ls = [1 if c in matrix_fact_cands else 0 for c in cands]
+        popular_hour_ls = [1 if c in popular_hour_cands else 0 for c in cands]
         session_ls = [session for i in range(len(cands))]
         cands_ls = cands
 
@@ -130,10 +141,21 @@ def pivot_candidates_list_to_rows(
         candidates.extend(cands_ls)
         labels.extend(label_ls)
 
+        candidates_covisit.extend(covisit_ls)
+        candidates_word2vec.extend(fasttext_ls)
+        candidates_fasttext.extend(word2vec_ls)
+        candidates_popular_hour.extend(matrix_fact_ls)
+        candidates_matrix_fact.extend(popular_hour_ls)
+
     # save as df
     data = {
         "session": sessions,
         "candidate_aid": candidates,
+        "retrieval_covisit": candidates_covisit,
+        "retrieval_word2vec": candidates_word2vec,
+        "retrieval_fasttext": candidates_fasttext,
+        "retrieval_popular_hour": candidates_popular_hour,
+        "retrieval_matrix_fact": candidates_matrix_fact,
         "label": labels,
     }
 
@@ -262,7 +284,7 @@ def main(mode: str):
             input_path=input_path,
             output_path=output_path,
             df_truth=df_truth,
-            ratio_negative_sample=20,
+            ratio_negative_sample=10,
         )
 
     elif mode == "training_test":

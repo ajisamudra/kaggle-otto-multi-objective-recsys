@@ -4,49 +4,53 @@
 # python src/ensemble/tuning_ensemble3.py
 
 # # make split_into_chunks MODE=training_train
-# make candidate_list MODE=training_train
+# make candidate_covisit_list MODE=training_train
 # make candidate_word2vec_list MODE=training_train
 # make candidate_fasttext_list MODE=training_train
 # make candidate_matrix_fact_list MODE=training_train
-# make preprocess_popular_hour_candidate MODE=training_train
-# make candidate_popular_hour_list MODE=training_train
-# make candidate_rows MODE=training_train
-# make session_features MODE=training_train
-# make item_features MODE=training_train
-# make session_item_features MODE=training_train
-# make item_hour_features MODE=training_train
-# make item_weekday_features MODE=training_train
-# make session_representation_items MODE=training_train
-# make item_covisitation_features MODE=training_train START=0 END=30
+# make preprocess_popular_week_candidate MODE=training_train
+# make candidate_popular_week_list MODE=training_train
+# make preprocess_query_representation MODE=training_train
+make candidate_word2vec_duration_list MODE=training_train
+make candidate_word2vec_weighted_recency_list MODE=training_train
+make candidate_word2vec_weighted_duration_list MODE=training_train
+make candidate_rows MODE=training_train
+make session_features MODE=training_train
+make item_features MODE=training_train
+make session_item_features MODE=training_train
+make item_hour_features MODE=training_train
+make item_weekday_features MODE=training_train
+make session_representation_items MODE=training_train
+make item_covisitation_features MODE=training_train START=0 END=30
 # make matrix_factorization_features MODE=training_train START=0 END=30
 # make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
-# make combine_features  MODE=training_train START=0 END=30
+make combine_features  MODE=training_train START=0 END=30
 
 
 # # make split_into_chunks MODE=training_test
-# make candidate_list MODE=training_test
-# make candidate_word2vec_list MODE=training_test
-# # make preprocess_popular_daily_candidate MODE=training_test
-# # make preprocess_popular_datehour_candidate MODE=training_test
+# make candidate_covisit_list MODE=training_test
 # make preprocess_popular_hour_candidate MODE=training_test
-
-# # make candidate_popular_daily_list MODE=training_test
-# # make candidate_popular_datehour_list MODE=training_test
 # make candidate_popular_hour_list MODE=training_test
-
+# make preprocess_popular_week_candidate MODE=training_test
+# make candidate_popular_week_list MODE=training_test
+# make candidate_word2vec_list MODE=training_test
+make preprocess_query_representation MODE=training_test
+make candidate_word2vec_duration_list MODE=training_test
+make candidate_word2vec_weighted_recency_list MODE=training_test
+make candidate_word2vec_weighted_duration_list MODE=training_test
 # make candidate_fasttext_list MODE=training_test
 # make candidate_matrix_fact_list MODE=training_test
 # make candidate_list_eval MODE=training_test
-# make candidate_rows MODE=training_test
-# make session_features MODE=training_test
-# make item_features MODE=training_test
-# make session_item_features MODE=training_test
-# make item_hour_features MODE=training_test
-# make item_weekday_features MODE=training_test
-# make session_representation_items MODE=training_test
-# make item_covisitation_features MODE=training_test START=0 END=50
-# make item_covisitation_features MODE=training_test START=50 END=100
+make candidate_rows MODE=training_test
+make session_features MODE=training_test
+make item_features MODE=training_test
+make session_item_features MODE=training_test
+make item_hour_features MODE=training_test
+make item_weekday_features MODE=training_test
+make session_representation_items MODE=training_test
+make item_covisitation_features MODE=training_test START=0 END=50
+make item_covisitation_features MODE=training_test START=50 END=100
 # make matrix_factorization_features MODE=training_test START=0 END=25
 # make matrix_factorization_features MODE=training_test START=25 END=50
 # make matrix_factorization_features MODE=training_test START=50 END=75
@@ -55,10 +59,10 @@
 # make word2vec_features MODE=training_test START=50 END=100
 # make fasttext_features MODE=training_test START=0 END=50
 # make fasttext_features MODE=training_test START=50 END=100
-# make combine_features  MODE=training_test START=0 END=25
-# make combine_features  MODE=training_test START=25 END=50
-# make combine_features  MODE=training_test START=50 END=75
-# make combine_features  MODE=training_test START=75 END=100
+make combine_features  MODE=training_test START=0 END=25
+make combine_features  MODE=training_test START=25 END=50
+make combine_features  MODE=training_test START=50 END=75
+make combine_features  MODE=training_test START=75 END=100
 
 # make split_into_chunks MODE=scoring_test
 # make candidate_list MODE=scoring_test
@@ -99,13 +103,15 @@
 # make train_one_ranker ALGO=lgbm_ranker
 # make train_one_ranker ALGO=cat_ranker
 
-# make train ALGO=cat_ranker
-# make train ALGO=lgbm_classifier
+make train ALGO=cat_ranker
+make train ALGO=lgbm_classifier
 # python src/ensemble/evaluate_ensemble.py
 # python src/ensemble/evaluate_ensemble_multi_retrieval.py
-python src/ensemble/tuning_ensemble.py
+# python src/ensemble/tuning_ensemble.py
 # make train ALGO=cat_classifier
 # make train ALGO=lgbm_ranker
+# make candidate_list_eval MODE=training_test
+# make train ALGO=lgbm_classifier
 # python src/ensemble/score_ensemble_multi_retrieval.py
 
 # make one_ranker_dataset
@@ -206,3 +212,9 @@ python src/ensemble/tuning_ensemble.py
 
 # # eval submission, only for week_data & week_model w2
 # python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+
+
+# IDEA ADDITIONAL FEATURE ENGINEERING
+# Item-timeseries features avg/std_num_click/cart/order_D2/3/7 -> relative deviation
+# Item-timeseries features difference between D1 with avg_num_click/cart/order_D7 -> relative difference
+# target encoding in category: rank_combined, retrieval combined

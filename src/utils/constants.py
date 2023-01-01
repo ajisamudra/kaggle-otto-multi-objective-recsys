@@ -8,9 +8,13 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 class CFG:
     N_test = 100
     N_train = 30
-    covisit_candidates = 40
+    past_candidates = 20
+    covisit_candidates = 60
     fasttext_candidates = 20
     word2vec_candidates = 60
+    word2vec_weighted_recency_candidates = 30
+    word2vec_weighted_duration_candidates = 30
+    word2vec_duration_candidates = 30
     matrix_factorization_candidates = 10
 
 
@@ -403,6 +407,37 @@ def get_processed_scoring_train_session_representation_items_dir() -> Path:
 def get_processed_scoring_test_session_representation_items_dir() -> Path:
     path = get_processed_full_data_dir()
     path = path / "scoring" / "test_features" / "session_representation_items"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: QUERY REPRESENTATION
+
+
+def get_processed_training_train_query_representation_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "query_representation"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_query_representation_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "query_representation"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_query_representation_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "query_representation"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_query_representation_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "query_representation"
     check_directory(path)
     return path
 
