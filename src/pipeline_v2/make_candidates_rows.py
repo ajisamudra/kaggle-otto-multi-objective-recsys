@@ -309,7 +309,9 @@ def pivot_candidates_list_to_rows(
         rank_fasttext.extend(
             [len(fasttext_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
         )
-        rank_popular_week.extend(popular_week_ranks)
+        rank_popular_week.extend(
+            [len(popular_week_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
+        )
         rank_matrix_fact.extend(
             [len(matrix_fact_ranks) for i in range(len(word2vec_wgtd_rec_cands))]
         )
@@ -335,7 +337,9 @@ def pivot_candidates_list_to_rows(
         rank_fasttext.extend(
             [len(fasttext_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
         )
-        rank_popular_week.extend(popular_week_ranks)
+        rank_popular_week.extend(
+            [len(popular_week_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
+        )
         rank_matrix_fact.extend(
             [len(matrix_fact_ranks) for i in range(len(word2vec_wgtd_dur_cands))]
         )
@@ -361,7 +365,9 @@ def pivot_candidates_list_to_rows(
         rank_fasttext.extend(
             [len(fasttext_ranks) for i in range(len(word2vec_dur_cands))]
         )
-        rank_popular_week.extend(popular_week_ranks)
+        rank_popular_week.extend(
+            [len(popular_week_ranks) for i in range(len(word2vec_dur_cands))]
+        )
         rank_matrix_fact.extend(
             [len(matrix_fact_ranks) for i in range(len(word2vec_dur_cands))]
         )
