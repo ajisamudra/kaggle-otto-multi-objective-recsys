@@ -38,6 +38,13 @@ NTRIAL = 15
 
 # cat_ranker "overall_recall@20": "0.5695929680744091"
 # lgbm_ranker "overall_recall@20": "0.5688542539337484"
+# Trial 1 finished with value: 0.569759927658998 and parameters: {'click_wgt_1': 0.45621418924901, 'cart_wgt_1': 0.32405522029793843, 'order_wgt_1': 0.5667974917822581}. Best is trial 1 with value: 0.569759927658998.
+# Trial 8 finished with value: 0.5698359037779946 and parameters: {'click_wgt_1': 0.7517307679224978, 'cart_wgt_1': 0.08357715813409086, 'order_wgt_1': 0.4038794534569637}.
+# [2023-01-02 19:11:20,478] {tuning_ensemble_2models.py:239} INFO - Found best tuned value 0.5698462099188555
+# [2023-01-02 19:11:20,478] {tuning_ensemble_2models.py:240} INFO - Best hyperparams {'click_wgt_1': 0.7648897303135639, 'cart_wgt_1': 0.13914664356159773, 'order_wgt_1': 0.2687816835097516}
+# [2023-01-02 19:11:20,483] {tuning_ensemble_2models.py:252} INFO - saving artifacts to: /Users/ajisamudra/Documents/kaggle/kaggle-otto-multi-objective-recsys/artifacts/tuning/w2/ensemble/2023-01-02_ensemble_0.5697481893737697_0.5698462099188555
+# [2023-01-02 19:11:20,490] {tuning_ensemble_2models.py:291} INFO - Tuned value is higher than previous value! you should update hyperparams in training!
+# [2023-01-02 19:11:20,490] {tuning_ensemble_2models.py:294} INFO - {'before': 0.5697481893737697, 'after': 0.5698462099188555}
 CFG_MODEL = {
     "clicks_models": [
         "2023-01-02_clicks_cat_ranker_60409_91085",
@@ -85,7 +92,10 @@ def measure_ensemble_scores(hyperparams: dict):
                 df_tmp = pl.read_parquet(tmp_path)
                 # apply weights
                 df_tmp = df_tmp.with_columns(
-                    [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
+                    [
+                        (np.sign(pl.col("score")) * pow(pl.col("score"), POWERS[ix]))
+                        * WEIGHTS[ix]
+                    ]
                 )
                 df_chunk = pl.concat([df_chunk, df_tmp])
 
@@ -198,9 +208,9 @@ class ObjectiveEnsemble:
             "click_wgt_2": 1 - hyperparams["click_wgt_1"],
             "cart_wgt_2": 1 - hyperparams["cart_wgt_1"],
             "order_wgt_2": 1 - hyperparams["order_wgt_1"],
-            "click_pow": 1,
-            "cart_pow": 1,
-            "order_pow": 1,
+            "click_pow": 2,
+            "cart_pow": 2,
+            "order_pow": 2,
         }
 
         hyperparams.update(wgts_2)
@@ -219,9 +229,9 @@ def tune_ensemble():
         "cart_wgt_2": 0.5,
         "order_wgt_1": 0.5,
         "order_wgt_2": 0.5,
-        "click_pow": 1,
-        "cart_pow": 1,
-        "order_pow": 1,
+        "click_pow": 2,
+        "cart_pow": 2,
+        "order_pow": 2,
     }
 
     recall20_before = measure_ensemble_scores(hyperparams)

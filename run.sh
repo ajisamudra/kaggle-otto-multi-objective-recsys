@@ -112,8 +112,8 @@
 # make combine_features  MODE=training_test START=50 END=75
 # make combine_features  MODE=training_test START=75 END=100
 
-# make train ALGO=cat_ranker
-# make train ALGO=lgbm_ranker
+make train ALGO=cat_ranker
+make train ALGO=lgbm_ranker
 # make train ALGO=lgbm_classifier
 # python src/ensemble/evaluate_ensemble.py
 # python src/ensemble/evaluate_ensemble_multi_retrieval.py
@@ -125,7 +125,7 @@
 # python src/ensemble/score_ensemble_multi_retrieval.py
 
 # make one_ranker_dataset
-make train_one_ranker ALGO=cat_ranker
+# make train_one_ranker ALGO=cat_ranker
 # make train_one_ranker ALGO=lgbm_ranker
 # make train ALGO=lgbm_ranker
 # python src/training/train_one_ranker.py --event all --n 3 --algo lgbm_ranker --week w2 --eval 1

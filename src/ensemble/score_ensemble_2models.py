@@ -7,12 +7,9 @@ import joblib
 from pathlib import Path
 from src.utils.constants import (
     CFG,
-    get_processed_local_validation_dir,
-    get_data_output_local_submission_dir,  # scoring output dir
-    get_data_output_local_ensemble_submission_dir,
+    get_data_output_submission_dir,  # scoring output dir
+    get_data_output_ensemble_submission_dir,
 )
-
-from src.metrics.submission_evaluation import measure_recall
 from src.utils.memory import freemem, round_float_3decimals
 from src.utils.logger import get_logger
 
@@ -21,7 +18,7 @@ logging = get_logger()
 TARGET = "label"
 
 
-def evaluate_ensemble():
+def score_ensemble():
     N_test = 100
     week_model = "w2"
     CONFIG = {
@@ -44,7 +41,6 @@ def evaluate_ensemble():
         "orders_powers": [1, 1],
         "orders_weights": [0.2687816835097516, 0.7312183164902484],
     }
-
     events_model_name = []
     pred_rows = 0
     for EVENT in ["clicks", "carts", "orders"]:
@@ -56,7 +52,7 @@ def evaluate_ensemble():
         for i in tqdm(range(N_test)):
             df_chunk = pl.DataFrame()
             for ix in range(len(ARTIFACTS)):
-                input_path = get_data_output_local_submission_dir(
+                input_path = get_data_output_submission_dir(
                     event=EVENT, model=ARTIFACTS[ix], week_model=week_model
                 )
                 tmp_path = f"{input_path}/test_{i}_{EVENT}_scores.parquet"
@@ -77,7 +73,7 @@ def evaluate_ensemble():
 
             # save weighted scores
             event_model_name = "_".join(ARTIFACTS)
-            output_path = get_data_output_local_ensemble_submission_dir(
+            output_path = get_data_output_ensemble_submission_dir(
                 event=EVENT, model=event_model_name, week_model=week_model
             )
 
@@ -111,7 +107,7 @@ def evaluate_ensemble():
                 ]
             )
 
-            output_path = get_data_output_local_ensemble_submission_dir(
+            output_path = get_data_output_ensemble_submission_dir(
                 event="submission", model=event_model_name, week_model=week_model
             )
             tmp_path = f"{output_path}/test_{i}_{EVENT}_submission.parquet"
@@ -130,7 +126,7 @@ def evaluate_ensemble():
     logging.info("start collecting submission")
     df_pred = pl.DataFrame()
     for ix, EVENT in enumerate(["clicks", "carts", "orders"]):
-        sub_path = get_data_output_local_ensemble_submission_dir(
+        sub_path = get_data_output_ensemble_submission_dir(
             event="submission", model=events_model_name[ix], week_model=week_model
         )
         for i in tqdm(range(N_test)):
@@ -141,26 +137,21 @@ def evaluate_ensemble():
             del df_chunk
             gc.collect()
 
-    logging.info("start eval submission")
-    # read ground truth
-    ground_truth_path = get_processed_local_validation_dir()
-    df_truth = pl.read_parquet(f"{ground_truth_path}/test_labels.parquet")
-    logging.info(f"ground truth shape {df_truth.shape}")
-    logging.info(f"prediction shape {df_pred.shape}")
-    # compute metrics
-    dict_metrics = measure_recall(
-        df_pred=df_pred.to_pandas(), df_truth=df_truth.to_pandas(), Ks=[20]
+    # save final submission to csv
+    logging.info("save submission to csv")
+    sub_path = get_data_output_ensemble_submission_dir(
+        event="final_submission", model=events_model_name[ix], week_model=week_model
     )
-
-    recall20 = float(dict_metrics["overall_recall@20"])
-    logging.info(f"overall recall@20: {recall20}")
-
-    del df_pred, df_truth
-    gc.collect()
+    filepath = f"{sub_path}/submission.csv"
+    df_pred = freemem(df_pred)
+    df_pred.write_csv(f"{filepath}")
+    logging.info(f"save prediction submission to: {filepath}")
+    logging.info(f"output df shape {df_pred.shape}")
+    logging.info(f"make submission complete!")
 
 
 def main():
-    evaluate_ensemble()
+    score_ensemble()
 
 
 if __name__ == "__main__":
