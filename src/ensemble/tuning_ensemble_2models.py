@@ -29,18 +29,27 @@ NTRIAL = 15
 
 # cat_ranker "overall_recall@20": "0.5695929680744091"
 # lgbm_classifier "overall_recall@20": "0.5667783095704233"
+# Trial 2 finished with value: 0.5696346552018332 and
+# parameters: {
+#     "click_wgt_1": 0.5975616947764413,
+#     "cart_wgt_1": 0.9672440436318414,
+#     "order_wgt_1": 0.7183293513602571,
+# }
+
+# cat_ranker "overall_recall@20": "0.5695929680744091"
+# lgbm_ranker "overall_recall@20": "0.5688542539337484"
 CFG_MODEL = {
     "clicks_models": [
         "2023-01-02_clicks_cat_ranker_60409_91085",
-        "2023-01-02_clicks_lgbm_classifier_61914_91628",
+        "2023-01-02_clicks_lgbm_ranker_61486_91133",
     ],
     "carts_models": [
         "2023-01-02_carts_cat_ranker_75502_94516",
-        "2023-01-02_carts_lgbm_classifier_76552_94862",
+        "2023-01-02_carts_lgbm_ranker_75627_94287",
     ],
     "orders_models": [
         "2023-01-02_orders_cat_ranker_86674_97221",
-        "2023-01-02_orders_lgbm_classifier_87993_97567",
+        "2023-01-02_orders_lgbm_ranker_85360_96765",
     ],
 }
 

@@ -1840,3 +1840,4 @@ if __name__ == "__main__":
 
 
 # strategy covisit 60 word2vec 60 word2vec weighted recency 30 weighted duration 30 word2vec duration 30, fasttext 20, matrix fact 10, popular week 20 recall @260
+# Recall@260 0.6293097191557979 (avg n_cand 132)

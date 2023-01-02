@@ -27,6 +27,7 @@ from src.model.model import (
     LGBClassifier,
     LGBRanker,
     RankingModel,
+    CATOneRanker,
 )
 from src.metrics.model_evaluation import (
     summarise_feature_importance,
@@ -114,7 +115,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
         if algo == "lgbm_ranker":
             model = LGBRanker(**hyperparams)
         elif algo == "cat_ranker":
-            model = CATRanker(**hyperparams)
+            model = CATOneRanker(**hyperparams)
         else:
             raise NotImplementedError(
                 "algorithm not implemented! (lgbm_ranker/cat_ranker)"

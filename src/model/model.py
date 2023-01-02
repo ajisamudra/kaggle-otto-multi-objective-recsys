@@ -254,6 +254,58 @@ class CATRanker(RankingModel):
         return self.hyperprams
 
 
+# ONE RANKER
+class CATOneRanker(RankingModel):
+    def __init__(self, **kwargs):
+        self._early_stopping_rounds = kwargs.pop("early_stopping_rounds", 200)
+        self._verbose = kwargs.pop("verbose", 100)
+
+        kwargs["custom_metric"] = ["MAP:top=20", "NDCG:top=20"]
+        # kwargs[
+        #     "loss_function"
+        # ] = "QueryCrossEntropy"  # YetiRank, StochasticFilter, StochasticRank,
+
+        self.feature_importances_ = None
+        self.best_score_ = 0
+        self.hyperprams = {}
+
+        self._model = CatBoostRanker(loss_function="QueryRMSE", **kwargs)
+
+    def fit(self, X_train, X_val, y_train, y_val, group_train, group_val):
+
+        train_pool = Pool(data=X_train, label=y_train, group_id=group_train)
+
+        val_pool = Pool(data=X_val, label=y_val, group_id=group_val)
+
+        self._model.fit(
+            train_pool,
+            eval_set=val_pool,
+            use_best_model=True,
+            early_stopping_rounds=self._early_stopping_rounds,
+            verbose=self._verbose,
+        )
+
+        # feature importance as DataFrame
+        self.feature_importances_ = pd.DataFrame(
+            {
+                "feature": X_train.columns.to_list(),
+                "importance": self._model.feature_importances_,
+            }
+        ).sort_values(by="importance", ascending=False, ignore_index=True)
+
+        # best_score as float
+        self.best_score_ = self._model.get_best_score()
+        self.hyperprams = self._model.get_all_params()
+
+        return self
+
+    def predict(self, X_test):
+        return self._model.predict(X_test)
+
+    def get_params(self):
+        return self.hyperprams
+
+
 #### ENSEMBLE MODEL
 class EnsembleModels:
     """Wrapper for Ensemble Models

@@ -29,22 +29,22 @@ NTRIAL = 15
 
 CFG_MODEL = {
     "clicks_models": [
-        "2022-12-25_clicks_cat_ranker_45439_89900",
-        "2022-12-25_clicks_lgbm_classifier_48807_90926",
-        "2022-12-26_clicks_cat_classifier_49243_90940",
-        "2022-12-26_clicks_lgbm_ranker_48370_89600",
+        "2023-01-02_clicks_cat_ranker_60409_91085",
+        "2023-01-02_clicks_lgbm_ranker_61486_91133",
+        "2023-01-02_clicks_cat_ranker_60409_91085",
+        "2023-01-02_clicks_lgbm_ranker_61486_91133",
     ],
     "carts_models": [
-        "2022-12-25_carts_cat_ranker_65389_94260",
-        "2022-12-25_carts_lgbm_classifier_66769_94771",
-        "2022-12-26_carts_cat_classifier_67369_94709",
-        "2022-12-26_carts_lgbm_ranker_66196_93867",
+        "2023-01-02_carts_cat_ranker_75502_94516",
+        "2023-01-02_carts_lgbm_ranker_75627_94287",
+        "2023-01-02_carts_cat_ranker_75502_94516",
+        "2023-01-02_carts_lgbm_ranker_75627_94287",
     ],
     "orders_models": [
-        "2022-12-25_orders_cat_ranker_80132_96912",
-        "2022-12-25_orders_lgbm_classifier_81484_97385",
-        "2022-12-26_orders_cat_classifier_81621_97386",
-        "2022-12-26_orders_lgbm_ranker_78372_95814",
+        "2023-01-02_orders_cat_ranker_86674_97221",
+        "2023-01-02_orders_lgbm_ranker_85360_96765",
+        "2023-01-02_orders_cat_ranker_86674_97221",
+        "2023-01-02_orders_lgbm_ranker_85360_96765",
     ],
 }
 
@@ -231,6 +231,32 @@ class ObjectiveEnsemble:
             "order_wgt_4": trial.suggest_float("order_wgt_4", 0.01, 0.99),
         }
 
+        # constraints sum of weights <= 1
+        cclick = (
+            hyperparams["click_wgt_1"]
+            + hyperparams["click_wgt_2"]
+            + hyperparams["click_wgt_3"]
+            + hyperparams["click_wgt_4"]
+            - 1
+        )
+        ccart = (
+            hyperparams["cart_wgt_1"]
+            + hyperparams["cart_wgt_2"]
+            + hyperparams["cart_wgt_3"]
+            + hyperparams["cart_wgt_4"]
+            - 1
+        )
+        corder = (
+            hyperparams["order_wgt_1"]
+            + hyperparams["order_wgt_2"]
+            + hyperparams["order_wgt_3"]
+            + hyperparams["order_wgt_4"]
+            - 1
+        )
+
+        # Store the constraints as user attributes so that they can be restored after optimization.
+        trial.set_user_attr("constraint", (cclick, ccart, corder))
+
         wgts_2 = {
             "click_pow": 1,
             "cart_pow": 1,
@@ -244,31 +270,39 @@ class ObjectiveEnsemble:
         return recall20
 
 
-def tune_ensemble():
-    logging.info("measure ensemble recall@20 before tuning")
-    hyperparams = {
-        "click_wgt_1": 0.25,
-        "click_wgt_2": 0.25,
-        "click_wgt_3": 0.25,
-        "click_wgt_4": 0.25,
-        "cart_wgt_1": 0.25,
-        "cart_wgt_2": 0.25,
-        "cart_wgt_3": 0.25,
-        "cart_wgt_4": 0.25,
-        "order_wgt_1": 0.25,
-        "order_wgt_2": 0.25,
-        "order_wgt_3": 0.25,
-        "order_wgt_4": 0.25,
-        "click_pow": 1,
-        "cart_pow": 1,
-        "order_pow": 1,
-    }
+def constraints(trial):
+    return trial.user_attrs["constraint"]
 
-    recall20_before = measure_ensemble_scores(hyperparams)
-    logging.info(f"ensemble recall@20 before tuning: {recall20_before}")
+
+def tune_ensemble():
+    # logging.info("measure ensemble recall@20 before tuning")
+    # hyperparams = {
+    #     "click_wgt_1": 0.25,
+    #     "click_wgt_2": 0.25,
+    #     "click_wgt_3": 0.25,
+    #     "click_wgt_4": 0.25,
+    #     "cart_wgt_1": 0.25,
+    #     "cart_wgt_2": 0.25,
+    #     "cart_wgt_3": 0.25,
+    #     "cart_wgt_4": 0.25,
+    #     "order_wgt_1": 0.25,
+    #     "order_wgt_2": 0.25,
+    #     "order_wgt_3": 0.25,
+    #     "order_wgt_4": 0.25,
+    #     "click_pow": 1,
+    #     "cart_pow": 1,
+    #     "order_pow": 1,
+    # }
+
+    # recall20_before = measure_ensemble_scores(hyperparams)
+    # logging.info(f"ensemble recall@20 before tuning: {recall20_before}")
 
     logging.info("perform tuning")
-    study = optuna.create_study(direction="maximize", sampler=TPESampler())
+    sampler = optuna.integration.BoTorchSampler(
+        constraints_func=constraints,
+        n_startup_trials=3,
+    )
+    study = optuna.create_study(direction="maximize", sampler=sampler)
     study.optimize(ObjectiveEnsemble(), n_trials=NTRIAL)
 
     logging.info("complete tuning!")
