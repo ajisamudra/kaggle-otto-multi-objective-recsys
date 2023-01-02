@@ -49,62 +49,26 @@
 # ORDER_MODEL="2022-12-23_orders_cat_ranker_78326_96000"
 
 
-#sub8 CV 0.5687338005167984 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
-CLICK_MODEL="2022-12-25_clicks_cat_ranker_45439_89900"
-CART_MODEL="2022-12-25_carts_cat_ranker_65389_94260"
-ORDER_MODEL="2022-12-25_orders_cat_ranker_80132_96912"
-WEEK_DATA=w1
+# #sub8 CV 0.5687338005167984 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+# CLICK_MODEL="2022-12-25_clicks_cat_ranker_45439_89900"
+# CART_MODEL="2022-12-25_carts_cat_ranker_65389_94260"
+# ORDER_MODEL="2022-12-25_orders_cat_ranker_80132_96912"
+# WEEK_DATA=w1
 
-# # perform scoring
-python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+# # sub9 CV 0.567130953598196 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+# CLICK_MODEL="2022-12-25_clicks_lgbm_classifier_48807_90926"
+# CART_MODEL="2022-12-25_carts_lgbm_classifier_66769_94771"
+# ORDER_MODEL="2022-12-25_orders_lgbm_classifier_81484_97385"
 
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# #sub10 CV 0.5662789963494648 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+# CLICK_MODEL="2022-12-26_clicks_cat_classifier_49243_90940"
+# CART_MODEL="2022-12-26_carts_cat_classifier_67369_94709"
+# ORDER_MODEL="2022-12-26_orders_cat_classifier_81621_97386"
 
-
-# sub9 CV 0.567130953598196 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
-CLICK_MODEL="2022-12-25_clicks_lgbm_classifier_48807_90926"
-CART_MODEL="2022-12-25_carts_lgbm_classifier_66769_94771"
-ORDER_MODEL="2022-12-25_orders_lgbm_classifier_81484_97385"
-WEEK_DATA=w1
-
-# # perform scoring
-python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
-
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
-
-#sub10 CV 0.5662789963494648 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
-CLICK_MODEL="2022-12-26_clicks_cat_classifier_49243_90940"
-CART_MODEL="2022-12-26_carts_cat_classifier_67369_94709"
-ORDER_MODEL="2022-12-26_orders_cat_classifier_81621_97386"
-WEEK_DATA=w1
-
-# # perform scoring
-python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
-
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
-
-#sub11 CV 0.5672425543156044 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
-CLICK_MODEL="2022-12-26_clicks_lgbm_ranker_48370_89600"
-CART_MODEL="2022-12-26_carts_lgbm_ranker_66196_93867"
-ORDER_MODEL="2022-12-26_orders_lgbm_ranker_78372_95814"
-WEEK_DATA=w1
-
-# # perform scoring
-python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
-
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# #sub11 CV 0.5672425543156044 Fea 172 recall@150 0.6185134 feature wor2vec vect32 LB XXX
+# CLICK_MODEL="2022-12-26_clicks_lgbm_ranker_48370_89600"
+# CART_MODEL="2022-12-26_carts_lgbm_ranker_66196_93867"
+# ORDER_MODEL="2022-12-26_orders_lgbm_ranker_78372_95814"
 
 # Recall@170 0.626504 (n_cand 130) fea 142 without word2vec/fasttext/matrix fact distances
 # cat_ranker overall recall@20 0.569340758508474
@@ -117,3 +81,33 @@ python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $C
 # CLICK_MODEL="2023-01-01_clicks_cat_ranker_60425_91197"
 # CART_MODEL="2023-01-01_carts_cat_ranker_74776_94381"
 # ORDER_MODEL="2023-01-01_orders_cat_ranker_86246_97127"
+
+# Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
+# overall recall@20 0.5695929680744091
+CLICK_MODEL="2023-01-02_clicks_cat_ranker_60409_91085"
+CART_MODEL="2023-01-02_carts_cat_ranker_75502_94516"
+ORDER_MODEL="2023-01-02_orders_cat_ranker_86674_97221"
+WEEK_DATA=w1
+
+# # perform scoring
+python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+# Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
+# overall recall@20 0.5667783095704233
+CLICK_MODEL="2023-01-02_clicks_lgbm_classifier_61914_91628"
+CART_MODEL="2023-01-02_carts_lgbm_classifier_76552_94862"
+ORDER_MODEL="2023-01-02_orders_lgbm_classifier_87993_97567"
+WEEK_DATA=w1
+
+# # perform scoring
+python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
+python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
+python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
