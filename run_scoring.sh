@@ -82,51 +82,23 @@
 # CART_MODEL="2023-01-01_carts_cat_ranker_74776_94381"
 # ORDER_MODEL="2023-01-01_orders_cat_ranker_86246_97127"
 
-# Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
-# overall recall@20 0.5695929680744091
-CLICK_MODEL="2023-01-02_clicks_cat_ranker_60409_91085"
-CART_MODEL="2023-01-02_carts_cat_ranker_75502_94516"
-ORDER_MODEL="2023-01-02_orders_cat_ranker_86674_97221"
-WEEK_DATA=w1
+# # Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
+# # overall recall@20 0.5695929680744091
+# CLICK_MODEL="2023-01-02_clicks_cat_ranker_60409_91085"
+# CART_MODEL="2023-01-02_carts_cat_ranker_75502_94516"
+# ORDER_MODEL="2023-01-02_orders_cat_ranker_86674_97221"
 
-# # perform scoring
-python src/scoring/score.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
+# # Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
+# # overall recall@20 0.5667783095704233
+# CLICK_MODEL="2023-01-02_clicks_lgbm_classifier_61914_91628"
+# CART_MODEL="2023-01-02_carts_lgbm_classifier_76552_94862"
+# ORDER_MODEL="2023-01-02_orders_lgbm_classifier_87993_97567"
 
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
-
-# Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
-# overall recall@20 0.5667783095704233
-CLICK_MODEL="2023-01-02_clicks_lgbm_classifier_61914_91628"
-CART_MODEL="2023-01-02_carts_lgbm_classifier_76552_94862"
-ORDER_MODEL="2023-01-02_orders_lgbm_classifier_87993_97567"
-WEEK_DATA=w1
-
-# # perform scoring
-python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
-
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
-
-
-# Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
-# overall recall@20 0.5688542539337484
-CLICK_MODEL="2023-01-02_clicks_lgbm_ranker_61486_91133"
-CART_MODEL="2023-01-02_carts_lgbm_ranker_75627_94287"
-ORDER_MODEL="2023-01-02_orders_lgbm_ranker_85360_96765"
-WEEK_DATA=w1
-
-# # perform scoring
-python src/scoring/score_treelite.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
-python src/scoring/score_treelite.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
-python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
-
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# # Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
+# # overall recall@20 0.5688542539337484
+# CLICK_MODEL="2023-01-02_clicks_lgbm_ranker_61486_91133"
+# CART_MODEL="2023-01-02_carts_lgbm_ranker_75627_94287"
+# ORDER_MODEL="2023-01-02_orders_lgbm_ranker_85360_96765"
 
 # Recall@260 0.6293097191557979 (n_cand 132) fea 160 with word2vec distances addd rank_combined & retrieval_combined
 # overall recall@20 0.5701213987848911
@@ -143,7 +115,7 @@ python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-# Recall@260 0.6293097191557979 (n_cand 132) fea 150 without word2vec/fasttext/matrix fact distances addd rank_combined & retrieval_combined
+# Recall@260 0.6293097191557979 (n_cand 132) fea 160 with word2vec distances addd rank_combined & retrieval_combined
 # overall recall@20 0.5692079551369664
 CLICK_MODEL="2023-01-02_clicks_lgbm_ranker_61844_91502"
 CART_MODEL="2023-01-02_carts_lgbm_ranker_75879_94504"
