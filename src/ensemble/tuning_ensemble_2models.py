@@ -277,16 +277,16 @@ def tune_ensemble():
             1 - best_hyperparams["order_wgt_1"],
         ],
         "clicks_powers": [
-            1,
-            1,
+            2,
+            2,
         ],
         "carts_powers": [
-            1,
-            1,
+            2,
+            2,
         ],
         "orders_powers": [
-            1,
-            1,
+            2,
+            2,
         ],
     }
     CONFIG.update(CFG_MODEL)
