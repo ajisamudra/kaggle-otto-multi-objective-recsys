@@ -44,10 +44,9 @@ def gen_target_encoding(data: pl.DataFrame, column: str):
     global_mean = {
         column: [-1],
         f"target_encoding_{column}_mean": [data[TARGET].mean()],
-        f"{column}_count": [data[TARGET].shape[0]],
     }
     global_mean = pl.DataFrame(global_mean)
-    data_agg = data_agg.with_columns([pl.col(f"{column}_count").cast(pl.Int32)])
+    # data_agg = data_agg.with_columns([pl.col(f"{column}_count").cast(pl.Int32)])
     data_agg = freemem(data_agg)
     global_mean = freemem(global_mean)
 
