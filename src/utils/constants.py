@@ -16,6 +16,7 @@ class CFG:
     word2vec_weighted_duration_candidates = 30
     word2vec_duration_candidates = 30
     matrix_factorization_candidates = 10
+    type_weight_multipliers = {0: 0.5, 1: 9, 2: 0.5}
 
 
 ### Create directory
@@ -562,6 +563,37 @@ def get_processed_scoring_train_dataset_dir() -> Path:
 def get_processed_scoring_test_dataset_dir() -> Path:
     path = get_processed_full_data_dir()
     path = path / "scoring" / "test_final_dataset"
+    check_directory(path)
+    return path
+
+
+### Data/Processed Dir: TARGET-ENCODING FEATURES
+
+
+def get_processed_training_train_target_encoding_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "train_features" / "target_encoding"
+    check_directory(path)
+    return path
+
+
+def get_processed_training_test_target_encoding_dir() -> Path:
+    path = get_processed_local_validation_dir()
+    path = path / "training" / "test_features" / "target_encoding"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_train_target_encoding_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "train_features" / "target_encoding"
+    check_directory(path)
+    return path
+
+
+def get_processed_scoring_test_target_encoding_dir() -> Path:
+    path = get_processed_full_data_dir()
+    path = path / "scoring" / "test_features" / "target_encoding"
     check_directory(path)
     return path
 

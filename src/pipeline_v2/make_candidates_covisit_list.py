@@ -36,7 +36,6 @@ def suggest_clicks(
     """
     covisit_click is dict of aid as key and list of suggested aid as value
     """
-    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
 
     sessions = []
     candidates = []
@@ -52,7 +51,7 @@ def suggest_clicks(
             aids_temp = Counter()
             # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
             for aid, w, t in zip(aids, weights, types):
-                aids_temp[aid] += w * type_weight_multipliers[t]
+                aids_temp[aid] += w * CFG.type_weight_multipliers[t]
             candidate = [k for k, v in aids_temp.most_common(n_candidate)]
 
         else:
@@ -96,7 +95,6 @@ def suggest_carts(
     """
     covisit_click is dict of aid as key and list of suggested aid as value
     """
-    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
 
     sessions = []
     candidates = []
@@ -111,7 +109,8 @@ def suggest_carts(
             if (curr_type == 0) or (curr_type == 1):
                 unique_buys.append(aid)
 
-        unique_buys = set(unique_buys)
+        # reverse the order
+        unique_buys = list(dict.fromkeys(unique_buys[::-1]))
 
         # RERANK CANDIDATES USING WEIGHTS
         if len(unique_aids) >= 20:
@@ -120,7 +119,7 @@ def suggest_carts(
 
             # Rerank based on repeat items and types of items
             for aid, w, t in zip(aids, weights, types):
-                aids_temp[aid] += w * type_weight_multipliers[t]
+                aids_temp[aid] += w * CFG.type_weight_multipliers[t]
 
             # Rerank candidates using"top_20_carts" co-visitation matrix
             aids2 = list(
@@ -180,7 +179,6 @@ def suggest_buys(
     """
     covisit_click is dict of aid as key and list of suggested aid as value
     """
-    type_weight_multipliers = {0: 1, 1: 6, 2: 3}
 
     sessions = []
     candidates = []
@@ -195,7 +193,8 @@ def suggest_buys(
             if (curr_type == 1) or (curr_type == 2):
                 unique_buys.append(aid)
 
-        unique_buys = set(unique_buys)
+        # reverse the order
+        unique_buys = list(dict.fromkeys(unique_buys[::-1]))
 
         # RERANK CANDIDATES USING WEIGHTS
         if len(unique_aids) >= 20:
@@ -204,7 +203,7 @@ def suggest_buys(
 
             # Rerank based on repeat items and types of items
             for aid, w, t in zip(aids, weights, types):
-                aids_temp[aid] += w * type_weight_multipliers[t]
+                aids_temp[aid] += w * CFG.type_weight_multipliers[t]
 
             # RERANK CANDIDATES USING "BUY2BUY" CO-VISITATION MATRIX
             aids3 = list(

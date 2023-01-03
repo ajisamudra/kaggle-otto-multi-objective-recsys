@@ -5,7 +5,7 @@ from src.utils.constants import get_local_covisitation_dir, get_scoring_covisita
 from src.utils.memory import freemem
 
 DISK_PIECES = 4
-VER = 9
+VER = 10
 
 
 def pqt_to_dict(df):

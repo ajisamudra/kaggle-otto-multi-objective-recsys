@@ -102,6 +102,12 @@ fasttext_features:
 combine_features:
 	python src/pipeline_v2/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
+target_encoding:
+	python src/features_v2/make_target_encoding_features.py --mode $(MODE)
+
+combine_features_l2:
+	python src/pipeline_v2/make_combine_features_l2.py --mode $(MODE) --istart $(START) --iend $(END)
+
 remake_session_features: session_features combine_features
 remake_session_item_features: session_item_features combine_features
 remake_item_features: item_features combine_features
