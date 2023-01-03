@@ -47,18 +47,19 @@ NTRIAL = 15
 # [2023-01-02 19:11:20,490] {tuning_ensemble_2models.py:294} INFO - {'before': 0.5697481893737697, 'after': 0.5698462099188555}
 CFG_MODEL = {
     "clicks_models": [
-        "2023-01-02_clicks_cat_ranker_60409_91085",
-        "2023-01-02_clicks_lgbm_ranker_61486_91133",
+        "2023-01-02_clicks_cat_ranker_60593_91362",
+        "2023-01-02_clicks_lgbm_ranker_61844_91502",
     ],
     "carts_models": [
-        "2023-01-02_carts_cat_ranker_75502_94516",
-        "2023-01-02_carts_lgbm_ranker_75627_94287",
+        "2023-01-02_carts_cat_ranker_75708_94697",
+        "2023-01-02_carts_lgbm_ranker_75879_94504",
     ],
     "orders_models": [
-        "2023-01-02_orders_cat_ranker_86674_97221",
-        "2023-01-02_orders_lgbm_ranker_85360_96765",
+        "2023-01-02_orders_cat_ranker_86779_97309",
+        "2023-01-02_orders_lgbm_ranker_85371_96813",
     ],
 }
+# Trial 0 finished with value: 0.570389305258137 and parameters: {'click_wgt_1': 0.2585326336756335, 'cart_wgt_1': 0.12190704613077386, 'order_wgt_1': 0.8761413773666954}.
 
 
 def measure_ensemble_scores(hyperparams: dict):
@@ -92,10 +93,7 @@ def measure_ensemble_scores(hyperparams: dict):
                 df_tmp = pl.read_parquet(tmp_path)
                 # apply weights
                 df_tmp = df_tmp.with_columns(
-                    [
-                        (np.sign(pl.col("score")) * pow(pl.col("score"), POWERS[ix]))
-                        * WEIGHTS[ix]
-                    ]
+                    [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
                 )
                 df_chunk = pl.concat([df_chunk, df_tmp])
 
@@ -208,9 +206,9 @@ class ObjectiveEnsemble:
             "click_wgt_2": 1 - hyperparams["click_wgt_1"],
             "cart_wgt_2": 1 - hyperparams["cart_wgt_1"],
             "order_wgt_2": 1 - hyperparams["order_wgt_1"],
-            "click_pow": 2,
-            "cart_pow": 2,
-            "order_pow": 2,
+            "click_pow": 1,
+            "cart_pow": 1,
+            "order_pow": 1,
         }
 
         hyperparams.update(wgts_2)
@@ -229,9 +227,9 @@ def tune_ensemble():
         "cart_wgt_2": 0.5,
         "order_wgt_1": 0.5,
         "order_wgt_2": 0.5,
-        "click_pow": 2,
-        "cart_pow": 2,
-        "order_pow": 2,
+        "click_pow": 1,
+        "cart_pow": 1,
+        "order_pow": 1,
     }
 
     recall20_before = measure_ensemble_scores(hyperparams)
@@ -277,16 +275,16 @@ def tune_ensemble():
             1 - best_hyperparams["order_wgt_1"],
         ],
         "clicks_powers": [
-            2,
-            2,
+            1,
+            1,
         ],
         "carts_powers": [
-            2,
-            2,
+            1,
+            1,
         ],
         "orders_powers": [
-            2,
-            2,
+            1,
+            1,
         ],
     }
     CONFIG.update(CFG_MODEL)
