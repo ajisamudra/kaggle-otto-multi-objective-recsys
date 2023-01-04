@@ -205,19 +205,19 @@ def fcombine_features(mode: str, event: str, ix: int):
     # del matrix_fact_fea
     # gc.collect()
 
-    # read word2vec features
-    word2vec_fea_df = pl.read_parquet(word2vec_path)
-    logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
-    cand_df = cand_df.join(
-        word2vec_fea_df,
-        how="left",
-        left_on=["session", "candidate_aid"],
-        right_on=["session", "candidate_aid"],
-    )
-    logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
+    # # read word2vec features
+    # word2vec_fea_df = pl.read_parquet(word2vec_path)
+    # logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
+    # cand_df = cand_df.join(
+    #     word2vec_fea_df,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "candidate_aid"],
+    # )
+    # logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
-    del word2vec_fea_df
-    gc.collect()
+    # del word2vec_fea_df
+    # gc.collect()
 
     # # read fasttext features
     # fasttext_fea_df = pl.read_parquet(fasttext_path)

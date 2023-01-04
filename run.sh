@@ -4,7 +4,7 @@
 # python src/ensemble/tuning_ensemble3.py
 
 # # make split_into_chunks MODE=training_train
-# make candidate_covisit_list MODE=training_train
+make candidate_covisit_list MODE=training_train
 # make candidate_word2vec_list MODE=training_train
 # make candidate_fasttext_list MODE=training_train
 # make candidate_matrix_fact_list MODE=training_train
@@ -14,14 +14,14 @@
 # make candidate_word2vec_duration_list MODE=training_train
 # make candidate_word2vec_weighted_recency_list MODE=training_train
 # make candidate_word2vec_weighted_duration_list MODE=training_train
-# make candidate_rows MODE=training_train
-# make session_features MODE=training_train
-# make item_features MODE=training_train
+make candidate_rows MODE=training_train
+make session_features MODE=training_train
+make item_features MODE=training_train
 make session_item_features MODE=training_train
-# make item_hour_features MODE=training_train
-# make item_weekday_features MODE=training_train
-# make session_representation_items MODE=training_train
-# make item_covisitation_features MODE=training_train START=0 END=30
+make item_hour_features MODE=training_train
+make item_weekday_features MODE=training_train
+make session_representation_items MODE=training_train
+make item_covisitation_features MODE=training_train START=0 END=30
 # make matrix_factorization_features MODE=training_train START=0 END=30
 # make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
@@ -31,7 +31,7 @@ make combine_features_l2  MODE=training_train START=0 END=30
 
 
 # # make split_into_chunks MODE=training_test
-# make candidate_covisit_list MODE=training_test
+make candidate_covisit_list MODE=training_test
 # make preprocess_popular_hour_candidate MODE=training_test
 # make candidate_popular_hour_list MODE=training_test
 # make preprocess_popular_week_candidate MODE=training_test
@@ -44,20 +44,20 @@ make combine_features_l2  MODE=training_train START=0 END=30
 # make candidate_fasttext_list MODE=training_test
 # make candidate_matrix_fact_list MODE=training_test
 # make candidate_list_eval MODE=training_test
-# make candidate_rows MODE=training_test
-# make session_features MODE=training_test
-# make item_features MODE=training_test
+make candidate_rows MODE=training_test
+make session_features MODE=training_test
+make item_features MODE=training_test
 make session_item_features MODE=training_test
-# make item_hour_features MODE=training_test
-# make item_weekday_features MODE=training_test
-# make session_representation_items MODE=training_test
-# make item_covisitation_features MODE=training_test START=0 END=50
-# make item_covisitation_features MODE=training_test START=50 END=100
+make item_hour_features MODE=training_test
+make item_weekday_features MODE=training_test
+make session_representation_items MODE=training_test
+make item_covisitation_features MODE=training_test START=0 END=50
+make item_covisitation_features MODE=training_test START=50 END=100
 # make matrix_factorization_features MODE=training_test START=0 END=25
 # make matrix_factorization_features MODE=training_test START=25 END=50
 # make matrix_factorization_features MODE=training_test START=50 END=75
 # make matrix_factorization_features MODE=training_test START=75 END=100
-# # make word2vec_features MODE=training_test START=0 END=50
+# make word2vec_features MODE=training_test START=0 END=50
 # make word2vec_features MODE=training_test START=50 END=100
 # make fasttext_features MODE=training_test START=0 END=50
 # make fasttext_features MODE=training_test START=50 END=100
