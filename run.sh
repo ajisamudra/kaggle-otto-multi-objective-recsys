@@ -25,7 +25,7 @@
 # make matrix_factorization_features MODE=training_train START=0 END=30
 # make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
-make combine_features  MODE=training_train START=0 END=30
+# make combine_features  MODE=training_train START=0 END=30
 # make target_encoding MODE=training_train
 # make combine_features_l2  MODE=training_train START=0 END=30
 
@@ -61,10 +61,10 @@ make combine_features  MODE=training_train START=0 END=30
 # make word2vec_features MODE=training_test START=50 END=100
 # make fasttext_features MODE=training_test START=0 END=50
 # make fasttext_features MODE=training_test START=50 END=100
-make combine_features  MODE=training_test START=0 END=25
-make combine_features  MODE=training_test START=25 END=50
-make combine_features  MODE=training_test START=50 END=75
-make combine_features  MODE=training_test START=75 END=100
+# make combine_features  MODE=training_test START=0 END=25
+# make combine_features  MODE=training_test START=25 END=50
+# make combine_features  MODE=training_test START=50 END=75
+# make combine_features  MODE=training_test START=75 END=100
 # make target_encoding MODE=training_test
 # make combine_features_l2  MODE=training_test START=0 END=25
 # make combine_features_l2  MODE=training_test START=25 END=50
@@ -114,12 +114,12 @@ make combine_features  MODE=training_test START=75 END=100
 
 # make combine_features  MODE=training_train START=0 END=30
 
-# make combine_features  MODE=training_test START=0 END=25
+# make combine_features  MODE=training_test START=0 END=20
 # make combine_features  MODE=training_test START=25 END=50
 # make combine_features  MODE=training_test START=50 END=75
 # make combine_features  MODE=training_test START=75 END=100
 
-make train ALGO=cat_ranker
+# make train ALGO=cat_ranker
 # make train ALGO=lgbm_ranker
 # make word2vec_features START=0 END=30
 # make word2vec_features MODE=training_test START=24 END=50
@@ -199,21 +199,37 @@ make train ALGO=cat_ranker
 # # eval submission, only for week_data & week_model w2
 # python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
-# # TRAINING EVALUATION
-# CLICK_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
-# CART_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
-# ORDER_MODEL="2022-12-17_one_ranker_lgbm_ranker_73977_44325_43583"
-# WEEK_DATA=w2
+# TRAINING EVALUATION
+CLICK_MODEL="2023-01-06_clicks_cat_ranker_60730_91151"
+CART_MODEL="2023-01-05_carts_cat_ranker_75642_94553"
+ORDER_MODEL="2023-01-05_orders_cat_ranker_86561_97213"
+WEEK_DATA=w2
+
+# {
+#     "cart_model": "2023-01-05_carts_cat_ranker_75642_94553",
+#     "carts_gt@20": "576482",
+#     "carts_hits@20": "241808",
+#     "carts_recall@20": "0.4194545536547542",
+#     "click_model": "2023-01-06_clicks_cat_ranker_60730_91151",
+#     "clicks_gt@20": "1755534",
+#     "clicks_hits@20": "930925",
+#     "clicks_recall@20": "0.5302802452131374",
+#     "order_model": "2023-01-05_orders_cat_ranker_86561_97213",
+#     "orders_gt@20": "313303",
+#     "orders_hits@20": "204165",
+#     "orders_recall@20": "0.6516535111377804",
+#     "overall_recall@20": "0.5698564973004082"
+# }
 
 # python src/scoring/score_one_ranker.py --event orders --week_data $WEEK_DATA --week_model w2 --artifact $ORDER_MODEL
 # python src/scoring/score_one_ranker.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
 # python src/scoring/score_one_ranker.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# # make submission
-# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# make submission
+python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-# # eval submission, only for week_data & week_model w2
-# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+# eval submission, only for week_data & week_model w2
+python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
 # make train ALGO=lgbm_classifier
 # make train ALGO=cat_ranker

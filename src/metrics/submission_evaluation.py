@@ -58,7 +58,7 @@ def measure_recall(df_pred: pd.DataFrame, df_truth: pd.DataFrame, Ks: list = [20
 
             label_session = list(label_session)
             recall_scores, hit_scores, gt_counts = [], [], []
-            for session_id in label_session:
+            for session_id in list(sub_session):
                 targets = set(tmp_labels_dict[session_id])
                 preds = set(sub_dict[session_id])
 

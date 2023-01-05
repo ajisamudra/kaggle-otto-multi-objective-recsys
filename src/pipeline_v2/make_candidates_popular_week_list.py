@@ -45,12 +45,15 @@ def suggest_candidates(df: pd.DataFrame, event: str, name: str, tmp_cands_path: 
 
 def generate_candidates_popular_week(
     name: str,
+    mode: str,
     input_path: Path,
     tmp_cands_path: Path,
     output_path: Path,
 ):
-    if name == "train":
+    if mode == "training_train":
         n = CFG.N_train
+    elif mode == "training_test":
+        n = CFG.N_local_test
     else:
         n = CFG.N_test
 
@@ -97,6 +100,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_popular_week(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             tmp_cands_path=tmp_cands_path,
@@ -110,6 +114,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_popular_week(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             tmp_cands_path=tmp_cands_path,
@@ -123,6 +128,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_popular_week(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             tmp_cands_path=tmp_cands_path,
@@ -136,6 +142,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_popular_week(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             tmp_cands_path=tmp_cands_path,

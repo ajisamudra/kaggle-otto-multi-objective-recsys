@@ -143,12 +143,15 @@ def gen_item_weekday_features(data: pl.DataFrame):
 
 def make_session_features(
     name: str,
+    mode: str,
     input_path: Path,
     output_path: Path,
 ):
 
-    if name == "train":
+    if mode == "training_train":
         n = CFG.N_train
+    elif mode == "training_test":
+        n = CFG.N_local_test
     else:
         n = CFG.N_test
 
@@ -190,6 +193,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
         )
@@ -201,6 +205,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
         )
@@ -212,6 +217,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
         )
@@ -223,6 +229,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         make_session_features(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
         )

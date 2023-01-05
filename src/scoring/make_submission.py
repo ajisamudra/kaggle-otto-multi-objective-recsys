@@ -36,7 +36,10 @@ def make_submission(
     # read trained ensemble model
     # iterate 10 chunk of test data
     # for each N: read training data, predict, merge score to dataframe, save dataframe
-    N_test = CFG.N_test
+    if week_data == "w2":
+        N_test = CFG.N_local_test
+    else:
+        N_test = CFG.N_test
     models = [click_model, cart_model, order_model]
     events = ["clicks", "carts", "orders"]
     df = pl.DataFrame()

@@ -103,21 +103,10 @@ def fcombine_features(mode: str, event: str, ix: int):
     help="index end",
 )
 def main(mode: str, istart: int, iend: int):
-    name = "train"
     if mode == "training_train":
-        name = "train"
-
-    elif mode == "training_test":
-        name = "test"
-
-    elif mode == "scoring_train":
-        name = "train"
-
-    elif mode == "scoring_test":
-        name = "test"
-
-    if name == "train":
         n = CFG.N_train
+    elif mode == "training_test":
+        n = CFG.N_local_test
     else:
         n = CFG.N_test
 

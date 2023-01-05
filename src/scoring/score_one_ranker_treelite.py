@@ -35,7 +35,10 @@ def scoring_treelite(artifact: str, event: str, week_data: str, week_model: str)
     # read trained ensemble model
     # iterate 10 chunk of test data
     # for each N: read training data, predict, merge score to dataframe, save dataframe
-    N_test = CFG.N_test
+    if week_data == "w2":
+        N_test = CFG.N_local_test
+    else:
+        N_test = CFG.N_test
 
     input_path: Path
     if week_data == "w1":

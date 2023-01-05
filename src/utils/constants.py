@@ -7,6 +7,7 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 
 class CFG:
     N_test = 100
+    N_local_test = 40
     N_train = 30
     past_candidates = 20
     covisit_candidates = 60

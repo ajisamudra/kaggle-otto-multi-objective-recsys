@@ -263,14 +263,17 @@ def suggest_buys(
 
 def generate_candidates_covisitation(
     name: str,
+    mode: str,
     input_path: Path,
     output_path: Path,
     top_15_buys: dict,
     top_15_buy2buy: dict,
     top_20_clicks: dict,
 ):
-    if name == "train":
+    if mode == "training_train":
         n = CFG.N_train
+    elif mode == "training_test":
+        n = CFG.N_local_test
     else:
         n = CFG.N_test
 
@@ -368,6 +371,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             top_15_buys=top_15_buys,
@@ -382,6 +386,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             top_15_buys=top_15_buys,
@@ -396,6 +401,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             top_15_buys=top_15_buys,
@@ -410,6 +416,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_covisitation(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             top_15_buys=top_15_buys,

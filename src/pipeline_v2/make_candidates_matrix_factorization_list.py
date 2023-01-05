@@ -113,13 +113,14 @@ def suggest_orders_matrix_fact(
 
 
 def generate_candidates_matrix_fact(
-    name: str, input_path: Path, output_path: Path, embedding: AnnoyIndex
+    name: str, mode: str, input_path: Path, output_path: Path, embedding: AnnoyIndex
 ):
-    if name == "train":
+    if mode == "training_train":
         n = CFG.N_train
+    elif mode == "training_test":
+        n = CFG.N_local_test
     else:
         n = CFG.N_test
-
     # iterate over chunks
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):
@@ -197,6 +198,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_matrix_fact(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             embedding=embedding,
@@ -209,6 +211,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_matrix_fact(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             embedding=embedding,
@@ -221,6 +224,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_matrix_fact(
             name="train",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             embedding=embedding,
@@ -233,6 +237,7 @@ def main(mode: str):
         logging.info(f"will save chunks data to: {output_path}")
         generate_candidates_matrix_fact(
             name="test",
+            mode=mode,
             input_path=input_path,
             output_path=output_path,
             embedding=embedding,

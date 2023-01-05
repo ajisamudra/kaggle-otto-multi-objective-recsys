@@ -533,6 +533,7 @@ def pivot_candidates_list_to_rows(
 
 def pivot_candidates(
     name: str,
+    mode: str,
     is_train: bool,
     exclude_training_zero_positive: bool,
     drop_zero_positive_sample: bool,
@@ -549,8 +550,10 @@ def pivot_candidates(
     123 | orders | [AID1]
     """
 
-    if name == "train":
+    if mode == "training_train":
         n = CFG.N_train
+    elif mode == "training_test":
+        n = CFG.N_local_test
     else:
         n = CFG.N_test
 
@@ -704,6 +707,7 @@ def main(mode: str):
         df_truth = pd.read_parquet(truth)
         pivot_candidates(
             name="train",
+            mode=mode,
             is_train=True,
             exclude_training_zero_positive=True,
             drop_zero_positive_sample=True,
@@ -724,6 +728,7 @@ def main(mode: str):
         logging.info(f"df_truth shape: {df_truth.shape}")
         pivot_candidates(
             name="test",
+            mode=mode,
             is_train=True,
             exclude_training_zero_positive=False,
             drop_zero_positive_sample=True,
@@ -742,6 +747,7 @@ def main(mode: str):
         df_truth = pd.read_parquet(truth)
         pivot_candidates(
             name="train",
+            mode=mode,
             is_train=True,
             exclude_training_zero_positive=False,
             drop_zero_positive_sample=True,
@@ -756,6 +762,7 @@ def main(mode: str):
         logging.info(f"will read input from & save output to: {input_path}")
         pivot_candidates(
             name="test",
+            mode=mode,
             is_train=False,
             exclude_training_zero_positive=False,
             drop_zero_positive_sample=False,
