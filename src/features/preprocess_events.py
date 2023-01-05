@@ -1,9 +1,11 @@
 import polars as pl
+from src.utils.constants import CFG
 from src.utils.date_function import (
     get_hour_from_ts,
     get_weekday_from_ts,
     get_datehour_from_ts,
     get_date_from_ts,
+    get_date_dt_from_ts,
 )
 
 
@@ -20,6 +22,15 @@ def preprocess_events(data: pl.DataFrame):
     oneday_cutoff = 1 * 60 * 60 * 24
     # sort session & ts ascendingly
     data = data.sort(["session", "ts"])
+
+    data = data.with_columns(
+        [
+            pl.col("ts")
+            .apply(lambda x: get_date_dt_from_ts(x))
+            .cast(pl.Date)
+            .alias("date"),
+        ],
+    )
 
     # shift ts per session & get duration between event
     # num reversed chrono + session_len

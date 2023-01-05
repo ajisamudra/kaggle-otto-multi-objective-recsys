@@ -116,6 +116,7 @@ def gen_user_features(data: pl.DataFrame):
             pl.col("weekday_order").mean().alias("sess_avg_weekday_order"),
             # for extracting hour and day of last event
             pl.col("ts").last().alias("curr_ts"),
+            pl.col("type").last().alias("sess_last_type_in_session"),
         ]
     )
 

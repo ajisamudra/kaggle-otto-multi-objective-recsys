@@ -102,6 +102,7 @@ def gen_session_item_features(data: pl.DataFrame):
             pl.col("action_num_reverse_chrono")
             .min()
             .alias("sesXaid_action_num_reverse_chrono"),
+            pl.col("type").last().alias("sesXaid_last_type_in_session"),
         ]
     )
 

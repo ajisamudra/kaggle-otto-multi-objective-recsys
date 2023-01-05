@@ -189,6 +189,334 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     cand_df = cand_df.fill_null(0)
 
+    # additional features in covisit weights
+    # expressing how far the weight of candidate over avg of weight with others candidate
+    # mean over session
+    cand_df = cand_df.with_columns(
+        [
+            pl.col("click_weight_with_last_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_click_weight_with_last_event_in_session_aid"),
+            pl.col("click_weight_with_max_recency_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_click_weight_with_max_recency_event_in_session_aid"),
+            pl.col("click_weight_with_max_weighted_recency_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_click_weight_with_max_weighted_recency_event_in_session_aid"),
+            pl.col("click_weight_with_max_log_duration_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_click_weight_with_max_log_duration_event_in_session_aid"),
+            pl.col("click_weight_with_max_weighted_log_duration_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias(
+                "mean_click_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+            pl.col("buys_weight_with_last_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_buys_weight_with_last_event_in_session_aid"),
+            pl.col("buys_weight_with_max_recency_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_buys_weight_with_max_recency_event_in_session_aid"),
+            pl.col("buys_weight_with_max_weighted_recency_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_buys_weight_with_max_weighted_recency_event_in_session_aid"),
+            pl.col("buys_weight_with_max_log_duration_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_buys_weight_with_max_log_duration_event_in_session_aid"),
+            pl.col("buys_weight_with_max_weighted_log_duration_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias(
+                "mean_buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+            pl.col("buy2buy_weight_with_last_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_buy2buy_weight_with_last_event_in_session_aid"),
+            pl.col("buy2buy_weight_with_max_recency_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_buy2buy_weight_with_max_recency_event_in_session_aid"),
+            pl.col("buy2buy_weight_with_max_weighted_recency_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias(
+                "mean_buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+            ),
+            pl.col("buy2buy_weight_with_max_log_duration_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias("mean_buy2buy_weight_with_max_log_duration_event_in_session_aid"),
+            pl.col("buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid")
+            .mean()
+            .over("session")
+            .alias(
+                "mean_buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+        ]
+    )
+    # difference with mean
+    cand_df = cand_df.with_columns(
+        [
+            (
+                pl.col("click_weight_with_last_event_in_session_aid")
+                - pl.col("mean_click_weight_with_last_event_in_session_aid")
+            ).alias("diff_w_mean_click_weight_with_last_event_in_session_aid"),
+            (
+                pl.col("click_weight_with_max_recency_event_in_session_aid")
+                - pl.col("mean_click_weight_with_max_recency_event_in_session_aid")
+            ).alias("diff_w_mean_click_weight_with_max_recency_event_in_session_aid"),
+            (
+                pl.col("click_weight_with_max_weighted_recency_event_in_session_aid")
+                - pl.col(
+                    "mean_click_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+            ).alias(
+                "diff_w_mean_click_weight_with_max_weighted_recency_event_in_session_aid"
+            ),
+            (
+                pl.col("click_weight_with_max_log_duration_event_in_session_aid")
+                - pl.col("mean_click_weight_with_max_log_duration_event_in_session_aid")
+            ).alias(
+                "diff_w_mean_click_weight_with_max_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "click_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+                - pl.col(
+                    "mean_click_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "diff_w_mean_click_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col("buys_weight_with_last_event_in_session_aid")
+                - pl.col("mean_buys_weight_with_last_event_in_session_aid")
+            ).alias("diff_w_mean_buys_weight_with_last_event_in_session_aid"),
+            (
+                pl.col("buys_weight_with_max_recency_event_in_session_aid")
+                - pl.col("mean_buys_weight_with_max_recency_event_in_session_aid")
+            ).alias("diff_w_mean_buys_weight_with_max_recency_event_in_session_aid"),
+            (
+                pl.col("buys_weight_with_max_weighted_recency_event_in_session_aid")
+                - pl.col(
+                    "mean_buys_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+            ).alias(
+                "diff_w_mean_buys_weight_with_max_weighted_recency_event_in_session_aid"
+            ),
+            (
+                pl.col("buys_weight_with_max_log_duration_event_in_session_aid")
+                - pl.col("mean_buys_weight_with_max_log_duration_event_in_session_aid")
+            ).alias(
+                "diff_w_mean_buys_weight_with_max_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+                - pl.col(
+                    "mean_buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "diff_w_mean_buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col("buy2buy_weight_with_last_event_in_session_aid")
+                - pl.col("mean_buy2buy_weight_with_last_event_in_session_aid")
+            ).alias("diff_w_mean_buy2buy_weight_with_last_event_in_session_aid"),
+            (
+                pl.col("buy2buy_weight_with_max_recency_event_in_session_aid")
+                - pl.col("mean_buy2buy_weight_with_max_recency_event_in_session_aid")
+            ).alias("diff_w_mean_buy2buy_weight_with_max_recency_event_in_session_aid"),
+            (
+                pl.col("buy2buy_weight_with_max_weighted_recency_event_in_session_aid")
+                - pl.col(
+                    "mean_buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+            ).alias(
+                "diff_w_mean_buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+            ),
+            (
+                pl.col("buy2buy_weight_with_max_log_duration_event_in_session_aid")
+                - pl.col(
+                    "mean_buy2buy_weight_with_max_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "diff_w_mean_buy2buy_weight_with_max_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+                - pl.col(
+                    "mean_buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "diff_w_mean_buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+        ]
+    )
+
+    # relative difference with mean
+    cand_df = cand_df.with_columns(
+        [
+            (
+                pl.col("diff_w_mean_click_weight_with_last_event_in_session_aid")
+                / pl.col("mean_click_weight_with_last_event_in_session_aid")
+            ).alias("relative_diff_w_mean_click_weight_with_last_event_in_session_aid"),
+            (
+                pl.col("diff_w_mean_click_weight_with_max_recency_event_in_session_aid")
+                / pl.col("mean_click_weight_with_max_recency_event_in_session_aid")
+            ).alias(
+                "relative_diff_w_mean_click_weight_with_max_recency_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_click_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+                / pl.col(
+                    "mean_click_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+            ).alias(
+                "relative_diff_w_mean_click_weight_with_max_weighted_recency_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_click_weight_with_max_log_duration_event_in_session_aid"
+                )
+                / pl.col("mean_click_weight_with_max_log_duration_event_in_session_aid")
+            ).alias(
+                "relative_diff_w_mean_click_weight_with_max_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_click_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+                / pl.col(
+                    "mean_click_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "relative_diff_w_mean_click_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col("diff_w_mean_buys_weight_with_last_event_in_session_aid")
+                / pl.col("mean_buys_weight_with_last_event_in_session_aid")
+            ).alias("relative_diff_w_mean_buys_weight_with_last_event_in_session_aid"),
+            (
+                pl.col("diff_w_mean_buys_weight_with_max_recency_event_in_session_aid")
+                / pl.col("mean_buys_weight_with_max_recency_event_in_session_aid")
+            ).alias(
+                "relative_diff_w_mean_buys_weight_with_max_recency_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_buys_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+                / pl.col(
+                    "mean_buys_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+            ).alias(
+                "relative_diff_w_mean_buys_weight_with_max_weighted_recency_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_buys_weight_with_max_log_duration_event_in_session_aid"
+                )
+                / pl.col("mean_buys_weight_with_max_log_duration_event_in_session_aid")
+            ).alias(
+                "relative_diff_w_mean_buys_weight_with_max_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+                / pl.col(
+                    "mean_buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "relative_diff_w_mean_buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col("diff_w_mean_buy2buy_weight_with_last_event_in_session_aid")
+                / pl.col("mean_buy2buy_weight_with_last_event_in_session_aid")
+            ).alias(
+                "relative_diff_w_mean_buy2buy_weight_with_last_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_buy2buy_weight_with_max_recency_event_in_session_aid"
+                )
+                / pl.col("mean_buy2buy_weight_with_max_recency_event_in_session_aid")
+            ).alias(
+                "relative_diff_w_mean_buy2buy_weight_with_max_recency_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+                / pl.col(
+                    "mean_buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+                )
+            ).alias(
+                "relative_diff_w_mean_buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_buy2buy_weight_with_max_log_duration_event_in_session_aid"
+                )
+                / pl.col(
+                    "mean_buy2buy_weight_with_max_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "relative_diff_w_mean_buy2buy_weight_with_max_log_duration_event_in_session_aid"
+            ),
+            (
+                pl.col(
+                    "diff_w_mean_buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+                / pl.col(
+                    "mean_buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+                )
+            ).alias(
+                "relative_diff_w_mean_buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+            ),
+        ]
+    )
+    # fill 0
+    cand_df = cand_df.fill_nan(0)
+
+    # drop unused cols
+    cand_df = cand_df.drop(
+        columns=[
+            "mean_click_weight_with_last_event_in_session_aid",
+            "mean_click_weight_with_max_recency_event_in_session_aid",
+            "mean_click_weight_with_max_weighted_recency_event_in_session_aid",
+            "mean_click_weight_with_max_log_duration_event_in_session_aid",
+            "mean_click_weight_with_max_weighted_log_duration_event_in_session_aid",
+            "mean_buys_weight_with_last_event_in_session_aid",
+            "mean_buys_weight_with_max_recency_event_in_session_aid",
+            "mean_buys_weight_with_max_weighted_recency_event_in_session_aid",
+            "mean_buys_weight_with_max_log_duration_event_in_session_aid",
+            "mean_buys_weight_with_max_weighted_log_duration_event_in_session_aid",
+            "mean_buy2buy_weight_with_last_event_in_session_aid",
+            "mean_buy2buy_weight_with_max_recency_event_in_session_aid",
+            "mean_buy2buy_weight_with_max_weighted_recency_event_in_session_aid",
+            "mean_buy2buy_weight_with_max_log_duration_event_in_session_aid",
+            "mean_buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid",
+        ]
+    )
+
     # # read matrix factorization features
     # matrix_fact_fea = pl.read_parquet(matrix_fact_path)
     # logging.info(
@@ -205,19 +533,19 @@ def fcombine_features(mode: str, event: str, ix: int):
     # del matrix_fact_fea
     # gc.collect()
 
-    # # read word2vec features
-    # word2vec_fea_df = pl.read_parquet(word2vec_path)
-    # logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
-    # cand_df = cand_df.join(
-    #     word2vec_fea_df,
-    #     how="left",
-    #     left_on=["session", "candidate_aid"],
-    #     right_on=["session", "candidate_aid"],
-    # )
-    # logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
+    # read word2vec features
+    word2vec_fea_df = pl.read_parquet(word2vec_path)
+    logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
+    cand_df = cand_df.join(
+        word2vec_fea_df,
+        how="left",
+        left_on=["session", "candidate_aid"],
+        right_on=["session", "candidate_aid"],
+    )
+    logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
-    # del word2vec_fea_df
-    # gc.collect()
+    del word2vec_fea_df
+    gc.collect()
 
     # # read fasttext features
     # fasttext_fea_df = pl.read_parquet(fasttext_path)

@@ -24,3 +24,7 @@ def get_datehour_from_ts(x):
     return (datetime.utcfromtimestamp(x) + timedelta(hours=2)).strftime(
         "%Y-%m-%d %H:00:00"
     )
+
+
+def get_date_dt_from_ts(x):
+    return datetime.utcfromtimestamp(x) + timedelta(hours=2)
