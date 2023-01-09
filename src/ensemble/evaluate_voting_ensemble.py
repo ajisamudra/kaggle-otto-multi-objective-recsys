@@ -21,28 +21,51 @@ logging = get_logger()
 TARGET = "label"
 
 
+def read_sub(
+    path, weight=1
+):  # by default let us assing the weight of 1 to predictions from each submission, this will be akin to a standard vote ensemble
+    """a helper function for loading and preprocessing submissions"""
+    return (
+        pl.read_parquet(path)
+        .with_column(pl.col("labels").str.split(by=" "))
+        .with_column(pl.lit(weight).alias("vote"))
+        .explode("labels")
+        .rename({"labels": "aid"})
+        .with_column(
+            pl.col("aid").cast(pl.UInt32)
+        )  # we are casting the `aids` to `Int32`! memory management is super important to ensure we don't run out of resources
+        .with_column(pl.col("vote").cast(pl.UInt8))
+    )
+
+
 def evaluate_ensemble():
     N_test = CFG.N_local_test
     week_model = "w2"
     CONFIG = {
         "carts_models": [
-            "2023-01-02_carts_cat_ranker_75502_94516",
-            "2023-01-02_carts_lgbm_ranker_75627_94287",
+            "2023-01-02_carts_cat_ranker_75708_94697",
+            "2023-01-02_carts_lgbm_ranker_75879_94504",
         ],
-        "carts_powers": [1, 1],
-        "carts_weights": [0.13914664356159773, 0.8608533564384022],
+        "carts_weights": [
+            1,
+            1,
+        ],
         "clicks_models": [
-            "2023-01-02_clicks_cat_ranker_60409_91085",
-            "2023-01-02_clicks_lgbm_ranker_61486_91133",
+            "2023-01-02_clicks_cat_ranker_60593_91362",
+            "2023-01-02_clicks_lgbm_ranker_61844_91502",
         ],
-        "clicks_powers": [1, 1],
-        "clicks_weights": [0.7648897303135639, 0.2351102696864361],
+        "clicks_weights": [
+            1,
+            1,
+        ],
         "orders_models": [
-            "2023-01-02_orders_cat_ranker_86674_97221",
-            "2023-01-02_orders_lgbm_ranker_85360_96765",
+            "2023-01-02_orders_cat_ranker_86779_97309",
+            "2023-01-02_orders_lgbm_ranker_85371_96813",
         ],
-        "orders_powers": [1, 1],
-        "orders_weights": [0.2687816835097516, 0.7312183164902484],
+        "orders_weights": [
+            1,
+            1,
+        ],
     }
 
     events_model_name = []
@@ -51,7 +74,6 @@ def evaluate_ensemble():
         logging.info(f"start applying weights in event: {EVENT.upper()}")
         ARTIFACTS = CONFIG[f"{EVENT}_models"]
         WEIGHTS = CONFIG[f"{EVENT}_weights"]
-        POWERS = CONFIG[f"{EVENT}_powers"]
         event_model_name = ""  # for accessing submission later
         for i in tqdm(range(N_test)):
             df_chunk = pl.DataFrame()
@@ -59,20 +81,21 @@ def evaluate_ensemble():
                 input_path = get_data_output_local_submission_dir(
                     event=EVENT, model=ARTIFACTS[ix], week_model=week_model
                 )
-                tmp_path = f"{input_path}/test_{i}_{EVENT}_scores.parquet"
-                df_tmp = pl.read_parquet(tmp_path)
-                # apply weights
-                df_tmp = df_tmp.with_columns(
-                    [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
-                )
+                tmp_path = f"{input_path}/test_{i}_{EVENT}_submission.parquet"
+                df_tmp = read_sub(path=tmp_path, weight=WEIGHTS[ix])
+                # df_tmp = pl.read_parquet(tmp_path)
+                # # apply weights
+                # df_tmp = df_tmp.with_columns(
+                #     [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
+                # )
                 df_chunk = pl.concat([df_chunk, df_tmp])
 
                 del df_tmp
                 gc.collect()
 
             # sum weightes scores per candidate aid
-            df_chunk = df_chunk.groupby(["session", "candidate_aid", "label"]).agg(
-                [pl.col("score").sum()]
+            df_chunk = df_chunk.groupby(["session_type", "aid"]).agg(
+                [pl.col("vote").sum()]
             )
 
             # save weighted scores
@@ -81,28 +104,30 @@ def evaluate_ensemble():
                 event=EVENT, model=event_model_name, week_model=week_model
             )
 
-            tmp_path = f"{output_path}/test_{i}_{EVENT}_ensemble_scores.parquet"
-            df_chunk = freemem(df_chunk)
-            df_chunk = round_float_3decimals(df_chunk)
-            df_chunk.write_parquet(tmp_path)
+            # tmp_path = f"{output_path}/test_{i}_{EVENT}_ensemble_scores.parquet"
+            # df_chunk = freemem(df_chunk)
+            # df_chunk = round_float_3decimals(df_chunk)
+            # df_chunk.write_parquet(tmp_path)
 
             # take top 20 candidate aid and save it as list
             test_predictions = (
-                df_chunk.sort(["session", "score"], reverse=True)
-                .groupby("session")
-                .agg([pl.col("candidate_aid").limit(20).list().alias("labels")])
+                df_chunk.sort(["session_type", "vote"], reverse=True)
+                .groupby("session_type")
+                .agg([pl.col("aid").limit(20).list().alias("labels")])
             )
 
             del df_chunk
             gc.collect()
 
-            test_predictions = test_predictions.select([pl.col(["session", "labels"])])
-            test_predictions = test_predictions.with_columns(
-                [(pl.col(["session"]) + f"_{EVENT}").alias("session_type")]
-            )
             test_predictions = test_predictions.select(
                 [pl.col(["session_type", "labels"])]
             )
+            # test_predictions = test_predictions.with_columns(
+            #     [(pl.col(["session"]) + f"_{EVENT}").alias("session_type")]
+            # )
+            # test_predictions = test_predictions.select(
+            #     [pl.col(["session_type", "labels"])]
+            # )
             test_predictions = test_predictions.with_columns(
                 [
                     pl.col("labels")
