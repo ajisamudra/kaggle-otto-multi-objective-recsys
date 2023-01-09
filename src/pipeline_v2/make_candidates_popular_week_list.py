@@ -70,6 +70,11 @@ def generate_candidates_popular_week(
         # A     | 1234  | 3  | 1
 
         for event in ["clicks", "carts", "orders"]:
+
+            if (mode == "training_train") & (event == "clicks") & (ix > 6):
+                logging.info("click ix > 6 continue")
+                continue
+
             logging.info(f"suggesting candidate {event}")
 
             # suggest based on event, only just left join

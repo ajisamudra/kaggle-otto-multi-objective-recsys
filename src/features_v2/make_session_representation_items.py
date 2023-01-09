@@ -28,6 +28,7 @@ logging = get_logger()
 def gen_session_representation_items(
     data: pl.DataFrame,
     name: str,
+    mode: str,
     ix: int,
     candidate_path: Path,
     output_path: Path,
@@ -155,6 +156,11 @@ def gen_session_representation_items(
     gc.collect()
 
     for event in ["clicks", "carts", "orders"]:
+
+        if (mode == "training_train") & (event == "clicks") & (ix > 6):
+            logging.info("click ix > 6 continue")
+            continue
+
         logging.info(f"read candidate for event {event.upper()}")
         # read candidate
         filepath = f"{candidate_path}/{name}_{ix}_{event}_rows.parquet"
@@ -211,6 +217,7 @@ def make_session_representation_items(
         logging.info(f"start creating sesion representation items")
         gen_session_representation_items(
             data=df,
+            mode=mode,
             name=name,
             ix=ix,
             candidate_path=candidate_path,

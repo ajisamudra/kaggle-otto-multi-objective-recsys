@@ -16,7 +16,10 @@ from src.utils.constants import (
     get_processed_scoring_train_word2vec_features_dir,
     get_processed_scoring_test_word2vec_features_dir,
 )
-from src.utils.word2vec import load_word2vec_embedding, load_word2vec_cbow_embedding
+from src.utils.word2vec import (
+    load_word2vec_embedding,
+    load_word2vec_vect32_wdw3_embedding,
+)
 from src.utils.memory import freemem, round_float_3decimals
 from src.utils.logger import get_logger
 
@@ -158,6 +161,7 @@ def calculate_distance_metrics(
 
 def gen_word2vec_features(
     name: str,
+    mode: str,
     ix: int,
     ses_representation_path: Path,
     output_path: Path,
@@ -173,6 +177,11 @@ def gen_word2vec_features(
     """
 
     for event in ["clicks", "carts", "orders"]:
+
+        if (mode == "training_train") & (event == "clicks") & (ix > 6):
+            logging.info("click ix > 6 continue")
+            continue
+
         logging.info(f"read session representation aids for event {event.upper()}")
 
         # read session representation
@@ -312,12 +321,12 @@ def make_word2vec_features(
 
     if mode in ["training_train", "training_test"]:
         logging.info("read local word2vec embedding")
-        word2vec_embedding = load_word2vec_embedding()
+        word2vec_embedding = load_word2vec_vect32_wdw3_embedding()
         # word2vec_cbow_embedding = load_word2vec_cbow_embedding()
 
     else:
         logging.info("read scoring word2vec embedding")
-        word2vec_embedding = load_word2vec_embedding(mode="scoring")
+        word2vec_embedding = load_word2vec_vect32_wdw3_embedding(mode="scoring")
         # word2vec_cbow_embedding = load_word2vec_cbow_embedding(mode="scoring")
 
     # iterate over chunks
@@ -326,6 +335,7 @@ def make_word2vec_features(
         logging.info(f"start creating word2vec features")
         gen_word2vec_features(
             name=name,
+            mode=mode,
             ix=ix,
             ses_representation_path=ses_representation_path,
             output_path=output_path,

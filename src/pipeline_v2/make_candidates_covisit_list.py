@@ -302,6 +302,11 @@ def generate_candidates_covisitation(
         candidates_list = pd.Series()
         ranks_list = []
         for event in ["clicks", "carts", "orders"]:
+
+            if (mode == "training_train") & (event == "clicks") & (ix > 6):
+                logging.info("click ix > 6 continue")
+                continue
+
             logging.info(f"start of suggesting {event}")
             if event == "clicks":
                 candidates_list, ranks_list = suggest_clicks(

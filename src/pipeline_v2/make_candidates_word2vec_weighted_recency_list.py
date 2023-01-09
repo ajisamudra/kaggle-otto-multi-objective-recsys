@@ -89,6 +89,11 @@ def generate_candidates_word2vec(
         )
 
         for event in ["clicks", "carts", "orders"]:
+
+            if (mode == "training_train") & (event == "clicks") & (ix > 6):
+                logging.info("click ix > 6 continue")
+                continue
+
             logging.info(f"suggesting candidate {event}")
             candidates_series_tmp = clicks_candidates_series.copy(deep=True)
             logging.info("create candidates df")

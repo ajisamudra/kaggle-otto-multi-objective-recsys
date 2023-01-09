@@ -27,6 +27,7 @@ logging = get_logger()
 
 def gen_item_covisitation_features(
     name: str,
+    mode: str,
     ix: int,
     ses_representation_path: Path,
     output_path: Path,
@@ -43,6 +44,11 @@ def gen_item_covisitation_features(
     """
 
     for event in ["clicks", "carts", "orders"]:
+
+        if (mode == "training_train") & (event == "clicks") & (ix > 6):
+            logging.info("click ix > 6 continue")
+            continue
+
         logging.info(f"read session representation aids for event {event.upper()}")
         # read session representation
         filepath = f"{ses_representation_path}/{name}_{ix}_{event}_session_representation_items.parquet"
@@ -507,6 +513,7 @@ def make_item_covisitation_features(
         logging.info(f"start creating item covisitation features")
         gen_item_covisitation_features(
             name=name,
+            mode=mode,
             ix=ix,
             ses_representation_path=ses_representation_path,
             output_path=output_path,

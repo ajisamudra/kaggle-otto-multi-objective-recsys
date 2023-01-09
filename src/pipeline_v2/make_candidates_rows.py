@@ -561,6 +561,11 @@ def pivot_candidates(
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(n)):
         for event in ["clicks", "carts", "orders"]:
+
+            if (mode == "training_train") & (event == "clicks") & (ix > 6):
+                logging.info("click ix > 6 continue")
+                continue
+
             # candidate #1 covisitation
             filepath = f"{input_path}/{name}_{ix}_{event}_list.parquet"
             cand_df = pd.read_parquet(filepath)

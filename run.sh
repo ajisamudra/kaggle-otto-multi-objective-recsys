@@ -21,47 +21,47 @@
 # make item_hour_features MODE=training_train
 # make item_weekday_features MODE=training_train
 # make session_representation_items MODE=training_train
-# make item_covisitation_features MODE=training_train START=0 END=30
+make item_covisitation_features MODE=training_train START=0 END=30
 # make matrix_factorization_features MODE=training_train START=0 END=30
 # make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
-# make combine_features  MODE=training_train START=0 END=30
+make combine_features  MODE=training_train START=0 END=30
 # make target_encoding MODE=training_train
 # make combine_features_l2  MODE=training_train START=0 END=30
 
 
 # # make split_into_chunks MODE=training_test
-# make candidate_covisit_list MODE=training_test
-# make preprocess_popular_hour_candidate MODE=training_test
-# make candidate_popular_hour_list MODE=training_test
-# make preprocess_popular_week_candidate MODE=training_test
-# make candidate_popular_week_list MODE=training_test
-# make candidate_word2vec_list MODE=training_test
-# make preprocess_query_representation MODE=training_test
-# make candidate_word2vec_duration_list MODE=training_test
-# make candidate_word2vec_weighted_recency_list MODE=training_test
-# make candidate_word2vec_weighted_duration_list MODE=training_test
-# make candidate_fasttext_list MODE=training_test
-# make candidate_matrix_fact_list MODE=training_test
+make candidate_covisit_list MODE=training_test
+make preprocess_popular_hour_candidate MODE=training_test
+make candidate_popular_hour_list MODE=training_test
+make preprocess_popular_week_candidate MODE=training_test
+make candidate_popular_week_list MODE=training_test
+make candidate_word2vec_list MODE=training_test
+make preprocess_query_representation MODE=training_test
+make candidate_word2vec_duration_list MODE=training_test
+make candidate_word2vec_weighted_recency_list MODE=training_test
+make candidate_word2vec_weighted_duration_list MODE=training_test
+make candidate_fasttext_list MODE=training_test
+make candidate_matrix_fact_list MODE=training_test
 # make candidate_list_eval MODE=training_test
-# make candidate_rows MODE=training_test
-# make session_features MODE=training_test
-# make item_features MODE=training_test
-# make session_item_features MODE=training_test
-# make item_hour_features MODE=training_test
-# make item_weekday_features MODE=training_test
-# make session_representation_items MODE=training_test
-# make item_covisitation_features MODE=training_test START=0 END=50
+make candidate_rows MODE=training_test
+make session_features MODE=training_test
+make item_features MODE=training_test
+make session_item_features MODE=training_test
+make item_hour_features MODE=training_test
+make item_weekday_features MODE=training_test
+make session_representation_items MODE=training_test
+make item_covisitation_features MODE=training_test START=0 END=40
 # make item_covisitation_features MODE=training_test START=50 END=100
 # make matrix_factorization_features MODE=training_test START=0 END=25
 # make matrix_factorization_features MODE=training_test START=25 END=50
 # make matrix_factorization_features MODE=training_test START=50 END=75
 # make matrix_factorization_features MODE=training_test START=75 END=100
-# make word2vec_features MODE=training_test START=0 END=50
+make word2vec_features MODE=training_test START=0 END=40
 # make word2vec_features MODE=training_test START=50 END=100
 # make fasttext_features MODE=training_test START=0 END=50
 # make fasttext_features MODE=training_test START=50 END=100
-# make combine_features  MODE=training_test START=0 END=25
+make combine_features  MODE=training_test START=0 END=40
 # make combine_features  MODE=training_test START=25 END=50
 # make combine_features  MODE=training_test START=50 END=75
 # make combine_features  MODE=training_test START=75 END=100
@@ -119,7 +119,7 @@
 # make combine_features  MODE=training_test START=50 END=75
 # make combine_features  MODE=training_test START=75 END=100
 
-# make train ALGO=cat_ranker
+make train ALGO=cat_ranker
 # make train ALGO=lgbm_ranker
 # make word2vec_features START=0 END=30
 # make word2vec_features MODE=training_test START=24 END=50
@@ -200,10 +200,10 @@
 # python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
 # TRAINING EVALUATION
-CLICK_MODEL="2023-01-06_clicks_cat_ranker_60730_91151"
-CART_MODEL="2023-01-05_carts_cat_ranker_75642_94553"
-ORDER_MODEL="2023-01-05_orders_cat_ranker_86561_97213"
-WEEK_DATA=w2
+# CLICK_MODEL="2023-01-06_clicks_cat_ranker_60730_91151"
+# CART_MODEL="2023-01-05_carts_cat_ranker_75642_94553"
+# ORDER_MODEL="2023-01-05_orders_cat_ranker_86561_97213"
+# WEEK_DATA=w2
 
 # {
 #     "cart_model": "2023-01-05_carts_cat_ranker_75642_94553",
@@ -225,11 +225,11 @@ WEEK_DATA=w2
 # python src/scoring/score_one_ranker.py --event carts --week_data $WEEK_DATA --week_model w2 --artifact $CART_MODEL
 # python src/scoring/score_one_ranker.py --event clicks --week_data $WEEK_DATA --week_model w2 --artifact $CLICK_MODEL
 
-# make submission
-python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+# # make submission
+# python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
 
-# eval submission, only for week_data & week_model w2
-python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
+# # eval submission, only for week_data & week_model w2
+# python src/scoring/eval_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL
 
 # make train ALGO=lgbm_classifier
 # make train ALGO=cat_ranker

@@ -1963,3 +1963,132 @@ if __name__ == "__main__":
 # [2023-01-04 19:07:53,374] {eval_candidate_list.py:101} INFO - Avg N candidates@260 = 129.64293287457247
 # [2023-01-04 19:07:53,431] {eval_candidate_list.py:102} INFO - Median N candidates@260 = 122.0
 # [2023-01-04 19:07:53,432] {eval_candidate_list.py:103} INFO - =============
+
+# strategy covisit 60 word2vec 60 word2vec weighted recency 30 weighted duration 30 word2vec duration 30, fasttext 20, matrix fact 10, popular week 20 recall @260
+# revert covisit weights to ver5
+# Recall@260 0.6293097191557979 (avg n_cand 132)
+
+
+# strategy covisit 60 word2vec 60 word2vec weighted recency 30 weighted duration 30 word2vec duration 30, fasttext 20, matrix fact 10, popular week 20 recall @260
+# tuned word2vec 2023-01-09 -> better at pick closer clicks event
+# Recall@260 0.6346438777696992 (avg n_cand 145)
+# [2023-01-09 10:58:26,895] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@60 = 0.5869009238901357
+# [2023-01-09 10:58:26,896] {eval_candidate_list.py:90} INFO - clicks hits@60 = 206075 / gt@60 = 351124
+# [2023-01-09 10:58:26,899] {eval_candidate_list.py:91} INFO - clicks recall@60 = 0.5869009238901357
+# [2023-01-09 10:58:36,566] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@60 = 0.6072437651912344
+# [2023-01-09 10:58:36,567] {eval_candidate_list.py:90} INFO - carts hits@60 = 53838 / gt@60 = 114307
+# [2023-01-09 10:58:36,567] {eval_candidate_list.py:91} INFO - carts recall@60 = 0.47099477722274224
+# [2023-01-09 10:58:45,817] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@60 = 0.7627809743876723
+# [2023-01-09 10:58:45,818] {eval_candidate_list.py:90} INFO - orders hits@60 = 42909 / gt@60 = 62805
+# [2023-01-09 10:58:45,818] {eval_candidate_list.py:91} INFO - orders recall@60 = 0.6832099355146883
+# [2023-01-09 10:58:45,853] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 10:58:45,853] {eval_candidate_list.py:99} INFO - Overall Recall@60 = 0.6099144868646492
+# [2023-01-09 10:58:45,853] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 10:58:45,854] {eval_candidate_list.py:101} INFO - Avg N candidates@60 = 54.70874938679917
+# [2023-01-09 10:58:45,860] {eval_candidate_list.py:102} INFO - Median N candidates@60 = 56.0
+# [2023-01-09 10:58:45,860] {eval_candidate_list.py:103} INFO - =============
+# [2023-01-09 10:59:02,497] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@120 = 0.6132933094861075
+# [2023-01-09 10:59:02,501] {eval_candidate_list.py:90} INFO - clicks hits@120 = 215342 / gt@120 = 351124
+# [2023-01-09 10:59:02,501] {eval_candidate_list.py:91} INFO - clicks recall@120 = 0.6132933094861075
+# [2023-01-09 10:59:22,181] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@120 = 0.6286230157350782
+# [2023-01-09 10:59:22,182] {eval_candidate_list.py:90} INFO - carts hits@120 = 56415 / gt@120 = 114307
+# [2023-01-09 10:59:22,182] {eval_candidate_list.py:91} INFO - carts recall@120 = 0.4935393283001041
+# [2023-01-09 10:59:40,049] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@120 = 0.7735092576725443
+# [2023-01-09 10:59:40,055] {eval_candidate_list.py:90} INFO - orders hits@120 = 43614 / gt@120 = 62805
+# [2023-01-09 10:59:40,055] {eval_candidate_list.py:91} INFO - orders recall@120 = 0.6944351564365895
+# [2023-01-09 10:59:40,088] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 10:59:40,088] {eval_candidate_list.py:99} INFO - Overall Recall@120 = 0.6260522233005956
+# [2023-01-09 10:59:40,088] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 10:59:40,089] {eval_candidate_list.py:101} INFO - Avg N candidates@120 = 97.3019118301982
+# [2023-01-09 10:59:40,096] {eval_candidate_list.py:102} INFO - Median N candidates@120 = 99.0
+# [2023-01-09 10:59:40,096] {eval_candidate_list.py:103} INFO - =============
+# [2023-01-09 11:00:06,975] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@150 = 0.6158308745628325
+# [2023-01-09 11:00:06,976] {eval_candidate_list.py:90} INFO - clicks hits@150 = 216233 / gt@150 = 351124
+# [2023-01-09 11:00:06,977] {eval_candidate_list.py:91} INFO - clicks recall@150 = 0.6158308745628325
+# [2023-01-09 11:00:35,378] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@150 = 0.6325312938126293
+# [2023-01-09 11:00:35,380] {eval_candidate_list.py:90} INFO - carts hits@150 = 56967 / gt@150 = 114307
+# [2023-01-09 11:00:35,380] {eval_candidate_list.py:91} INFO - carts recall@150 = 0.49836842888012106
+# [2023-01-09 11:01:03,072] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@150 = 0.7752024796275041
+# [2023-01-09 11:01:03,077] {eval_candidate_list.py:90} INFO - orders hits@150 = 43758 / gt@150 = 62805
+# [2023-01-09 11:01:03,078] {eval_candidate_list.py:91} INFO - orders recall@150 = 0.6967279675185096
+# [2023-01-09 11:01:03,119] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 11:01:03,119] {eval_candidate_list.py:99} INFO - Overall Recall@150 = 0.6291303966314253
+# [2023-01-09 11:01:03,119] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 11:01:03,120] {eval_candidate_list.py:101} INFO - Avg N candidates@150 = 104.05798562679863
+# [2023-01-09 11:01:03,126] {eval_candidate_list.py:102} INFO - Median N candidates@150 = 102.0
+# [2023-01-09 11:01:03,126] {eval_candidate_list.py:103} INFO - =============
+# [2023-01-09 11:01:39,511] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@180 = 0.6170640571422061
+# [2023-01-09 11:01:39,514] {eval_candidate_list.py:90} INFO - clicks hits@180 = 216666 / gt@180 = 351124
+# [2023-01-09 11:01:39,515] {eval_candidate_list.py:91} INFO - clicks recall@180 = 0.6170640571422061
+# [2023-01-09 11:02:27,116] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@180 = 0.6338357823059207
+# [2023-01-09 11:02:27,118] {eval_candidate_list.py:90} INFO - carts hits@180 = 57172 / gt@180 = 114307
+# [2023-01-09 11:02:27,118] {eval_candidate_list.py:91} INFO - carts recall@180 = 0.5001618448563955
+# [2023-01-09 11:03:09,283] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@180 = 0.7761808364933416
+# [2023-01-09 11:03:09,286] {eval_candidate_list.py:90} INFO - orders hits@180 = 43838 / gt@180 = 62805
+# [2023-01-09 11:03:09,286] {eval_candidate_list.py:91} INFO - orders recall@180 = 0.6980017514529098
+# [2023-01-09 11:03:09,332] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 11:03:09,333] {eval_candidate_list.py:99} INFO - Overall Recall@180 = 0.6305560100428851
+# [2023-01-09 11:03:09,333] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 11:03:09,333] {eval_candidate_list.py:101} INFO - Avg N candidates@180 = 109.39029865423612
+# [2023-01-09 11:03:09,345] {eval_candidate_list.py:102} INFO - Median N candidates@180 = 107.0
+# [2023-01-09 11:03:09,345] {eval_candidate_list.py:103} INFO - =============
+# [2023-01-09 11:04:00,448] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@210 = 0.6204645652248209
+# [2023-01-09 11:04:00,454] {eval_candidate_list.py:90} INFO - clicks hits@210 = 217860 / gt@210 = 351124
+# [2023-01-09 11:04:00,454] {eval_candidate_list.py:91} INFO - clicks recall@210 = 0.6204645652248209
+# [2023-01-09 11:04:59,264] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@210 = 0.6358648929239298
+# [2023-01-09 11:04:59,268] {eval_candidate_list.py:90} INFO - carts hits@210 = 57403 / gt@210 = 114307
+# [2023-01-09 11:04:59,268] {eval_candidate_list.py:91} INFO - carts recall@210 = 0.5021827184686852
+# [2023-01-09 11:05:55,304] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@210 = 0.7778881643855627
+# [2023-01-09 11:05:55,306] {eval_candidate_list.py:90} INFO - orders hits@210 = 43937 / gt@210 = 62805
+# [2023-01-09 11:05:55,306] {eval_candidate_list.py:91} INFO - orders recall@210 = 0.69957805907173
+# [2023-01-09 11:05:55,345] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 11:05:55,346] {eval_candidate_list.py:99} INFO - Overall Recall@210 = 0.6324481075061257
+# [2023-01-09 11:05:55,346] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 11:05:55,347] {eval_candidate_list.py:101} INFO - Avg N candidates@210 = 125.61734685803808
+# [2023-01-09 11:05:55,354] {eval_candidate_list.py:102} INFO - Median N candidates@210 = 126.0
+# [2023-01-09 11:05:55,354] {eval_candidate_list.py:103} INFO - =============
+# [2023-01-09 11:06:59,270] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@230 = 0.6222588031578588
+# [2023-01-09 11:06:59,275] {eval_candidate_list.py:90} INFO - clicks hits@230 = 218490 / gt@230 = 351124
+# [2023-01-09 11:06:59,275] {eval_candidate_list.py:91} INFO - clicks recall@230 = 0.6222588031578588
+# [2023-01-09 11:08:11,032] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@230 = 0.6376247424413045
+# [2023-01-09 11:08:11,037] {eval_candidate_list.py:90} INFO - carts hits@230 = 57624 / gt@230 = 114307
+# [2023-01-09 11:08:11,037] {eval_candidate_list.py:91} INFO - carts recall@230 = 0.5041161083748152
+# [2023-01-09 11:09:10,229] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@230 = 0.7788503724081205
+# [2023-01-09 11:09:10,232] {eval_candidate_list.py:90} INFO - orders hits@230 = 44001 / gt@230 = 62805
+# [2023-01-09 11:09:10,233] {eval_candidate_list.py:91} INFO - orders recall@230 = 0.7005970862192501
+# [2023-01-09 11:09:10,287] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 11:09:10,288] {eval_candidate_list.py:99} INFO - Overall Recall@230 = 0.6338189645597805
+# [2023-01-09 11:09:10,288] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 11:09:10,290] {eval_candidate_list.py:101} INFO - Avg N candidates@230 = 138.8801766018388
+# [2023-01-09 11:09:10,299] {eval_candidate_list.py:102} INFO - Median N candidates@230 = 138.0
+# [2023-01-09 11:09:10,301] {eval_candidate_list.py:103} INFO - =============
+# [2023-01-09 11:10:18,627] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@240 = 0.6225407548330504
+# [2023-01-09 11:10:18,631] {eval_candidate_list.py:90} INFO - clicks hits@240 = 218589 / gt@240 = 351124
+# [2023-01-09 11:10:18,631] {eval_candidate_list.py:91} INFO - clicks recall@240 = 0.6225407548330504
+# [2023-01-09 11:11:27,083] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@240 = 0.6380407656193633
+# [2023-01-09 11:11:27,088] {eval_candidate_list.py:90} INFO - carts hits@240 = 57679 / gt@240 = 114307
+# [2023-01-09 11:11:27,088] {eval_candidate_list.py:91} INFO - carts recall@240 = 0.5045972687586937
+# [2023-01-09 11:12:32,035] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@240 = 0.7790433029696435
+# [2023-01-09 11:12:32,039] {eval_candidate_list.py:90} INFO - orders hits@240 = 44015 / gt@240 = 62805
+# [2023-01-09 11:12:32,039] {eval_candidate_list.py:91} INFO - orders recall@240 = 0.7008199984077701
+# [2023-01-09 11:12:32,101] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 11:12:32,101] {eval_candidate_list.py:99} INFO - Overall Recall@240 = 0.6341252551555752
+# [2023-01-09 11:12:32,101] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 11:12:32,102] {eval_candidate_list.py:101} INFO - Avg N candidates@240 = 142.90930731477943
+# [2023-01-09 11:12:32,109] {eval_candidate_list.py:102} INFO - Median N candidates@240 = 142.0
+# [2023-01-09 11:12:32,109] {eval_candidate_list.py:103} INFO - =============
+# [2023-01-09 11:13:46,287] {eval_candidate_list.py:89} INFO - clicks mean_recall_per_sample@260 = 0.6228170105148039
+# [2023-01-09 11:13:46,297] {eval_candidate_list.py:90} INFO - clicks hits@260 = 218686 / gt@260 = 351124
+# [2023-01-09 11:13:46,298] {eval_candidate_list.py:91} INFO - clicks recall@260 = 0.6228170105148039
+# [2023-01-09 11:15:04,670] {eval_candidate_list.py:89} INFO - carts mean_recall_per_sample@260 = 0.6388480812548439
+# [2023-01-09 11:15:04,674] {eval_candidate_list.py:90} INFO - carts hits@260 = 57786 / gt@260 = 114307
+# [2023-01-09 11:15:04,674] {eval_candidate_list.py:91} INFO - carts recall@260 = 0.5055333444146027
+# [2023-01-09 11:16:11,006] {eval_candidate_list.py:89} INFO - orders mean_recall_per_sample@260 = 0.7792960887180557
+# [2023-01-09 11:16:11,009] {eval_candidate_list.py:90} INFO - orders hits@260 = 44037 / gt@260 = 62805
+# [2023-01-09 11:16:11,010] {eval_candidate_list.py:91} INFO - orders recall@260 = 0.7011702889897301
+# [2023-01-09 11:16:11,176] {eval_candidate_list.py:98} INFO - =============
+# [2023-01-09 11:16:11,177] {eval_candidate_list.py:99} INFO - Overall Recall@260 = 0.6346438777696992
+# [2023-01-09 11:16:11,177] {eval_candidate_list.py:100} INFO - =============
+# [2023-01-09 11:16:11,178] {eval_candidate_list.py:101} INFO - Avg N candidates@260 = 148.17510076839432
+# [2023-01-09 11:16:11,195] {eval_candidate_list.py:102} INFO - Median N candidates@260 = 145.0
+# [2023-01-09 11:16:11,196] {eval_candidate_list.py:103} INFO - =============
