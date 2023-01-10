@@ -396,7 +396,7 @@ def load_annoy_idx_word2vec_vect32_wdw3_embedding(
         filepath = f"{emd_path}/word2vec_local_clicks_skipgram_vec32_wdw3.kv"
     else:
         emd_path = get_scoring_word2vec_dir()
-        filepath = f"{emd_path}/word2vec_scoring_clicks_skipgram_vec32_wdw3.kv"
+        filepath = f"{emd_path}/word2vec_scoring_skipgram_clicks_vec32_wdw3.kv"
 
     # load keyed vectors
     kvectors = KeyedVectors.load(filepath, mmap="r")
@@ -421,7 +421,7 @@ def load_word2vec_vect32_wdw3_embedding(mode: str = "local"):
         filepath = f"{emd_path}/word2vec_local_clicks_skipgram_vec32_wdw3.kv"
     else:
         emd_path = get_scoring_word2vec_dir()
-        filepath = f"{emd_path}/word2vec_scoring_clicks_skipgram_vec32_wdw3.kv"
+        filepath = f"{emd_path}/word2vec_scoring_skipgram_clicks_vec32_wdw3.kv"
 
     # load keyed vectors
     kvectors = KeyedVectors.load(filepath, mmap="r")
