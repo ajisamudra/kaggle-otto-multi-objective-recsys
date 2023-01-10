@@ -48,7 +48,13 @@ def fcombine_features(mode: str, event: str, ix: int):
     cand_df = pl.read_parquet(filepath)
     logging.info(f"read candidates with shape {cand_df.shape}")
 
-    cat_columns = ["rank_covisit", "rank_combined", "retrieval_covisit"]
+    cat_columns = [
+        "combined_rank_combined_sess_last_type_in_session",
+        "combined_rank_combined_sess_hour",
+        "combined_rank_combined_sess_weekday",
+        "combined_rank_combined_sess_weekday_hour",
+        "combined_rank_combined_sess_binned_aid_dcount",
+    ]
     for cat_col in cat_columns:
         logging.info(f"left join with target encodig column: {cat_col.upper()}")
 
@@ -64,7 +70,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         te_fea_agg = pl.read_parquet(features_path)
         # get global mean just in case there's missing keys
         global_mean = (
-            te_fea_agg.filter(pl.col(cat_col) == -1)[f"target_encoding_{cat_col}_mean"]
+            te_fea_agg.filter(pl.col(cat_col) == "global_mean")[
+                f"target_encoding_{cat_col}_mean"
+            ]
             .to_pandas()
             .values[0]
         )
@@ -76,6 +84,9 @@ def fcombine_features(mode: str, event: str, ix: int):
 
         del te_fea_agg
         gc.collect()
+
+    # drop the cat combined columns
+    cand_df = cand_df.drop(columns=cat_columns)
 
     filepath = f"{output_path}/{name}_{ix}_{event}_combined.parquet"
     logging.info(f"save chunk to: {filepath}")
@@ -114,6 +125,11 @@ def main(mode: str, istart: int, iend: int):
     logging.info(f"iterate {n} chunks")
     for ix in tqdm(range(istart, iend)):
         for event in ["clicks", "carts", "orders"]:
+
+            if (mode == "training_train") & (event == "clicks") & (ix > 6):
+                logging.info("click ix > 6 continue")
+                continue
+
             logging.info(f"start combining features")
             fcombine_features(mode=mode, event=event, ix=ix)
 

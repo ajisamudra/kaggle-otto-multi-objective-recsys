@@ -42,7 +42,7 @@ def gen_target_encoding(data: pl.DataFrame, column: str):
     )
 
     global_mean = {
-        column: [-1],
+        column: ["global_mean"],
         f"target_encoding_{column}_mean": [data[TARGET].mean()],
     }
     global_mean = pl.DataFrame(global_mean)
@@ -58,7 +58,13 @@ def gen_target_encoding(data: pl.DataFrame, column: str):
 def iterate_target_encoding(
     data: pl.DataFrame, name: str, output_path: Path, idx: int, event: str
 ):
-    cat_columns = ["rank_covisit", "rank_combined", "retrieval_covisit"]
+    cat_columns = [
+        "combined_rank_combined_sess_last_type_in_session",
+        "combined_rank_combined_sess_hour",
+        "combined_rank_combined_sess_weekday",
+        "combined_rank_combined_sess_weekday_hour",
+        "combined_rank_combined_sess_binned_aid_dcount",
+    ]
     for cat_col in cat_columns:
         logging.info(f"target encodig for column: {cat_col.upper()}")
         # calculate target encoding for that columns
@@ -115,12 +121,13 @@ def make_target_encoding_features(
             else:
                 # create target encoding for each fold
                 # use only 5 other folds without that fold data
-                for i in tqdm(range(CFG.N_train)):
+                N_click_train = 7
+                for i in tqdm(range(N_click_train)):
                     train_df = pl.DataFrame()
-                    start_idx = (i + 1) % CFG.N_train
-                    end_idx = (i + 6) % CFG.N_train
+                    start_idx = (i + 1) % N_click_train
+                    end_idx = (i + 6) % N_click_train
                     if end_idx < start_idx:
-                        for j in range(start_idx, CFG.N_train):
+                        for j in range(start_idx, N_click_train):
                             filepath = (
                                 f"{input_path}/train_{i}_{event}_combined.parquet"
                             )

@@ -29,28 +29,28 @@ NTRIAL = 15
 
 CFG_MODEL = {
     "clicks_models": [
-        "2023-01-02_clicks_cat_ranker_60409_91085",
-        "2023-01-02_clicks_lgbm_ranker_61486_91133",
-        "2023-01-02_clicks_cat_ranker_60409_91085",
-        "2023-01-02_clicks_lgbm_ranker_61486_91133",
+        "2022-12-25_clicks_cat_ranker_45439_89900",
+        "2022-12-26_clicks_lgbm_ranker_48370_89600",
+        "2023-01-02_clicks_cat_ranker_60593_91362",
+        "2023-01-02_clicks_lgbm_ranker_61844_91502",
     ],
     "carts_models": [
-        "2023-01-02_carts_cat_ranker_75502_94516",
-        "2023-01-02_carts_lgbm_ranker_75627_94287",
-        "2023-01-02_carts_cat_ranker_75502_94516",
-        "2023-01-02_carts_lgbm_ranker_75627_94287",
+        "2022-12-25_carts_cat_ranker_65389_94260",
+        "2022-12-26_carts_lgbm_ranker_66196_93867",
+        "2023-01-02_carts_cat_ranker_75708_94697",
+        "2023-01-02_carts_lgbm_ranker_75879_94504",
     ],
     "orders_models": [
-        "2023-01-02_orders_cat_ranker_86674_97221",
-        "2023-01-02_orders_lgbm_ranker_85360_96765",
-        "2023-01-02_orders_cat_ranker_86674_97221",
-        "2023-01-02_orders_lgbm_ranker_85360_96765",
+        "2022-12-25_orders_cat_ranker_80132_96912",
+        "2022-12-26_orders_lgbm_ranker_78372_95814",
+        "2023-01-02_orders_cat_ranker_86779_97309",
+        "2023-01-02_orders_lgbm_ranker_85371_96813",
     ],
 }
 
 
 def measure_ensemble_scores(hyperparams: dict):
-    N_test = 100
+    N_test = 40
     week_model = "w2"
     CONFIG = {
         "clicks_weights": [
@@ -110,10 +110,7 @@ def measure_ensemble_scores(hyperparams: dict):
                 df_tmp = pl.read_parquet(tmp_path)
                 # apply weights
                 df_tmp = df_tmp.with_columns(
-                    [
-                        (np.sign(pl.col("score")) * pow(pl.col("score"), POWERS[ix]))
-                        * WEIGHTS[ix]
-                    ]
+                    [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
                 )
                 df_chunk = pl.concat([df_chunk, df_tmp])
 
@@ -275,34 +272,30 @@ def constraints(trial):
 
 
 def tune_ensemble():
-    # logging.info("measure ensemble recall@20 before tuning")
-    # hyperparams = {
-    #     "click_wgt_1": 0.25,
-    #     "click_wgt_2": 0.25,
-    #     "click_wgt_3": 0.25,
-    #     "click_wgt_4": 0.25,
-    #     "cart_wgt_1": 0.25,
-    #     "cart_wgt_2": 0.25,
-    #     "cart_wgt_3": 0.25,
-    #     "cart_wgt_4": 0.25,
-    #     "order_wgt_1": 0.25,
-    #     "order_wgt_2": 0.25,
-    #     "order_wgt_3": 0.25,
-    #     "order_wgt_4": 0.25,
-    #     "click_pow": 1,
-    #     "cart_pow": 1,
-    #     "order_pow": 1,
-    # }
+    logging.info("measure ensemble recall@20 before tuning")
+    hyperparams = {
+        "click_wgt_1": 0.25,
+        "click_wgt_2": 0.25,
+        "click_wgt_3": 0.25,
+        "click_wgt_4": 0.25,
+        "cart_wgt_1": 0.25,
+        "cart_wgt_2": 0.25,
+        "cart_wgt_3": 0.25,
+        "cart_wgt_4": 0.25,
+        "order_wgt_1": 0.25,
+        "order_wgt_2": 0.25,
+        "order_wgt_3": 0.25,
+        "order_wgt_4": 0.25,
+        "click_pow": 1,
+        "cart_pow": 1,
+        "order_pow": 1,
+    }
 
-    # recall20_before = measure_ensemble_scores(hyperparams)
-    # logging.info(f"ensemble recall@20 before tuning: {recall20_before}")
+    recall20_before = measure_ensemble_scores(hyperparams)
+    logging.info(f"ensemble recall@20 before tuning: {recall20_before}")
 
     logging.info("perform tuning")
-    sampler = optuna.integration.BoTorchSampler(
-        constraints_func=constraints,
-        n_startup_trials=3,
-    )
-    study = optuna.create_study(direction="maximize", sampler=sampler)
+    study = optuna.create_study(direction="maximize", sampler=TPESampler())
     study.optimize(ObjectiveEnsemble(), n_trials=NTRIAL)
 
     logging.info("complete tuning!")

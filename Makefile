@@ -70,6 +70,9 @@ session_features:
 session_item_features:
 	python src/features_v2/make_session_item_features.py --mode $(MODE)
 
+session_item_features_l2:
+	python src/features_v2/make_session_item_features_l2.py --mode $(MODE)
+
 item_features:
 	python src/features_v2/make_item_features.py --mode $(MODE)
 

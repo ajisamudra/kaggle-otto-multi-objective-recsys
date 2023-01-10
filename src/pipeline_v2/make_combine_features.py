@@ -175,6 +175,9 @@ def fcombine_features(mode: str, event: str, ix: int):
     c_path = f"{candidate_path}/{name}_{ix}_{event}_rows.parquet"
     sfea_path = f"{session_fea_path}/{name}_{ix}_session_feas.parquet"
     sfeaXaid_path = f"{sessionXaid_fea_path}/{name}_{ix}_session_item_feas.parquet"
+    sfeaXaid_l2_path = (
+        f"{sessionXaid_fea_path}/{name}_{ix}_session_item_feas_l2.parquet"
+    )
     item_path = f"{item_fea_path}/{name}_item_feas.parquet"
     itemXhour_path = f"{itemXhour_fea_path}/{name}_item_hour_feas.parquet"
     itemXweekday_path = f"{itemXweekday_fea_path}/{name}_item_weekday_feas.parquet"
@@ -253,27 +256,6 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     del word2vec_fea_df
     gc.collect()
-
-    # additional features in covisit weights
-    # expressing how far the weight of candidate over avg of weight with others candidate
-    # mean over session
-    logging.info(f"start calc relative dist w mean features!")
-    DIF_FEAS = [
-        "click_weight_with_last_event_in_session_aid",
-        "buys_weight_with_last_event_in_session_aid",
-        "buy2buy_weight_with_last_event_in_session_aid",
-        "word2vec_skipgram_last_event_cosine_distance",
-        "word2vec_skipgram_last_event_euclidean_distance",
-        "word2vec_skipgram_max_weighted_recency_cosine_distance",
-        "word2vec_skipgram_max_weighted_recency_euclidean_distance",
-    ]
-    for f in tqdm(DIF_FEAS):
-        cand_df = calc_relative_diff_w_mean(df=cand_df, feature=f)
-
-    # fill 0
-    cand_df = cand_df.fill_nan(0)
-
-    logging.info(f"complete calc relative dist w mean features! shape {cand_df.shape}")
 
     # # read fasttext features
     # fasttext_fea_df = pl.read_parquet(fasttext_path)
@@ -355,6 +337,27 @@ def fcombine_features(mode: str, event: str, ix: int):
     del ses_aid_agg
     gc.collect()
 
+    # additional features in covisit weights
+    # expressing how far the weight of candidate over avg of weight with others candidate
+    # mean over session
+    logging.info(f"start calc relative dist w mean features!")
+    DIF_FEAS = [
+        "click_weight_with_last_event_in_session_aid",
+        "buys_weight_with_last_event_in_session_aid",
+        "buy2buy_weight_with_last_event_in_session_aid",
+        "word2vec_skipgram_last_event_cosine_distance",
+        "word2vec_skipgram_last_event_euclidean_distance",
+        "word2vec_skipgram_max_weighted_recency_cosine_distance",
+        "word2vec_skipgram_max_weighted_recency_euclidean_distance",
+    ]
+    for f in tqdm(DIF_FEAS):
+        cand_df = calc_relative_diff_w_mean(df=cand_df, feature=f)
+
+    # fill 0
+    cand_df = cand_df.fill_nan(0)
+
+    logging.info(f"complete calc relative dist w mean features! shape {cand_df.shape}")
+
     # read item features
     item_agg = pl.read_parquet(item_path)
     logging.info(f"read item features with shape {item_agg.shape}")
@@ -398,6 +401,17 @@ def fcombine_features(mode: str, event: str, ix: int):
         ]
     )
     cand_df = cand_df.fill_null(0)
+
+    # # read session-item l2 features
+    # ses_aid_agg = pl.read_parquet(sfeaXaid_l2_path)
+    # logging.info(f"read sessionXaid l2 features with shape {ses_aid_agg.shape}")
+    # cand_df = cand_df.join(
+    #     ses_aid_agg,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "candidate_aid"],
+    # )
+    # logging.info(f"joined with sessionXaid l2 features! shape {cand_df.shape}")
 
     # read item-hour features
     item_hour_agg = pl.read_parquet(itemXhour_path)
