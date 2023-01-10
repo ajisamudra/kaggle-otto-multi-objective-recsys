@@ -204,19 +204,20 @@ def gen_user_features(data: pl.DataFrame):
 
     def binning_aid_dcount(x):
         if x <= 4:
-            return str(x)
+            # return str(x)
+            return x
         elif (x > 4) and (x <= 8):
-            return "5_8"
+            return 5  # "5_8"
         elif (x > 8) and (x <= 12):
-            return "9_12"
+            return 6  # "9_12"
         elif (x > 12) and (x <= 15):
-            return "13_15"
+            return 7  # "13_15"
         elif (x > 15) and (x <= 20):
-            return "16_20"
+            return 8  # "16_20"
         elif (x > 20) and (x <= 30):
-            return "21_30"
+            return 9  # "21_30"
         else:
-            return ">30"
+            return 10  # ">30"
 
     data_agg = data_agg.with_columns(
         pl.col("sess_aid_dcount")
