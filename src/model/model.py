@@ -217,7 +217,7 @@ class CATRanker(RankingModel):
         self.best_score_ = 0
         self.hyperprams = {}
 
-        self._model = CatBoostRanker(**kwargs)
+        self._model = CatBoostRanker(n_estimators=2000, **kwargs)
 
     def fit(self, X_train, X_val, y_train, y_val, group_train, group_val):
 

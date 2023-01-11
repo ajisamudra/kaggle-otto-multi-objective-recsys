@@ -14,19 +14,19 @@
 # make candidate_word2vec_duration_list MODE=training_train
 # make candidate_word2vec_weighted_recency_list MODE=training_train
 # make candidate_word2vec_weighted_duration_list MODE=training_train
-make candidate_rows MODE=training_train
-make session_features MODE=training_train
-make item_features MODE=training_train
-make session_item_features MODE=training_train
-make item_hour_features MODE=training_train
-make item_weekday_features MODE=training_train
-make session_representation_items MODE=training_train
-make item_covisitation_features MODE=training_train START=0 END=30
+# make candidate_rows MODE=training_train
+# make session_features MODE=training_train
+# make item_features MODE=training_train
+# make session_item_features MODE=training_train
+# make item_hour_features MODE=training_train
+# make item_weekday_features MODE=training_train
+# make session_representation_items MODE=training_train
+# make item_covisitation_features MODE=training_train START=0 END=30
 # make matrix_factorization_features MODE=training_train START=0 END=30
-make word2vec_features START=0 END=30
+# make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
 # make session_item_features_l2 MODE=training_train
-make combine_features  MODE=training_train START=0 END=30
+# make combine_features  MODE=training_train START=0 END=30
 # make target_encoding MODE=training_train
 # make target_encoding MODE=training_test
 # make combine_features_l2  MODE=training_train START=0 END=30
@@ -64,7 +64,7 @@ make combine_features  MODE=training_train START=0 END=30
 # make fasttext_features MODE=training_test START=0 END=50
 # make fasttext_features MODE=training_test START=50 END=100
 # make session_item_features_l2 MODE=training_test
-make combine_features  MODE=training_test START=0 END=40
+# make combine_features  MODE=training_test START=0 END=40
 # make combine_features  MODE=training_test START=25 END=50
 # make combine_features  MODE=training_test START=50 END=75
 # make combine_features  MODE=training_test START=75 END=100
@@ -121,7 +121,7 @@ make combine_features  MODE=training_test START=0 END=40
 # make combine_features  MODE=training_test START=75 END=100
 
 make train ALGO=cat_ranker
-# make train ALGO=lgbm_ranker
+make train ALGO=lgbm_ranker
 # make word2vec_features START=0 END=30
 # make word2vec_features MODE=training_test START=24 END=50
 # make word2vec_features MODE=training_test START=50 END=100

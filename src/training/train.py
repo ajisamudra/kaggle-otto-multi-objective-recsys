@@ -172,7 +172,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             elif algo == "lgbm_ranker":
                 if EVENT == "orders":
                     hyperparams = {
-                        "n_estimators": 500,
+                        "n_estimators": 2000,
                         "learning_rate": 0.06686942900752924,
                         "max_depth": 2,
                         "num_leaves": 19,
@@ -182,7 +182,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     }
                 elif EVENT == "carts":
                     hyperparams = {
-                        "n_estimators": 500,
+                        "n_estimators": 2000,
                         "learning_rate": 0.0489842694434591,
                         "max_depth": 5,
                         "num_leaves": 83,
@@ -192,7 +192,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     }
                 elif EVENT == "clicks":
                     hyperparams = {
-                        "n_estimators": 500,
+                        "n_estimators": 2000,
                         "learning_rate": 0.04184392968947091,
                         "max_depth": 6,
                         "num_leaves": 106,
