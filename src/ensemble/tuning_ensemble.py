@@ -5,6 +5,7 @@ import numpy as np
 import gc
 import joblib
 from pathlib import Path
+from sklearn.preprocessing import MinMaxScaler
 import datetime
 import optuna
 from optuna.samplers import TPESampler
@@ -108,10 +109,21 @@ def measure_ensemble_scores(hyperparams: dict):
                 )
                 tmp_path = f"{input_path}/test_{i}_{EVENT}_scores.parquet"
                 df_tmp = pl.read_parquet(tmp_path)
+                # min max scale
+                scaler = MinMaxScaler()
+                scaled_score = scaler.fit_transform(
+                    df_tmp["score"].to_pandas().values.reshape(-1, 1)
+                )
+                # reshape the scaled score
+                scaled_score = scaled_score.reshape(1, -1)[0]
+                df_tmp = df_tmp.with_columns(
+                    [pl.Series(name="scaled_score", values=scaled_score)]
+                )
                 # apply weights
                 df_tmp = df_tmp.with_columns(
-                    [(pow(pl.col("score"), POWERS[ix])) * WEIGHTS[ix]]
+                    [(pow(pl.col("scaled_score"), POWERS[ix])) * WEIGHTS[ix]]
                 )
+                df_tmp = freemem(df_tmp)
                 df_chunk = pl.concat([df_chunk, df_tmp])
 
                 del df_tmp
@@ -119,7 +131,7 @@ def measure_ensemble_scores(hyperparams: dict):
 
             # sum weightes scores per candidate aid
             df_chunk = df_chunk.groupby(["session", "candidate_aid", "label"]).agg(
-                [pl.col("score").sum()]
+                [pl.col("scaled_score").sum()]
             )
 
             # save weighted scores
@@ -135,7 +147,7 @@ def measure_ensemble_scores(hyperparams: dict):
 
             # take top 20 candidate aid and save it as list
             test_predictions = (
-                df_chunk.sort(["session", "score"], reverse=True)
+                df_chunk.sort(["session", "scaled_score"], reverse=True)
                 .groupby("session")
                 .agg([pl.col("candidate_aid").limit(20).list().alias("labels")])
             )
