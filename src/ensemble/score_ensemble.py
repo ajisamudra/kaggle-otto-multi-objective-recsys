@@ -28,39 +28,45 @@ def score_ensemble():
             "2022-12-26_carts_lgbm_ranker_66196_93867",
             "2023-01-02_carts_cat_ranker_75708_94697",
             "2023-01-02_carts_lgbm_ranker_75879_94504",
+            "2023-01-10_carts_cat_ranker_76221_94688",
         ],
-        "carts_powers": [1, 1, 1, 1],
+        "carts_powers": [2, 2, 2, 2, 2],
         "carts_weights": [
-            0.25,
-            0.25,
-            0.25,
-            0.25,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
         ],
         "clicks_models": [
             "2022-12-25_clicks_cat_ranker_45439_89900",
             "2022-12-26_clicks_lgbm_ranker_48370_89600",
             "2023-01-02_clicks_cat_ranker_60593_91362",
             "2023-01-02_clicks_lgbm_ranker_61844_91502",
+            "2023-01-10_clicks_cat_ranker_61483_91316",
         ],
-        "clicks_powers": [1, 1, 1, 1],
+        "clicks_powers": [2, 2, 2, 2, 2],
         "clicks_weights": [
-            0.25,
-            0.25,
-            0.25,
-            0.25,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
         ],
         "orders_models": [
             "2022-12-25_orders_cat_ranker_80132_96912",
             "2022-12-26_orders_lgbm_ranker_78372_95814",
             "2023-01-02_orders_cat_ranker_86779_97309",
             "2023-01-02_orders_lgbm_ranker_85371_96813",
+            "2023-01-10_orders_cat_ranker_87315_97301",
         ],
-        "orders_powers": [1, 1, 1, 1],
+        "orders_powers": [2, 2, 2, 2, 2],
         "orders_weights": [
-            0.25,
-            0.25,
-            0.25,
-            0.25,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
+            0.2,
         ],
     }
     events_model_name = []
@@ -96,7 +102,7 @@ def score_ensemble():
                 df_tmp = freemem(df_tmp)
                 df_chunk = pl.concat([df_chunk, df_tmp])
 
-                del df_tmp
+                del df_tmp, scaler
                 gc.collect()
 
             # sum weightes scores per candidate aid

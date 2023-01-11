@@ -151,3 +151,13 @@ python src/scoring/score_treelite.py --event clicks --week_data $WEEK_DATA --wee
 
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+
+# normalized ensemble power 1 Overall Recall@20 = 0.5711136077256553
+# normalized ensemble power 2 Overall Recall@20 = 0.571169451316483
+# normalized ensemble power 4 Overall Recall@20 = 0.5709476195353862
+# normalized ensemble power 8 Overall Recall@20 = 0.5707563035448169
+
+# 5 models pow 2 before tuning Overall Recall@20 = 0.5715749250604418
+# 5 models pow 1 before tuningOverall Recall@20 = 0.5715320445688369
+# 6 models before tuning Overall Recall@20 = 0.5710348916361374
