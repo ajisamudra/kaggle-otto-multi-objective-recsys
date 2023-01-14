@@ -90,7 +90,8 @@ class CatClassifier(ClassifierModel):
         self.best_score_ = 0
         self.best_iteration = 0
 
-        self._model = CatBoostClassifier(auto_class_weights="SqrtBalanced", **kwargs)
+        # self._model = CatBoostClassifier(auto_class_weights="SqrtBalanced", **kwargs)
+        self._model = CatBoostClassifier(**kwargs)
         self.hyperprams = {}
 
     def fit(self, X_train, X_val, y_train, y_val):
@@ -221,6 +222,7 @@ class CATRanker(RankingModel):
         # self._model = CatBoostRanker(loss_function="PairLogitPairwise", **kwargs)
         # self._model = CatBoostRanker(loss_function="QueryRMSE", **kwargs)
         self._model = CatBoostRanker(**kwargs)
+        # self._model = CatBoostRanker(loss_function="PairLogit", **kwargs)
 
     def fit(self, X_train, X_val, y_train, y_val, group_train, group_val):
 
@@ -236,11 +238,13 @@ class CATRanker(RankingModel):
             verbose=self._verbose,
         )
 
+        feature_importance = self._model.get_feature_importance(data=train_pool)
+
         # feature importance as DataFrame
         self.feature_importances_ = pd.DataFrame(
             {
                 "feature": X_train.columns.to_list(),
-                "importance": self._model.feature_importances_,
+                "importance": feature_importance,
             }
         ).sort_values(by="importance", ascending=False, ignore_index=True)
 

@@ -161,3 +161,9 @@ python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $C
 # 5 models pow 2 before tuning Overall Recall@20 = 0.5715749250604418
 # 5 models pow 1 before tuningOverall Recall@20 = 0.5715320445688369
 # 6 models before tuning Overall Recall@20 = 0.5710348916361374
+
+
+# # only keep word2vec last event
+# # only keep covisit recency & weighted recency
+# # log duration -> change to plain duration
+

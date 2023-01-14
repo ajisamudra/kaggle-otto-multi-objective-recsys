@@ -54,10 +54,10 @@ def gen_session_representation_items(
             pl.col("type_weighted_log_recency_score")
             .sum()
             .alias("sum_type_weighted_log_recency_score"),
-            pl.col("log_duration_second").sum().alias("sum_log_duration_second"),
-            pl.col("type_weighted_log_duration_second")
-            .sum()
-            .alias("sum_type_weighted_log_duration_second"),
+            pl.col("duration_second").sum().alias("sum_duration_second"),
+            # pl.col("type_weighted_log_duration_second")
+            # .sum()
+            # .alias("sum_type_weighted_log_duration_second"),
         ]
     )
     data_agg = data_agg.sort(pl.col("session"))
@@ -84,38 +84,38 @@ def gen_session_representation_items(
 
     # aid with log_duration_second
     data_aids_log_duration = data_agg.filter(
-        pl.col("sum_log_duration_second")
-        == pl.col("sum_log_duration_second").max().over("session")
-    ).select(["session", pl.col("aid").alias("max_log_duration_event_in_session_aid")])
+        pl.col("sum_duration_second")
+        == pl.col("sum_duration_second").max().over("session")
+    ).select(["session", pl.col("aid").alias("max_duration_event_in_session_aid")])
     # remove duplicate
     data_aids_log_duration = data_aids_log_duration.groupby("session").agg(
         [
-            pl.col("max_log_duration_event_in_session_aid")
+            pl.col("max_duration_event_in_session_aid")
             .max()
-            .alias("max_log_duration_event_in_session_aid")
+            .alias("max_duration_event_in_session_aid")
         ]
     )
 
-    # aid with sum_type_weighted_log_duration_second
-    data_aids_wighted_log_duration = data_agg.filter(
-        pl.col("sum_type_weighted_log_duration_second")
-        == pl.col("sum_type_weighted_log_duration_second").max().over("session")
-    ).select(
-        [
-            "session",
-            pl.col("aid").alias("max_weighted_log_duration_event_in_session_aid"),
-        ]
-    )
-    # remove duplicate
-    data_aids_wighted_log_duration = data_aids_wighted_log_duration.groupby(
-        "session"
-    ).agg(
-        [
-            pl.col("max_weighted_log_duration_event_in_session_aid")
-            .max()
-            .alias("max_weighted_log_duration_event_in_session_aid")
-        ]
-    )
+    # # aid with sum_type_weighted_log_duration_second
+    # data_aids_wighted_log_duration = data_agg.filter(
+    #     pl.col("sum_type_weighted_log_duration_second")
+    #     == pl.col("sum_type_weighted_log_duration_second").max().over("session")
+    # ).select(
+    #     [
+    #         "session",
+    #         pl.col("aid").alias("max_weighted_log_duration_event_in_session_aid"),
+    #     ]
+    # )
+    # # remove duplicate
+    # data_aids_wighted_log_duration = data_aids_wighted_log_duration.groupby(
+    #     "session"
+    # ).agg(
+    #     [
+    #         pl.col("max_weighted_log_duration_event_in_session_aid")
+    #         .max()
+    #         .alias("max_weighted_log_duration_event_in_session_aid")
+    #     ]
+    # )
     # join
     # now each session is represented by 5 aids
     # we can get covisitation score using 5 covisitation matrix
@@ -137,18 +137,18 @@ def gen_session_representation_items(
         left_on=["session"],
         right_on=["session"],
     )
-    data_aids = data_aids.join(
-        data_aids_wighted_log_duration,
-        how="left",
-        left_on=["session"],
-        right_on=["session"],
-    )
+    # data_aids = data_aids.join(
+    #     data_aids_wighted_log_duration,
+    #     how="left",
+    #     left_on=["session"],
+    #     right_on=["session"],
+    # )
 
-    logging.info("get 5 aids representing 1 session")
+    logging.info("get 4 aids representing 1 session")
     data_aids = freemem(data_aids)
 
     del (
-        data_aids_wighted_log_duration,
+        # data_aids_wighted_log_duration,
         data_aids_log_duration,
         data_aids_weighted_recency,
         data_aids_recency,
@@ -156,12 +156,11 @@ def gen_session_representation_items(
     gc.collect()
 
     for event in ["clicks", "carts", "orders"]:
-
+        logging.info(f"read candidate for event {event.upper()}")
         if (mode == "training_train") & (event == "clicks") & (ix > 6):
             logging.info("click ix > 6 continue")
             continue
 
-        logging.info(f"read candidate for event {event.upper()}")
         # read candidate
         filepath = f"{candidate_path}/{name}_{ix}_{event}_rows.parquet"
         cand_df = pl.read_parquet(filepath)
@@ -200,10 +199,8 @@ def make_session_representation_items(
     output_path: Path,
 ):
 
-    if mode == "training_train":
+    if name == "train":
         n = CFG.N_train
-    elif mode == "training_test":
-        n = CFG.N_local_test
     else:
         n = CFG.N_test
 
@@ -217,8 +214,8 @@ def make_session_representation_items(
         logging.info(f"start creating sesion representation items")
         gen_session_representation_items(
             data=df,
-            mode=mode,
             name=name,
+            mode=mode,
             ix=ix,
             candidate_path=candidate_path,
             output_path=output_path,

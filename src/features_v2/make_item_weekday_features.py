@@ -97,32 +97,32 @@ def gen_item_weekday_features(data: pl.DataFrame):
             (pl.col("itemXweekday_cart_count") / pl.col("itemXweekday_all_cart_count"))
             .fill_nan(0)
             .alias("itemXweekday_frac_cart_all_cart_count"),
-            (
-                pl.col("itemXweekday_order_count")
-                / pl.col("itemXweekday_all_order_count")
-            )
-            .fill_nan(0)
-            .alias("itemXweekday_frac_order_all_order_count"),
+            # (
+            #     pl.col("itemXweekday_order_count")
+            #     / pl.col("itemXweekday_all_order_count")
+            # )
+            # .fill_nan(0)
+            # .alias("itemXweekday_frac_order_all_order_count"),
             # frac compare to total event in particular weekday
             # represent popularity at that weekday
-            (
-                pl.col("itemXweekday_click_count")
-                / pl.col("itemXweekday_all_weekday_click_count")
-            )
-            .fill_nan(0)
-            .alias("itemXweekday_frac_click_all_weekday_click_count"),
+            # (
+            #     pl.col("itemXweekday_click_count")
+            #     / pl.col("itemXweekday_all_weekday_click_count")
+            # )
+            # .fill_nan(0)
+            # .alias("itemXweekday_frac_click_all_weekday_click_count"),
             (
                 pl.col("itemXweekday_cart_count")
                 / pl.col("itemXweekday_all_weekday_cart_count")
             )
             .fill_nan(0)
             .alias("itemXweekday_frac_cart_all_weekday_cart_count"),
-            (
-                pl.col("itemXweekday_order_count")
-                / pl.col("itemXweekday_all_weekday_order_count")
-            )
-            .fill_nan(0)
-            .alias("itemXweekday_frac_order_all_weekday_order_count"),
+            # (
+            #     pl.col("itemXweekday_order_count")
+            #     / pl.col("itemXweekday_all_weekday_order_count")
+            # )
+            # .fill_nan(0)
+            # .alias("itemXweekday_frac_order_all_weekday_order_count"),
         ],
     )
 
@@ -135,6 +135,7 @@ def gen_item_weekday_features(data: pl.DataFrame):
             "itemXweekday_all_weekday_click_count",
             "itemXweekday_all_weekday_cart_count",
             "itemXweekday_all_weekday_order_count",
+            "itemXweekday_click_count",
         ]
     )
 

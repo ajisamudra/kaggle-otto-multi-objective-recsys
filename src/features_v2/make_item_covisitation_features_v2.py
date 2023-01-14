@@ -133,9 +133,9 @@ def gen_item_covisitation_features(
             top_15_buys=top_15_buys,
         )
 
-        logging.info("compare max_log_duration_event_in_session_aid with candidate")
+        logging.info("compare max_duration_event_in_session_aid with candidate")
         cand_df["pair_list"] = (
-            cand_df["max_log_duration_event_in_session_aid"].astype(str)
+            cand_df["max_duration_event_in_session_aid"].astype(str)
             + "_"
             + cand_df["candidate_aid"].astype(str)
         )
@@ -151,25 +151,25 @@ def gen_item_covisitation_features(
             top_15_buys=top_15_buys,
         )
 
-        logging.info(
-            "compare max_weighted_log_duration_event_in_session_aid with candidate"
-        )
-        cand_df["pair_list"] = (
-            cand_df["max_weighted_log_duration_event_in_session_aid"].astype(str)
-            + "_"
-            + cand_df["candidate_aid"].astype(str)
-        )
-        candidate_list = list(cand_df["pair_list"].values)
-        (
-            click_weights_max_weighted_duration_event,
-            buys_weights_max_weighted_duration_event,
-            buy2buy_weights_max_weighted_duration_event,
-        ) = look_into_dict(
-            candidate_list=candidate_list,
-            top_20_clicks=top_20_clicks,
-            top_15_buy2buy=top_15_buy2buy,
-            top_15_buys=top_15_buys,
-        )
+        # logging.info(
+        #     "compare max_weighted_log_duration_event_in_session_aid with candidate"
+        # )
+        # cand_df["pair_list"] = (
+        #     cand_df["max_weighted_log_duration_event_in_session_aid"].astype(str)
+        #     + "_"
+        #     + cand_df["candidate_aid"].astype(str)
+        # )
+        # candidate_list = list(cand_df["pair_list"].values)
+        # (
+        #     click_weights_max_weighted_duration_event,
+        #     buys_weights_max_weighted_duration_event,
+        #     buy2buy_weights_max_weighted_duration_event,
+        # ) = look_into_dict(
+        #     candidate_list=candidate_list,
+        #     top_20_clicks=top_20_clicks,
+        #     top_15_buy2buy=top_15_buy2buy,
+        #     top_15_buys=top_15_buys,
+        # )
 
         # add to cand_df
         cand_df = cand_df[["session", "candidate_aid"]]
@@ -184,11 +184,11 @@ def gen_item_covisitation_features(
             "click_weight_with_max_weighted_recency_event_in_session_aid"
         ] = click_weights_max_weighted_recency_event
         cand_df[
-            "click_weight_with_max_log_duration_event_in_session_aid"
+            "click_weight_with_max_duration_event_in_session_aid"
         ] = click_weights_max_duration_event
-        cand_df[
-            "click_weight_with_max_weighted_log_duration_event_in_session_aid"
-        ] = click_weights_max_weighted_duration_event
+        # cand_df[
+        #     "click_weight_with_max_weighted_log_duration_event_in_session_aid"
+        # ] = click_weights_max_weighted_duration_event
 
         # buys weights
         cand_df["buys_weight_with_last_event_in_session_aid"] = buys_weights_last_event
@@ -199,11 +199,11 @@ def gen_item_covisitation_features(
             "buys_weight_with_max_weighted_recency_event_in_session_aid"
         ] = buys_weights_max_weighted_recency_event
         cand_df[
-            "buys_weight_with_max_log_duration_event_in_session_aid"
+            "buys_weight_with_max_duration_event_in_session_aid"
         ] = buys_weights_max_duration_event
-        cand_df[
-            "buys_weight_with_max_weighted_log_duration_event_in_session_aid"
-        ] = buys_weights_max_weighted_duration_event
+        # cand_df[
+        #     "buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+        # ] = buys_weights_max_weighted_duration_event
 
         # buy2buy weights
         cand_df[
@@ -216,11 +216,11 @@ def gen_item_covisitation_features(
             "buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
         ] = buy2buy_weights_max_weighted_recency_event
         cand_df[
-            "buy2buy_weight_with_max_log_duration_event_in_session_aid"
+            "buy2buy_weight_with_max_duration_event_in_session_aid"
         ] = buy2buy_weights_max_duration_event
-        cand_df[
-            "buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
-        ] = buy2buy_weights_max_weighted_duration_event
+        # cand_df[
+        #     "buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+        # ] = buy2buy_weights_max_weighted_duration_event
 
         # save item covisitation features
         filepath = output_path / f"{name}_{ix}_{event}_item_covisitation_feas.parquet"

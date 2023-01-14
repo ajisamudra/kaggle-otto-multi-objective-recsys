@@ -65,11 +65,11 @@ def gen_session_item_features(data: pl.DataFrame):
             .mean()
             .fill_null(0)
             .alias("sesXaid_avg_cart_dur_sec"),
-            pl.col("duration_second")
-            .filter(pl.col("type") == 2)
-            .mean()
-            .fill_null(0)
-            .alias("sesXaid_avg_order_dur_sec"),
+            # pl.col("duration_second")
+            # .filter(pl.col("type") == 2)
+            # .mean()
+            # .fill_null(0)
+            # .alias("sesXaid_avg_order_dur_sec"),
             # sum duration per event type
             pl.col("duration_second")
             .filter(pl.col("type") == 0)
@@ -95,10 +95,10 @@ def gen_session_item_features(data: pl.DataFrame):
             pl.col("type_weighted_log_recency_score")
             .sum()
             .alias("sesXaid_type_weighted_log_recency_score"),
-            pl.col("log_duration_second").sum().alias("sesXaid_log_duration_second"),
-            pl.col("type_weighted_log_duration_second")
-            .sum()
-            .alias("sesXaid_type_weighted_log_duration_second"),
+            # pl.col("log_duration_second").sum().alias("sesXaid_log_duration_second"),
+            # pl.col("type_weighted_log_duration_second")
+            # .sum()
+            # .alias("sesXaid_type_weighted_log_duration_second"),
             pl.col("action_num_reverse_chrono")
             .min()
             .alias("sesXaid_action_num_reverse_chrono"),
@@ -111,12 +111,12 @@ def gen_session_item_features(data: pl.DataFrame):
             (pl.col("sesXaid_sec_from_last_event") / 60).alias(
                 "sesXaid_mins_from_last_event"
             ),
-            (np.log2(1 + pl.col("sesXaid_log_duration_second"))).alias(
-                "sesXaid_log_duration_second_log2p1"
-            ),
-            (np.log2(1 + pl.col("sesXaid_type_weighted_log_duration_second"))).alias(
-                "sesXaid_type_weighted_log_duration_second_log2p1"
-            ),
+            # (np.log2(1 + pl.col("sesXaid_log_duration_second"))).alias(
+            #     "sesXaid_log_duration_second_log2p1"
+            # ),
+            # (np.log2(1 + pl.col("sesXaid_type_weighted_log_duration_second"))).alias(
+            #     "sesXaid_type_weighted_log_duration_second_log2p1"
+            # ),
         ],
     )
 
@@ -170,14 +170,14 @@ def gen_session_item_features(data: pl.DataFrame):
             .sum()
             .over("session")
             .alias("sesXaid_all_type_weighted_log_recency_score"),
-            pl.col("sesXaid_log_duration_second")
-            .sum()
-            .over("session")
-            .alias("sesXaid_all_log_duration_second"),
-            pl.col("sesXaid_type_weighted_log_duration_second")
-            .sum()
-            .over("session")
-            .alias("sesXaid_all_type_weighted_log_duration_second"),
+            # pl.col("sesXaid_log_duration_second")
+            # .sum()
+            # .over("session")
+            # .alias("sesXaid_all_log_duration_second"),
+            # pl.col("sesXaid_type_weighted_log_duration_second")
+            # .sum()
+            # .over("session")
+            # .alias("sesXaid_all_type_weighted_log_duration_second"),
         ],
     )
 
@@ -213,12 +213,12 @@ def gen_session_item_features(data: pl.DataFrame):
             (pl.col("sesXaid_sum_cart_dur_sec") / pl.col("sesXaid_all_duration_second"))
             .fill_nan(0)
             .alias("sesXaid_frac_dur_cart_all_dur_sec"),
-            (
-                pl.col("sesXaid_sum_order_dur_sec")
-                / pl.col("sesXaid_all_duration_second")
-            )
-            .fill_nan(0)
-            .alias("sesXaid_frac_dur_order_all_dur_sec"),
+            # (
+            #     pl.col("sesXaid_sum_order_dur_sec")
+            #     / pl.col("sesXaid_all_duration_second")
+            # )
+            # .fill_nan(0)
+            # .alias("sesXaid_frac_dur_order_all_dur_sec"),
             # frac to total duration specific event
             (
                 pl.col("sesXaid_sum_click_dur_sec")
@@ -232,12 +232,12 @@ def gen_session_item_features(data: pl.DataFrame):
             )
             .fill_nan(0)
             .alias("sesXaid_frac_dur_cart_all_dur_sec"),
-            (
-                pl.col("sesXaid_sum_order_dur_sec")
-                / pl.col("sesXaid_all_sum_order_dur_sec")
-            )
-            .fill_nan(0)
-            .alias("sesXaid_frac_dur_order_all_dur_sec"),
+            # (
+            #     pl.col("sesXaid_sum_order_dur_sec")
+            #     / pl.col("sesXaid_all_sum_order_dur_sec")
+            # )
+            # .fill_nan(0)
+            # .alias("sesXaid_frac_dur_order_all_dur_sec"),
             # frac to total log_recency_score
             (
                 pl.col("sesXaid_log_recency_score")
@@ -251,18 +251,18 @@ def gen_session_item_features(data: pl.DataFrame):
             )
             .fill_nan(0)
             .alias("sesXaid_frac_type_weighted_log_recency_to_all"),
-            (
-                pl.col("sesXaid_log_duration_second")
-                / pl.col("sesXaid_all_log_duration_second")
-            )
-            .fill_nan(0)
-            .alias("sesXaid_frac_log_duration_sec_to_all"),
-            (
-                pl.col("sesXaid_type_weighted_log_duration_second")
-                / pl.col("sesXaid_all_type_weighted_log_duration_second")
-            )
-            .fill_nan(0)
-            .alias("sesXaid_frac_type_weighted_log_duration_sec_to_all"),
+            # (
+            #     pl.col("sesXaid_log_duration_second")
+            #     / pl.col("sesXaid_all_log_duration_second")
+            # )
+            # .fill_nan(0)
+            # .alias("sesXaid_frac_log_duration_sec_to_all"),
+            # (
+            #     pl.col("sesXaid_type_weighted_log_duration_second")
+            #     / pl.col("sesXaid_all_type_weighted_log_duration_second")
+            # )
+            # .fill_nan(0)
+            # .alias("sesXaid_frac_type_weighted_log_duration_sec_to_all"),
         ],
     )
 
@@ -270,8 +270,8 @@ def gen_session_item_features(data: pl.DataFrame):
     data_agg = data_agg.drop(
         columns=[
             "sesXaid_sec_from_last_event",
-            "sesXaid_log_duration_second",
-            "sesXaid_type_weighted_log_duration_second",
+            # "sesXaid_log_duration_second",
+            # "sesXaid_type_weighted_log_duration_second",
             "sesXaid_all_click_count",
             "sesXaid_all_cart_count",
             "sesXaid_all_order_count",
@@ -281,8 +281,11 @@ def gen_session_item_features(data: pl.DataFrame):
             "sesXaid_all_sum_order_dur_sec",
             "sesXaid_all_log_recency_score",
             "sesXaid_all_type_weighted_log_recency_score",
-            "sesXaid_all_log_duration_second",
-            "sesXaid_all_type_weighted_log_duration_second",
+            # "sesXaid_all_log_duration_second",
+            # "sesXaid_all_type_weighted_log_duration_second",
+            "sesXaid_events_count",
+            "sesXaid_order_count",
+            "sesXaid_sum_cart_dur_sec",
         ]
     )
 

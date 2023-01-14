@@ -59,12 +59,12 @@ def gen_user_features(data: pl.DataFrame):
     data_agg = data.groupby("session").agg(
         [
             pl.col("aid").count().alias("sess_all_events_count"),
-            pl.col("oneday_session").sum().alias("sess_num_real_session"),
+            # pl.col("oneday_session").sum().alias("sess_num_real_session"),
             pl.col("aid").n_unique().alias("sess_aid_dcount"),
             # num of event type
             (pl.col("type") == 0).sum().alias("sess_click_count"),
             (pl.col("type") == 1).sum().alias("sess_cart_count"),
-            (pl.col("type") == 2).sum().alias("sess_order_count"),
+            # (pl.col("type") == 2).sum().alias("sess_order_count"),
             # aid dcount per event type
             pl.col("aid")
             .filter(pl.col("type") == 0)
@@ -85,35 +85,35 @@ def gen_user_features(data: pl.DataFrame):
                 "sess_duration_mins"
             ),
             # avg duration per session
-            pl.col("duration_second")
-            .mean()
-            .fill_null(0)
-            .alias("sess_avg_all_events_dur_sec"),
+            # pl.col("duration_second")
+            # .mean()
+            # .fill_null(0)
+            # .alias("sess_avg_all_events_dur_sec"),
             # duration per event type
-            pl.col("duration_second")
-            .filter(pl.col("type") == 0)
-            .mean()
-            .fill_null(0)
-            .alias("sess_avg_click_dur_sec"),
+            # pl.col("duration_second")
+            # .filter(pl.col("type") == 0)
+            # .mean()
+            # .fill_null(0)
+            # .alias("sess_avg_click_dur_sec"),
             pl.col("duration_second")
             .filter(pl.col("type") == 1)
             .mean()
             .fill_null(0)
             .alias("sess_avg_cart_dur_sec"),
-            pl.col("duration_second")
-            .filter(pl.col("type") == 2)
-            .mean()
-            .fill_null(0)
-            .alias("sess_avg_order_dur_sec"),
+            # pl.col("duration_second")
+            # .filter(pl.col("type") == 2)
+            # .mean()
+            # .fill_null(0)
+            # .alias("sess_avg_order_dur_sec"),
             # event type
-            pl.col("type").n_unique().alias("sess_type_dcount"),
+            # pl.col("type").n_unique().alias("sess_type_dcount"),
             # avg hour & weekday of click/cart/order
-            pl.col("hour_click").mean().alias("sess_avg_hour_click"),
+            # pl.col("hour_click").mean().alias("sess_avg_hour_click"),
             pl.col("hour_cart").mean().alias("sess_avg_hour_cart"),
-            pl.col("hour_order").mean().alias("sess_avg_hour_order"),
-            pl.col("weekday_click").mean().alias("sess_avg_weekday_click"),
+            # pl.col("hour_order").mean().alias("sess_avg_hour_order"),
+            # pl.col("weekday_click").mean().alias("sess_avg_weekday_click"),
             pl.col("weekday_cart").mean().alias("sess_avg_weekday_cart"),
-            pl.col("weekday_order").mean().alias("sess_avg_weekday_order"),
+            # pl.col("weekday_order").mean().alias("sess_avg_weekday_order"),
             # for extracting hour and day of last event
             pl.col("ts").last().alias("curr_ts"),
             pl.col("type").last().alias("sess_last_type_in_session"),
@@ -126,79 +126,79 @@ def gen_user_features(data: pl.DataFrame):
             pl.col("curr_ts")
             .apply(lambda x: get_weekday_from_ts(x))
             .alias("sess_weekday"),
-            (pl.col("sess_num_real_session") + 1).alias("sess_num_real_session"),
+            # (pl.col("sess_num_real_session") + 1).alias("sess_num_real_session"),
         ],
     )
 
     data_agg = data_agg.with_columns(
         [
             # conversion rate
-            (pl.col("sess_cart_count") / pl.col("sess_click_count"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_click_to_cart_cvr"),
-            (pl.col("sess_order_count") / pl.col("sess_cart_count"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_cart_to_order_cvr"),
-            (pl.col("sess_carted_aid_dcount") / pl.col("sess_clicked_aid_dcount"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_clicked_to_carted_aid_cvr"),
+            # (pl.col("sess_cart_count") / pl.col("sess_click_count"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_click_to_cart_cvr"),
+            # (pl.col("sess_order_count") / pl.col("sess_cart_count"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_cart_to_order_cvr"),
+            # (pl.col("sess_carted_aid_dcount") / pl.col("sess_clicked_aid_dcount"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_clicked_to_carted_aid_cvr"),
             (pl.col("sess_ordered_aid_dcount") / pl.col("sess_carted_aid_dcount"))
             .fill_nan(0)
             .fill_null(0)
             .alias("sess_carted_to_ordered_aid_cvr"),
             # click / cart / order event proportion
-            (pl.col("sess_click_count") / pl.col("sess_all_events_count"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_frac_click_to_all_events"),
-            (pl.col("sess_cart_count") / pl.col("sess_all_events_count"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_frac_cart_to_all_events"),
-            (pl.col("sess_order_count") / pl.col("sess_all_events_count"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_frac_order_to_all_events"),
-            (pl.col("sess_clicked_aid_dcount") / pl.col("sess_aid_dcount"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_frac_clicked_aid_to_all_aid"),
+            # (pl.col("sess_click_count") / pl.col("sess_all_events_count"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_frac_click_to_all_events"),
+            # (pl.col("sess_cart_count") / pl.col("sess_all_events_count"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_frac_cart_to_all_events"),
+            # (pl.col("sess_order_count") / pl.col("sess_all_events_count"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_frac_order_to_all_events"),
+            # (pl.col("sess_clicked_aid_dcount") / pl.col("sess_aid_dcount"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_frac_clicked_aid_to_all_aid"),
             (pl.col("sess_carted_aid_dcount") / pl.col("sess_aid_dcount"))
             .fill_nan(0)
             .fill_null(0)
             .alias("sess_frac_carted_aid_to_all_aid"),
-            (pl.col("sess_ordered_aid_dcount") / pl.col("sess_aid_dcount"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_frac_ordered_aid_to_all_aid"),
+            # (pl.col("sess_ordered_aid_dcount") / pl.col("sess_aid_dcount"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_frac_ordered_aid_to_all_aid"),
             # abs diff sess avg hour/weekday click/cart/order with current session hour/weekday
-            np.abs(pl.col("sess_hour") - pl.col("sess_all_events_count"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sess_abs_diff_avg_hour_click"),
+            # np.abs(pl.col("sess_hour") - pl.col("sess_all_events_count"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sess_abs_diff_avg_hour_click"),
             np.abs(pl.col("sess_hour") - pl.col("sess_avg_hour_cart"))
             .cast(pl.Int32)
             .fill_null(99)
             .alias("sess_abs_diff_avg_hour_cart"),
-            np.abs(pl.col("sess_hour") - pl.col("sess_avg_hour_order"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sess_abs_diff_avg_hour_order"),
-            np.abs(pl.col("sess_weekday") - pl.col("sess_avg_weekday_click"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sess_abs_diff_avg_weekday_click"),
+            # np.abs(pl.col("sess_hour") - pl.col("sess_avg_hour_order"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sess_abs_diff_avg_hour_order"),
+            # np.abs(pl.col("sess_weekday") - pl.col("sess_avg_weekday_click"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sess_abs_diff_avg_weekday_click"),
             np.abs(pl.col("sess_weekday") - pl.col("sess_avg_weekday_cart"))
             .cast(pl.Int32)
             .fill_null(99)
             .alias("sess_abs_diff_avg_weekday_cart"),
-            np.abs(pl.col("sess_weekday") - pl.col("sess_avg_weekday_order"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sess_abs_diff_avg_weekday_order"),
+            # np.abs(pl.col("sess_weekday") - pl.col("sess_avg_weekday_order"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sess_abs_diff_avg_weekday_order"),
         ],
     )
 
@@ -226,7 +226,15 @@ def gen_user_features(data: pl.DataFrame):
     )
 
     # drop cols
-    data_agg = data_agg.drop(columns=["curr_ts", "sess_aid_dcount"])
+    data_agg = data_agg.drop(
+        columns=[
+            "curr_ts",
+            "sess_aid_dcount",
+            "sess_avg_hour_cart",
+            "sess_avg_weekday_cart",
+            "sess_click_count",
+        ]
+    )
 
     return data_agg
 

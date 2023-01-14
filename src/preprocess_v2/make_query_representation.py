@@ -48,7 +48,7 @@ def gen_query_representation(
             pl.col("type_weighted_log_recency_score")
             .sum()
             .alias("sum_type_weighted_log_recency_score"),
-            pl.col("log_duration_second").sum().alias("sum_log_duration_second"),
+            pl.col("duration_second").sum().alias("sum_log_duration_second"),
             pl.col("type_weighted_log_duration_second")
             .sum()
             .alias("sum_type_weighted_log_duration_second"),

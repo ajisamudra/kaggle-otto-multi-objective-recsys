@@ -65,22 +65,22 @@ def gen_item_features(data: pl.DataFrame):
             pl.col("hour_cart").mean().alias("item_avg_hour_cart"),
             pl.col("hour_order").mean().alias("item_avg_hour_order"),
             pl.col("weekday_click").mean().alias("item_avg_weekday_click"),
-            pl.col("weekday_cart").mean().alias("item_avg_weekday_cart"),
+            # pl.col("weekday_cart").mean().alias("item_avg_weekday_cart"),
             pl.col("weekday_order").mean().alias("item_avg_weekday_order"),
         ]
     )
 
-    # conversion rate per event
-    data_agg = data_agg.with_columns(
-        [
-            (pl.col("item_cart_count") / pl.col("item_click_count"))
-            .fill_null(0)
-            .alias("item_click_to_cart_cvr"),
-            (pl.col("item_order_count") / pl.col("item_cart_count"))
-            .fill_null(0)
-            .alias("item_cart_to_order_cvr"),
-        ],
-    )
+    # # conversion rate per event
+    # data_agg = data_agg.with_columns(
+    #     [
+    #         # (pl.col("item_cart_count") / pl.col("item_click_count"))
+    #         # .fill_null(0)
+    #         # .alias("item_click_to_cart_cvr"),
+    #         # (pl.col("item_order_count") / pl.col("item_cart_count"))
+    #         # .fill_null(0)
+    #         # .alias("item_cart_to_order_cvr"),
+    #     ],
+    # )
 
     data_agg = data_agg.fill_nan(0)
 

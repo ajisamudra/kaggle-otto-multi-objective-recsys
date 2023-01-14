@@ -51,7 +51,7 @@ TARGET = "label"
 
 
 def downsample(df: pd.DataFrame):
-    desired_ratio = 20
+    desired_ratio = 10
     positive_class = df[df[TARGET] == 1]
     negative_class = df[df[TARGET] == 0]
     negative_downsample = resample(
@@ -225,13 +225,13 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     # df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                # for i in range(10):
-                #     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
-                #     df_chunk = pl.read_parquet(filepath)
-                #     df_chunk = df_chunk.to_pandas()
-                #     df_chunk = downsample(df_chunk)
-                #     df_chunk = pl.from_pandas(df_chunk)
-                #     val_df = pl.concat([val_df, df_chunk])
+                for i in range(5):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
+                    val_df = pl.concat([val_df, df_chunk])
 
             elif EVENT == "carts":
                 train_df = pl.DataFrame()
@@ -243,13 +243,14 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     # df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                # for i in range(10):
-                #     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
-                #     df_chunk = pl.read_parquet(filepath)
-                #     df_chunk = df_chunk.to_pandas()
-                #     df_chunk = downsample(df_chunk)
-                #     df_chunk = pl.from_pandas(df_chunk)
-                #     val_df = pl.concat([val_df, df_chunk])
+                for i in range(3):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
+                    val_df = pl.concat([val_df, df_chunk])
+
             else:
                 for i in range(int(CFG.N_train / 5)):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
@@ -259,25 +260,24 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     # df_chunk = pl.from_pandas(df_chunk)
                     train_df = pl.concat([train_df, df_chunk])
 
-                # for i in range(3):
-                #     filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
-                #     df_chunk = pl.read_parquet(filepath)
-                #     df_chunk = df_chunk.to_pandas()
-                #     df_chunk = downsample(df_chunk)
-                #     df_chunk = pl.from_pandas(df_chunk)
-                #     val_df = pl.concat([val_df, df_chunk])
+                for i in range(1):
+                    filepath = f"{val_path}/test_{i}_{EVENT}_combined.parquet"
+                    df_chunk = pl.read_parquet(filepath)
+                    df_chunk = df_chunk.to_pandas()
+                    df_chunk = downsample(df_chunk)
+                    df_chunk = pl.from_pandas(df_chunk)
+                    val_df = pl.concat([val_df, df_chunk])
 
             logging.info(f"train shape {train_df.shape}")
-            # logging.info(f"val shape {val_df.shape}")
+            logging.info(f"val shape {val_df.shape}")
             # sort data based on session & label
-            train_df = train_df.sort(by=["session", TARGET], reverse=[True, True])
+            train_df = train_df.sort(
+                by=["session", "candidate_aid"], reverse=[True, False]
+            )
             train_df = train_df.to_pandas()
 
-            # val_df = val_df.sort(by=["session", TARGET], reverse=[True, True])
-            # val_df = val_df.to_pandas()
-
-            # del val_df
-            # gc.collect()
+            val_df = val_df.sort(by=["session", "candidate_aid"], reverse=[True, False])
+            val_df = val_df.to_pandas()
 
             selected_features = list(train_df.columns)
             selected_features.remove("session")
@@ -285,89 +285,61 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             selected_features.remove(TARGET)
 
             # unimportant features in order models
-            selected_features.remove("item_click_to_cart_cvr")
-            selected_features.remove("itemXhour_cart_count")
-            selected_features.remove("itemXhour_cart_to_order_cvr")
-            selected_features.remove("itemXhour_frac_cart_all_hour_cart_count")
-            selected_features.remove("itemXhour_frac_order_all_hour_order_count")
-            selected_features.remove("itemXhour_frac_order_all_order_count")
-            selected_features.remove("itemXhour_order_count")
-            selected_features.remove("itemXweekday_cart_to_order_cvr")
-            selected_features.remove("itemXweekday_click_count")
-            selected_features.remove("itemXweekday_frac_click_all_weekday_click_count")
-            selected_features.remove("itemXweekday_frac_order_all_order_count")
-            selected_features.remove("itemXweekday_frac_order_all_weekday_order_count")
             selected_features.remove("rank_word2vec")
             selected_features.remove("rank_word2vec_dur")
             selected_features.remove("rank_word2vec_wgtd_dur")
+            selected_features.remove("rank_word2vec_wgtd_rec")
+            selected_features.remove("rank_popular_week")
+            selected_features.remove("rank_matrix_fact")
+            selected_features.remove("rank_fasttext")
             selected_features.remove("retrieval_fasttext")
             selected_features.remove("retrieval_popular_week")
             selected_features.remove("retrieval_word2vec")
             selected_features.remove("retrieval_word2vec_dur")
             selected_features.remove("retrieval_word2vec_wgtd_dur")
             selected_features.remove("retrieval_word2vec_wgtd_rec")
-            selected_features.remove("sess_abs_diff_avg_hour_click")
-            selected_features.remove("sess_abs_diff_avg_hour_order")
-            selected_features.remove("sess_abs_diff_avg_weekday_order")
-            selected_features.remove("sess_avg_click_dur_sec")
-            selected_features.remove("sess_avg_hour_click")
-            selected_features.remove("sess_avg_hour_order")
-            selected_features.remove("sess_avg_order_dur_sec")
-            selected_features.remove("sess_avg_weekday_click")
-            selected_features.remove("sess_avg_weekday_order")
-            selected_features.remove("sess_cart_to_order_cvr")
-            selected_features.remove("sess_click_count")
-            selected_features.remove("sess_click_to_cart_cvr")
-            selected_features.remove("sess_clicked_to_carted_aid_cvr")
-            selected_features.remove("sess_duration_mins")
-            selected_features.remove("sess_frac_cart_to_all_events")
-            selected_features.remove("sess_frac_click_to_all_events")
-            selected_features.remove("sess_frac_clicked_aid_to_all_aid")
-            selected_features.remove("sess_frac_order_to_all_events")
-            selected_features.remove("sess_frac_ordered_aid_to_all_aid")
-            selected_features.remove("sess_hour")
-            selected_features.remove("sess_num_real_session")
-            selected_features.remove("sess_order_count")
-            selected_features.remove("sess_type_dcount")
-            selected_features.remove("sess_weekday")
-            selected_features.remove("sessXitem_abs_diff_avg_hour_cart")
-            selected_features.remove("sessXitem_abs_diff_avg_hour_click")
-            selected_features.remove("sessXitem_abs_diff_avg_weekday_click")
-            selected_features.remove("sesXaid_avg_order_dur_sec")
-            selected_features.remove("sesXaid_events_count")
-            selected_features.remove("sesXaid_frac_dur_order_all_dur_sec")
-            selected_features.remove("sesXaid_order_count")
-            selected_features.remove("sesXaid_sum_cart_dur_sec")
+            selected_features.remove("retrieval_matrix_fact")
 
-            # X_train = train_df[selected_features]
-            # group_train = train_df["session"]
-            # y_train = train_df[TARGET]
+            # remove word2vec related fea
+            selected_features.remove(
+                "diff_w_mean_word2vec_skipgram_last_event_cosine_distance"
+            )
 
-            # X_val = val_df[selected_features]
-            # group_val = val_df["session"]
-            # y_val = val_df[TARGET]
+            X_train = train_df[selected_features]
+            group_train = train_df["session"]
+            y_train = train_df[TARGET]
+
+            X_val = val_df[selected_features]
+            group_val = val_df["session"]
+            y_val = val_df[TARGET]
+
+            del val_df
+            gc.collect()
 
             # split train and validation using StratifiedGroupKFold
             # X_train, X_val, y_train, y_val, group_train, group_val = train_test_split(
             #     X, y, group, test_size=0.2, stratify=y, random_state=745
             # )
 
-            X = train_df[selected_features]
-            group = train_df["session"]
-            y = train_df[TARGET]
+            # X = train_df[selected_features]
+            # group = train_df["session"]
+            # y = train_df[TARGET]
 
-            skgfold = StratifiedGroupKFold(n_splits=5)
-            train_idx, val_idx = [], []
-
-            for tidx, vidx in skgfold.split(X, y, groups=group):
-                train_idx, val_idx = tidx, vidx
-
-            X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
-            y_train, y_val = y[train_idx], y[val_idx]
-            group_train, group_val = group[train_idx], group[val_idx]
-
-            del X, y, group
+            del train_df
             gc.collect()
+
+            # skgfold = StratifiedGroupKFold(n_splits=5)
+            # train_idx, val_idx = [], []
+
+            # for tidx, vidx in skgfold.split(X, y, groups=group):
+            #     train_idx, val_idx = tidx, vidx
+
+            # X_train, X_val = X.iloc[train_idx, :], X.iloc[val_idx, :]
+            # y_train, y_val = y[train_idx], y[val_idx]
+            # group_train, group_val = group[train_idx], group[val_idx]
+
+            # del X, y, group
+            # gc.collect()
 
             # calculate num samples per group
             logging.info("calculate num samples per group")
@@ -436,8 +408,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             val_score = pd.DataFrame(val_score)
             val_score_dists.append(val_score)
 
-            del train_df, X_train, X_val, y_train, y_val, group_train, group_val
-            del val_df
+            del X_train, X_val, y_train, y_val, group_train, group_val
             gc.collect()
 
         # save to dict per event

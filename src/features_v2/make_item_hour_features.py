@@ -78,9 +78,9 @@ def gen_item_hour_features(data: pl.DataFrame):
             (pl.col("itemXhour_cart_count") / pl.col("itemXhour_click_count"))
             .fill_nan(0)
             .alias("itemXhour_click_to_cart_cvr"),
-            (pl.col("itemXhour_order_count") / pl.col("itemXhour_cart_count"))
-            .fill_nan(0)
-            .alias("itemXhour_cart_to_order_cvr"),
+            # (pl.col("itemXhour_order_count") / pl.col("itemXhour_cart_count"))
+            # .fill_nan(0)
+            # .alias("itemXhour_cart_to_order_cvr"),
         ],
     )
 
@@ -91,23 +91,23 @@ def gen_item_hour_features(data: pl.DataFrame):
             (pl.col("itemXhour_click_count") / pl.col("itemXhour_all_click_count"))
             .fill_nan(0)
             .alias("itemXhour_frac_click_all_click_count"),
-            (pl.col("itemXhour_cart_count") / pl.col("itemXhour_all_cart_count"))
-            .fill_nan(0)
-            .alias("itemXhour_frac_cart_all_cart_count"),
-            (pl.col("itemXhour_order_count") / pl.col("itemXhour_all_order_count"))
-            .fill_nan(0)
-            .alias("itemXhour_frac_order_all_order_count"),
+            # (pl.col("itemXhour_cart_count") / pl.col("itemXhour_all_cart_count"))
+            # .fill_nan(0)
+            # .alias("itemXhour_frac_cart_all_cart_count"),
+            # (pl.col("itemXhour_order_count") / pl.col("itemXhour_all_order_count"))
+            # .fill_nan(0)
+            # .alias("itemXhour_frac_order_all_order_count"),
             # frac compare to total event in particular hour
             # represent popularity at that hour
             (pl.col("itemXhour_click_count") / pl.col("itemXhour_all_hour_click_count"))
             .fill_nan(0)
             .alias("itemXhour_frac_click_all_hour_click_count"),
-            (pl.col("itemXhour_cart_count") / pl.col("itemXhour_all_hour_cart_count"))
-            .fill_nan(0)
-            .alias("itemXhour_frac_cart_all_hour_cart_count"),
-            (pl.col("itemXhour_order_count") / pl.col("itemXhour_all_hour_order_count"))
-            .fill_nan(0)
-            .alias("itemXhour_frac_order_all_hour_order_count"),
+            # (pl.col("itemXhour_cart_count") / pl.col("itemXhour_all_hour_cart_count"))
+            # .fill_nan(0)
+            # .alias("itemXhour_frac_cart_all_hour_cart_count"),
+            # (pl.col("itemXhour_order_count") / pl.col("itemXhour_all_hour_order_count"))
+            # .fill_nan(0)
+            # .alias("itemXhour_frac_order_all_hour_order_count"),
         ],
     )
 
@@ -120,6 +120,8 @@ def gen_item_hour_features(data: pl.DataFrame):
             "itemXhour_all_hour_click_count",
             "itemXhour_all_hour_cart_count",
             "itemXhour_all_hour_order_count",
+            "itemXhour_cart_count",
+            "itemXhour_order_count",
         ]
     )
 

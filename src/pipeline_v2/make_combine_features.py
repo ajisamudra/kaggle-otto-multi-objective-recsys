@@ -220,12 +220,149 @@ def fcombine_features(mode: str, event: str, ix: int):
         left_on=["session", "candidate_aid"],
         right_on=["session", "candidate_aid"],
     ).fill_null(0)
-    logging.info(f"joined with sessionXcovisitation features! shape {cand_df.shape}")
 
     del item_covisit_agg
     gc.collect()
 
     cand_df = cand_df.fill_null(0)
+
+    cand_df = cand_df.with_columns(
+        [
+            np.mean(
+                [
+                    pl.col("click_weight_with_last_event_in_session_aid"),
+                    pl.col("click_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "click_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("click_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "click_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("click_weight_mean"),
+            pl.max(
+                [
+                    pl.col("click_weight_with_last_event_in_session_aid"),
+                    pl.col("click_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "click_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("click_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "click_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("click_weight_max"),
+            pl.min(
+                [
+                    pl.col("click_weight_with_last_event_in_session_aid"),
+                    pl.col("click_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "click_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("click_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "click_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("click_weight_min"),
+            np.mean(
+                [
+                    pl.col("buys_weight_with_last_event_in_session_aid"),
+                    pl.col("buys_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "buys_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("buys_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("buys_weight_mean"),
+            pl.max(
+                [
+                    pl.col("buys_weight_with_last_event_in_session_aid"),
+                    pl.col("buys_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "buys_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("buys_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("buys_weight_max"),
+            pl.min(
+                [
+                    pl.col("buys_weight_with_last_event_in_session_aid"),
+                    pl.col("buys_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "buys_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("buys_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "buys_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("buys_weight_min"),
+            np.mean(
+                [
+                    pl.col("buy2buy_weight_with_last_event_in_session_aid"),
+                    pl.col("buy2buy_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("buy2buy_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("buy2buy_weight_mean"),
+            pl.max(
+                [
+                    pl.col("buy2buy_weight_with_last_event_in_session_aid"),
+                    pl.col("buy2buy_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("buy2buy_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("buy2buy_weight_max"),
+            pl.min(
+                [
+                    pl.col("buy2buy_weight_with_last_event_in_session_aid"),
+                    pl.col("buy2buy_weight_with_max_recency_event_in_session_aid"),
+                    pl.col(
+                        "buy2buy_weight_with_max_weighted_recency_event_in_session_aid"
+                    ),
+                    pl.col("buy2buy_weight_with_max_duration_event_in_session_aid"),
+                    # pl.col(
+                    #     "buy2buy_weight_with_max_weighted_log_duration_event_in_session_aid"
+                    # ),
+                ]
+            ).alias("buy2buy_weight_min"),
+        ]
+    )
+
+    cand_df = cand_df.with_columns(
+        [
+            (pl.col("buy2buy_weight_max") - pl.col("buy2buy_weight_min")).alias(
+                "buy2buy_weight_diff_max_min"
+            ),
+            (pl.col("buys_weight_max") - pl.col("buys_weight_min")).alias(
+                "buys_weight_diff_max_min"
+            ),
+            (pl.col("click_weight_max") - pl.col("click_weight_min")).alias(
+                "click_weight_diff_max_min"
+            ),
+        ]
+    )
+
+    logging.info(f"joined with sessionXcovisitation features! shape {cand_df.shape}")
 
     # # read matrix factorization features
     # matrix_fact_fea = pl.read_parquet(matrix_fact_path)
@@ -252,10 +389,45 @@ def fcombine_features(mode: str, event: str, ix: int):
         left_on=["session", "candidate_aid"],
         right_on=["session", "candidate_aid"],
     )
-    logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
     del word2vec_fea_df
     gc.collect()
+
+    cand_df = cand_df.with_columns(
+        [
+            np.mean(
+                [
+                    pl.col("word2vec_skipgram_last_event_cosine_distance"),
+                    # pl.col("word2vec_skipgram_max_recency_cosine_distance"),
+                    # pl.col("word2vec_skipgram_max_weighted_recency_cosine_distance"),
+                    pl.col("word2vec_skipgram_max_duration_cosine_distance"),
+                    # pl.col("word2vec_skipgram_max_weighted_duration_cosine_distance"),
+                ]
+            ).alias("word2vec_cosine_distance_mean"),
+            pl.min(
+                [
+                    pl.col("word2vec_skipgram_last_event_cosine_distance"),
+                    # pl.col("word2vec_skipgram_max_recency_cosine_distance"),
+                    # pl.col("word2vec_skipgram_max_weighted_recency_cosine_distance"),
+                    pl.col("word2vec_skipgram_max_duration_cosine_distance"),
+                    # pl.col("word2vec_skipgram_max_weighted_duration_cosine_distance"),
+                ]
+            ).alias("word2vec_cosine_distance_min"),
+            pl.min(
+                [
+                    pl.col("word2vec_skipgram_last_event_euclidean_distance"),
+                    # pl.col("word2vec_skipgram_max_recency_euclidean_distance"),
+                    # pl.col("word2vec_skipgram_max_weighted_recency_euclidean_distance"),
+                    pl.col("word2vec_skipgram_max_duration_euclidean_distance"),
+                    # pl.col(
+                    #     "word2vec_skipgram_max_weighted_duration_euclidean_distance"
+                    # ),
+                ]
+            ).alias("word2vec_euclidean_distance_min"),
+        ]
+    )
+
+    logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
     # # read fasttext features
     # fasttext_fea_df = pl.read_parquet(fasttext_path)
@@ -300,26 +472,17 @@ def fcombine_features(mode: str, event: str, ix: int):
             pl.col("sesXaid_log_recency_score")
             .fill_null(0)
             .alias("sesXaid_log_recency_score"),
-            pl.col("sesXaid_events_count").fill_null(0).alias("sesXaid_events_count"),
+            # pl.col("sesXaid_events_count").fill_null(0).alias("sesXaid_events_count"),
             pl.col("sesXaid_click_count").fill_null(0).alias("sesXaid_click_count"),
             pl.col("sesXaid_cart_count").fill_null(0).alias("sesXaid_cart_count"),
-            pl.col("sesXaid_order_count").fill_null(0).alias("sesXaid_order_count"),
+            # pl.col("sesXaid_order_count").fill_null(0).alias("sesXaid_order_count"),
             pl.col("sesXaid_avg_click_dur_sec")
             .fill_null(0)
             .alias("sesXaid_avg_click_dur_sec"),
             pl.col("sesXaid_avg_cart_dur_sec")
             .fill_null(0)
             .alias("sesXaid_avg_cart_dur_sec"),
-            pl.col("sesXaid_avg_order_dur_sec")
-            .fill_null(0)
-            .alias("sesXaid_avg_order_dur_sec"),
             pl.col("sesXaid_type_dcount").fill_null(0).alias("sesXaid_type_dcount"),
-            pl.col("sesXaid_log_duration_second_log2p1")
-            .fill_null(0)
-            .alias("sesXaid_log_duration_second_log2p1"),
-            pl.col("sesXaid_type_weighted_log_duration_second_log2p1")
-            .fill_null(0)
-            .alias("sesXaid_type_weighted_log_duration_second_log2p1"),
             # the lower the better, fill_null with high number
             pl.col("sesXaid_action_num_reverse_chrono")
             .fill_null(500)
@@ -347,8 +510,8 @@ def fcombine_features(mode: str, event: str, ix: int):
         "buy2buy_weight_with_last_event_in_session_aid",
         "word2vec_skipgram_last_event_cosine_distance",
         "word2vec_skipgram_last_event_euclidean_distance",
-        "word2vec_skipgram_max_weighted_recency_cosine_distance",
-        "word2vec_skipgram_max_weighted_recency_euclidean_distance",
+        "word2vec_skipgram_max_duration_cosine_distance",
+        "word2vec_skipgram_max_duration_euclidean_distance",
     ]
     for f in tqdm(DIF_FEAS):
         cand_df = calc_relative_diff_w_mean(df=cand_df, feature=f)
@@ -374,26 +537,26 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     cand_df = cand_df.with_columns(
         [
-            np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_click"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sessXitem_abs_diff_avg_hour_click"),
-            np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_cart"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sessXitem_abs_diff_avg_hour_cart"),
+            # np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_click"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sessXitem_abs_diff_avg_hour_click"),
+            # np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_cart"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sessXitem_abs_diff_avg_hour_cart"),
             np.abs(pl.col("sess_hour") - pl.col("item_avg_hour_order"))
             .cast(pl.Int32)
             .fill_null(99)
             .alias("sessXitem_abs_diff_avg_hour_order"),
-            np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_click"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sessXitem_abs_diff_avg_weekday_click"),
-            np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_cart"))
-            .cast(pl.Int32)
-            .fill_null(99)
-            .alias("sessXitem_abs_diff_avg_weekday_cart"),
+            # np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_click"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sessXitem_abs_diff_avg_weekday_click"),
+            # np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_cart"))
+            # .cast(pl.Int32)
+            # .fill_null(99)
+            # .alias("sessXitem_abs_diff_avg_weekday_cart"),
             np.abs(pl.col("sess_weekday") - pl.col("item_avg_weekday_order"))
             .cast(pl.Int32)
             .fill_null(99)
@@ -440,6 +603,16 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     del item_weekday_agg
     gc.collect()
+
+    # drop cols
+    cand_df = cand_df.drop(
+        columns=[
+            "sess_hour",
+            "sess_weekday",
+        ]
+    )
+
+    logging.info(f"drop some features! shape {cand_df.shape}")
 
     filepath = f"{output_path}/{name}_{ix}_{event}_combined.parquet"
     logging.info(f"save chunk to: {filepath}")

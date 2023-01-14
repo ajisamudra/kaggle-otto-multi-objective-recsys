@@ -528,6 +528,23 @@ def pivot_candidates_list_to_rows(
         ]
     )
 
+    # drop unecessary columns
+    data = data.drop(
+        columns=[
+            "rank_word2vec",
+            "rank_word2vec_dur",
+            "rank_word2vec_wgtd_dur",
+            "rank_popular_week",
+            "retrieval_fasttext",
+            "retrieval_popular_week",
+            "retrieval_word2vec",
+            "retrieval_word2vec_dur",
+            "retrieval_word2vec_wgtd_dur",
+            "retrieval_word2vec_wgtd_rec",
+            "retrieval_matrix_fact",
+        ]
+    )
+
     return data
 
 

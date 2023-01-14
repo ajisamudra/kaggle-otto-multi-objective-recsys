@@ -71,6 +71,22 @@ def scoring_treelite(artifact: str, event: str, week_data: str, week_model: str)
         selected_features.remove("candidate_aid")
         selected_features.remove(TARGET)
 
+        # unimportant features in order models
+        selected_features.remove("rank_word2vec")
+        selected_features.remove("rank_word2vec_dur")
+        selected_features.remove("rank_word2vec_wgtd_dur")
+        selected_features.remove("rank_word2vec_wgtd_rec")
+        selected_features.remove("rank_popular_week")
+        selected_features.remove("rank_matrix_fact")
+        selected_features.remove("rank_fasttext")
+        selected_features.remove("retrieval_fasttext")
+        selected_features.remove("retrieval_popular_week")
+        selected_features.remove("retrieval_word2vec")
+        selected_features.remove("retrieval_word2vec_dur")
+        selected_features.remove("retrieval_word2vec_wgtd_dur")
+        selected_features.remove("retrieval_word2vec_wgtd_rec")
+        selected_features.remove("retrieval_matrix_fact")
+
         # select features
         X_test = test_df[selected_features].to_pandas()
 
