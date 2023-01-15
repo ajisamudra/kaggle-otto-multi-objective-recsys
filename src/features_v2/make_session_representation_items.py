@@ -199,8 +199,10 @@ def make_session_representation_items(
     output_path: Path,
 ):
 
-    if name == "train":
+    if mode == "training_train":
         n = CFG.N_train
+    elif mode == "training_test":
+        n = CFG.N_local_test
     else:
         n = CFG.N_test
 

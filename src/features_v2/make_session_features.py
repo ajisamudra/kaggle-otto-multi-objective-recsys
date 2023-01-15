@@ -166,10 +166,10 @@ def gen_user_features(data: pl.DataFrame):
             # .fill_nan(0)
             # .fill_null(0)
             # .alias("sess_frac_clicked_aid_to_all_aid"),
-            (pl.col("sess_carted_aid_dcount") / pl.col("sess_aid_dcount"))
-            .fill_nan(0)
-            .fill_null(0)
-            .alias("sess_frac_carted_aid_to_all_aid"),
+            # (pl.col("sess_carted_aid_dcount") / pl.col("sess_aid_dcount"))
+            # .fill_nan(0)
+            # .fill_null(0)
+            # .alias("sess_frac_carted_aid_to_all_aid"),
             # (pl.col("sess_ordered_aid_dcount") / pl.col("sess_aid_dcount"))
             # .fill_nan(0)
             # .fill_null(0)

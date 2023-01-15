@@ -209,6 +209,34 @@ def fcombine_features(mode: str, event: str, ix: int):
     del ses_agg
     gc.collect()
 
+    logging.info(f"add log_recency rank_covisit")
+    cand_df = cand_df.with_columns(
+        [
+            pl.col("rank_covisit").max().over("session").alias("max_rank_covisit"),
+        ]
+    )
+    # add log_rank_covisit_score
+    linear_interpolation = 0.1 + ((1 - 0.1) / (cand_df["max_rank_covisit"] - 1)) * (
+        cand_df["max_rank_covisit"] - cand_df["rank_covisit"]
+    )
+    cand_df = cand_df.with_columns(
+        [
+            pl.Series(2**linear_interpolation - 1)
+            .alias("log_rank_covisit_score")
+            .fill_nan(1),
+        ]
+    )
+    cand_df = cand_df.fill_null(0)
+
+    # drop cols
+    cand_df = cand_df.drop(
+        columns=[
+            "max_rank_covisit",
+        ]
+    )
+
+    logging.info(f"the log_recency rank_covisit features added! shape {cand_df.shape}")
+
     # read item-covisitation features
     item_covisit_agg = pl.read_parquet(itemXcovisit_path)
     logging.info(
@@ -395,24 +423,6 @@ def fcombine_features(mode: str, event: str, ix: int):
 
     cand_df = cand_df.with_columns(
         [
-            np.mean(
-                [
-                    pl.col("word2vec_skipgram_last_event_cosine_distance"),
-                    # pl.col("word2vec_skipgram_max_recency_cosine_distance"),
-                    # pl.col("word2vec_skipgram_max_weighted_recency_cosine_distance"),
-                    pl.col("word2vec_skipgram_max_duration_cosine_distance"),
-                    # pl.col("word2vec_skipgram_max_weighted_duration_cosine_distance"),
-                ]
-            ).alias("word2vec_cosine_distance_mean"),
-            pl.min(
-                [
-                    pl.col("word2vec_skipgram_last_event_cosine_distance"),
-                    # pl.col("word2vec_skipgram_max_recency_cosine_distance"),
-                    # pl.col("word2vec_skipgram_max_weighted_recency_cosine_distance"),
-                    pl.col("word2vec_skipgram_max_duration_cosine_distance"),
-                    # pl.col("word2vec_skipgram_max_weighted_duration_cosine_distance"),
-                ]
-            ).alias("word2vec_cosine_distance_min"),
             pl.min(
                 [
                     pl.col("word2vec_skipgram_last_event_euclidean_distance"),
@@ -511,7 +521,6 @@ def fcombine_features(mode: str, event: str, ix: int):
         "word2vec_skipgram_last_event_cosine_distance",
         "word2vec_skipgram_last_event_euclidean_distance",
         "word2vec_skipgram_max_duration_cosine_distance",
-        "word2vec_skipgram_max_duration_euclidean_distance",
     ]
     for f in tqdm(DIF_FEAS):
         cand_df = calc_relative_diff_w_mean(df=cand_df, feature=f)
@@ -609,6 +618,10 @@ def fcombine_features(mode: str, event: str, ix: int):
         columns=[
             "sess_hour",
             "sess_weekday",
+            "buy2buy_weight_min",
+            "click_weight_min",
+            "itemXhour_all_events_count",
+            "itemXweekday_order_count",
         ]
     )
 

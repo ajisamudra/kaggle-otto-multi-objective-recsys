@@ -52,6 +52,14 @@ def preprocess_events(data: pl.DataFrame):
             ),
         ]
     )
+    # data = data.with_columns(
+    #     [
+    #         pl.when(pl.col("session_len") <= 15)
+    #         .then(15)
+    #         .otherwise(pl.col("session_len"))
+    #         .alias("fixed_recency_len")
+    #     ]
+    # )
     # add log_recency_score
     linear_interpolation = 0.1 + ((1 - 0.1) / (data["session_len"] - 1)) * (
         data["session_len"] - data["action_num_reverse_chrono"]

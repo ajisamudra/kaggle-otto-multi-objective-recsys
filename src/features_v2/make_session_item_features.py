@@ -266,6 +266,24 @@ def gen_session_item_features(data: pl.DataFrame):
         ],
     )
 
+    # # binary is_clicked, is_carted, is_clicked_and_carted
+    # data_agg = data_agg.with_columns(
+    #     [
+    #         pl.when(pl.col("sesXaid_click_count") > 0)
+    #         .then(1)
+    #         .otherwise(0)
+    #         .alias("sesXaid_is_clicked"),
+    #         pl.when(pl.col("sesXaid_cart_count") > 0)
+    #         .then(1)
+    #         .otherwise(0)
+    #         .alias("sesXaid_is_carted"),
+    #         pl.when((pl.col("sesXaid_click_count") > 0) & (pl.col("sesXaid_cart_count") > 0))
+    #         .then(1)
+    #         .otherwise(0)
+    #         .alias("sesXaid_is_clicked_and_carted")
+    #     ],
+    # )
+
     # drop cols
     data_agg = data_agg.drop(
         columns=[
@@ -286,6 +304,7 @@ def gen_session_item_features(data: pl.DataFrame):
             "sesXaid_events_count",
             "sesXaid_order_count",
             "sesXaid_sum_cart_dur_sec",
+            "sesXaid_sum_order_dur_sec",
         ]
     )
 
