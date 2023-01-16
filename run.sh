@@ -4,6 +4,7 @@
 # python src/ensemble/tuning_ensemble3.py
 
 # # make split_into_chunks MODE=training_train
+# make candidate_past_aids_list MODE=training_train
 # make candidate_covisit_list MODE=training_train
 # make candidate_word2vec_list MODE=training_train
 # make candidate_fasttext_list MODE=training_train
@@ -15,7 +16,7 @@
 # make candidate_word2vec_weighted_recency_list MODE=training_train
 # make candidate_word2vec_weighted_duration_list MODE=training_train
 # make candidate_rows MODE=training_train
-# make session_features MODE=training_train
+make session_features MODE=training_train
 # make item_features MODE=training_train
 # make session_item_features MODE=training_train
 # make item_hour_features MODE=training_train
@@ -33,6 +34,7 @@ make combine_features  MODE=training_train START=0 END=30
 
 
 # # make split_into_chunks MODE=training_test
+# make candidate_past_aids_list MODE=training_test
 # make candidate_covisit_list MODE=training_test
 # make preprocess_popular_hour_candidate MODE=training_test
 # make candidate_popular_hour_list MODE=training_test
@@ -47,7 +49,7 @@ make combine_features  MODE=training_train START=0 END=30
 # make candidate_matrix_fact_list MODE=training_test
 # make candidate_list_eval MODE=training_test
 # make candidate_rows MODE=training_test
-# make session_features MODE=training_test
+make session_features MODE=training_test
 # make item_features MODE=training_test
 # make session_item_features MODE=training_test
 # make item_hour_features MODE=training_test
@@ -122,6 +124,8 @@ make combine_features  MODE=training_test START=0 END=40
 
 make train ALGO=cat_ranker
 # make train ALGO=cat_classifier
+# make item_covisitation_features MODE=training_train START=0 END=30
+# make item_covisitation_features MODE=training_test START=0 END=40
 # make train ALGO=lgbm_ranker
 # make word2vec_features START=0 END=30
 # make word2vec_features MODE=training_test START=24 END=50
@@ -255,3 +259,5 @@ WEEK_DATA=w2
 # Item-timeseries features avg/std_num_click/cart/order_D2/3/7 -> relative deviation
 # Item-timeseries features difference between D1 with avg_num_click/cart/order_D7 -> relative difference
 # target encoding in category: rank_combined, retrieval combined
+
+# current best 0.5674039950748497

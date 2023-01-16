@@ -284,26 +284,10 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             selected_features.remove("candidate_aid")
             selected_features.remove(TARGET)
 
-            # unimportant features in order models
-            selected_features.remove("rank_word2vec")
-            selected_features.remove("rank_word2vec_dur")
-            selected_features.remove("rank_word2vec_wgtd_dur")
-            selected_features.remove("rank_word2vec_wgtd_rec")
-            selected_features.remove("rank_popular_week")
-            selected_features.remove("rank_matrix_fact")
-            selected_features.remove("rank_fasttext")
-            selected_features.remove("retrieval_fasttext")
-            selected_features.remove("retrieval_popular_week")
-            selected_features.remove("retrieval_word2vec")
-            selected_features.remove("retrieval_word2vec_dur")
-            selected_features.remove("retrieval_word2vec_wgtd_dur")
-            selected_features.remove("retrieval_word2vec_wgtd_rec")
-            selected_features.remove("retrieval_matrix_fact")
-
-            # remove word2vec related fea
-            selected_features.remove(
-                "diff_w_mean_word2vec_skipgram_last_event_cosine_distance"
-            )
+            # # remove word2vec related fea
+            # selected_features.remove(
+            #     "diff_w_mean_word2vec_skipgram_last_event_cosine_distance"
+            # )
 
             X_train = train_df[selected_features]
             group_train = train_df["session"]

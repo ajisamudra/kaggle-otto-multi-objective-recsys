@@ -118,6 +118,7 @@ def concat_candidates(
     fasttext_ses2candidates: dict,
     matrix_fact_ses2candidates: dict,
     popular_week_ses2candidates: dict,
+    past_aids_ses2candidates: dict,
     # popular_daily_ses2candidates: dict,
     # popular_hour_ses2candidates: dict,
     # popular_datehour_ses2candidates: dict,
@@ -128,9 +129,12 @@ def concat_candidates(
         # get candidates for specific session
         # past aids candidates
         # cands = list(past_ses2candidates[session])
+        # past aids candidate
+        cands = list(past_aids_ses2candidates[session])
+
         # covisitation candidates
-        cands = list(covisit_ses2candidates[session])
-        # cands.extend(covisit_cands)
+        covisit_cands = list(covisit_ses2candidates[session])
+        cands.extend(covisit_cands)
 
         # word2vec candidates
         word2vec_cands = list(word2vec_ses2candidates[session])
@@ -209,6 +213,14 @@ def eval_candidate_list(
             unique_sessions = list(cand_df["session"].values)
 
             del cand_df
+            gc.collect()
+
+            # candidate #past aids
+            filepath = f"{input_path}/{name}_{ix}_{event}_past_aids_list.parquet"
+            cand_past_aids_df = pd.read_parquet(filepath)
+            past_aids_ses2candidates = get_ses2candidates(cand_past_aids_df)
+
+            del cand_past_aids_df
             gc.collect()
 
             # candidate #2 fasttext
@@ -302,6 +314,7 @@ def eval_candidate_list(
                 fasttext_ses2candidates=fasttext_ses2candidates,
                 matrix_fact_ses2candidates=matrix_fact_ses2candidates,
                 popular_week_ses2candidates=popular_week_ses2candidates,
+                past_aids_ses2candidates=past_aids_ses2candidates,
                 # past_ses2candidates=past_ses2candidates,
                 # popular_daily_ses2candidates=popular_daily_ses2candidates,
                 # popular_hour_ses2candidates=popular_hour_ses2candidates,
@@ -326,7 +339,7 @@ def eval_candidate_list(
     measure_recall(
         df_pred=df_pred,
         df_truth=df_truth,
-        Ks=[60, 120, 150, 180, 210, 230, 240, 260],
+        Ks=[20, 80, 140, 260],
         # strategy covisit 60 word2vec 60 word2vec weighted recency 30 weighted duration 30 word2vec duration 30, fasttext 20, matrix fact 10, popular week 20 recall @260
     )
 
@@ -2092,3 +2105,6 @@ if __name__ == "__main__":
 # [2023-01-09 11:16:11,178] {eval_candidate_list.py:101} INFO - Avg N candidates@260 = 148.17510076839432
 # [2023-01-09 11:16:11,195] {eval_candidate_list.py:102} INFO - Median N candidates@260 = 145.0
 # [2023-01-09 11:16:11,196] {eval_candidate_list.py:103} INFO - =============
+
+# strategy past aids 20 covisit 60 word2vec 60 word2vec weighted recency 30 weighted duration 30 word2vec duration 30, fasttext 20, matrix fact 10, popular week 20 recall @260
+# Overall Recall@260 = 0.6328215612814481 (avg n_cand 148.31829700848422)

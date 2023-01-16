@@ -213,6 +213,7 @@ def fcombine_features(mode: str, event: str, ix: int):
     cand_df = cand_df.with_columns(
         [
             pl.col("rank_covisit").max().over("session").alias("max_rank_covisit"),
+            pl.col("rank_past_aids").max().over("session").alias("max_rank_past_aids"),
         ]
     )
     # add log_rank_covisit_score
@@ -226,12 +227,66 @@ def fcombine_features(mode: str, event: str, ix: int):
             .fill_nan(1),
         ]
     )
+    linear_interpolation = 0.1 + ((1 - 0.1) / (cand_df["max_rank_past_aids"] - 1)) * (
+        cand_df["max_rank_past_aids"] - cand_df["rank_past_aids"]
+    )
+    cand_df = cand_df.with_columns(
+        [
+            pl.Series(2**linear_interpolation - 1)
+            .alias("log_rank_past_aids_score")
+            .fill_nan(1),
+        ]
+    )
     cand_df = cand_df.fill_null(0)
+
+    # fraction of rank score to total rank score in session
+    cand_df = cand_df.with_columns(
+        [
+            # window event count session
+            pl.col("log_rank_past_aids_score")
+            .sum()
+            .over("session")
+            .alias("total_log_rank_past_aids_score"),
+            pl.col("log_rank_covisit_score")
+            .sum()
+            .over("session")
+            .alias("total_log_rank_covisit_score"),
+        ],
+    )
+
+    cand_df = cand_df.with_columns(
+        [
+            # frac compare to total in particular session
+            (
+                pl.col("log_rank_past_aids_score")
+                / pl.col("total_log_rank_past_aids_score")
+            )
+            .fill_nan(0)
+            .alias("frac_log_rank_past_aids_score_to_all"),
+            (pl.col("log_rank_covisit_score") / pl.col("total_log_rank_covisit_score"))
+            .fill_nan(0)
+            .alias("frac_log_rank_covisit_score_to_all"),
+        ],
+    )
 
     # drop cols
     cand_df = cand_df.drop(
         columns=[
             "max_rank_covisit",
+            "max_rank_past_aids",
+            "total_log_rank_past_aids_score",
+            "total_log_rank_covisit_score",
+        ]
+    )
+
+    # add correction in the rank_past_aids
+    cand_df = cand_df.with_columns(
+        [
+            pl.when(pl.col("rank_past_aids") < pl.col("sess_aid_dcount"))
+            .then(pl.col("rank_past_aids"))
+            .otherwise(-1)
+            .alias("rank_past_aids_min_sess_aid_dcount")
+            # type: ignore        ]
         ]
     )
 
@@ -408,36 +463,36 @@ def fcombine_features(mode: str, event: str, ix: int):
     # del matrix_fact_fea
     # gc.collect()
 
-    # read word2vec features
-    word2vec_fea_df = pl.read_parquet(word2vec_path)
-    logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
-    cand_df = cand_df.join(
-        word2vec_fea_df,
-        how="left",
-        left_on=["session", "candidate_aid"],
-        right_on=["session", "candidate_aid"],
-    )
+    # # read word2vec features
+    # word2vec_fea_df = pl.read_parquet(word2vec_path)
+    # logging.info(f"read sessionXword2vec features with shape {word2vec_fea_df.shape}")
+    # cand_df = cand_df.join(
+    #     word2vec_fea_df,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "candidate_aid"],
+    # )
 
-    del word2vec_fea_df
-    gc.collect()
+    # del word2vec_fea_df
+    # gc.collect()
 
-    cand_df = cand_df.with_columns(
-        [
-            pl.min(
-                [
-                    pl.col("word2vec_skipgram_last_event_euclidean_distance"),
-                    # pl.col("word2vec_skipgram_max_recency_euclidean_distance"),
-                    # pl.col("word2vec_skipgram_max_weighted_recency_euclidean_distance"),
-                    pl.col("word2vec_skipgram_max_duration_euclidean_distance"),
-                    # pl.col(
-                    #     "word2vec_skipgram_max_weighted_duration_euclidean_distance"
-                    # ),
-                ]
-            ).alias("word2vec_euclidean_distance_min"),
-        ]
-    )
+    # cand_df = cand_df.with_columns(
+    #     [
+    #         pl.min(
+    #             [
+    #                 pl.col("word2vec_skipgram_last_event_euclidean_distance"),
+    #                 # pl.col("word2vec_skipgram_max_recency_euclidean_distance"),
+    #                 # pl.col("word2vec_skipgram_max_weighted_recency_euclidean_distance"),
+    #                 pl.col("word2vec_skipgram_max_duration_euclidean_distance"),
+    #                 # pl.col(
+    #                 #     "word2vec_skipgram_max_weighted_duration_euclidean_distance"
+    #                 # ),
+    #             ]
+    #         ).alias("word2vec_euclidean_distance_min"),
+    #     ]
+    # )
 
-    logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
+    # logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
     # # read fasttext features
     # fasttext_fea_df = pl.read_parquet(fasttext_path)
@@ -518,9 +573,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         "click_weight_with_last_event_in_session_aid",
         "buys_weight_with_last_event_in_session_aid",
         "buy2buy_weight_with_last_event_in_session_aid",
-        "word2vec_skipgram_last_event_cosine_distance",
-        "word2vec_skipgram_last_event_euclidean_distance",
-        "word2vec_skipgram_max_duration_cosine_distance",
+        # "word2vec_skipgram_last_event_cosine_distance",
+        # "word2vec_skipgram_last_event_euclidean_distance",
+        # "word2vec_skipgram_max_duration_cosine_distance",
     ]
     for f in tqdm(DIF_FEAS):
         cand_df = calc_relative_diff_w_mean(df=cand_df, feature=f)
@@ -618,8 +673,8 @@ def fcombine_features(mode: str, event: str, ix: int):
         columns=[
             "sess_hour",
             "sess_weekday",
-            "buy2buy_weight_min",
-            "click_weight_min",
+            # "buy2buy_weight_min",
+            # "click_weight_min",
             "itemXhour_all_events_count",
             "itemXweekday_order_count",
         ]

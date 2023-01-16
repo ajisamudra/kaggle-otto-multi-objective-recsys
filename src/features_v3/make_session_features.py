@@ -202,34 +202,34 @@ def gen_user_features(data: pl.DataFrame):
         ],
     )
 
-    def binning_aid_dcount(x):
-        if x <= 4:
-            # return str(x)
-            return x
-        elif (x > 4) and (x <= 8):
-            return 5  # "5_8"
-        elif (x > 8) and (x <= 12):
-            return 6  # "9_12"
-        elif (x > 12) and (x <= 15):
-            return 7  # "13_15"
-        elif (x > 15) and (x <= 20):
-            return 8  # "16_20"
-        elif (x > 20) and (x <= 30):
-            return 9  # "21_30"
-        else:
-            return 10  # ">30"
+    # def binning_aid_dcount(x):
+    #     if x <= 4:
+    #         # return str(x)
+    #         return x
+    #     elif (x > 4) and (x <= 8):
+    #         return 5  # "5_8"
+    #     elif (x > 8) and (x <= 12):
+    #         return 6  # "9_12"
+    #     elif (x > 12) and (x <= 15):
+    #         return 7  # "13_15"
+    #     elif (x > 15) and (x <= 20):
+    #         return 8  # "16_20"
+    #     elif (x > 20) and (x <= 30):
+    #         return 9  # "21_30"
+    #     else:
+    #         return 10  # ">30"
 
-    data_agg = data_agg.with_columns(
-        pl.col("sess_aid_dcount")
-        .apply(lambda x: binning_aid_dcount(x))
-        .alias("sess_binned_aid_dcount")
-    )
+    # data_agg = data_agg.with_columns(
+    #     pl.col("sess_aid_dcount")
+    #     .apply(lambda x: binning_aid_dcount(x))
+    #     .alias("sess_binned_aid_dcount")
+    # )
 
     # drop cols
     data_agg = data_agg.drop(
         columns=[
             "curr_ts",
-            "sess_aid_dcount",
+            # "sess_aid_dcount",
             "sess_avg_hour_cart",
             "sess_avg_weekday_cart",
             "sess_click_count",
