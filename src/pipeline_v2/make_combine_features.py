@@ -457,22 +457,6 @@ def fcombine_features(mode: str, event: str, ix: int):
     del word2vec_fea_df
     gc.collect()
 
-    cand_df = cand_df.with_columns(
-        [
-            pl.min(
-                [
-                    pl.col("word2vec_skipgram_last_event_euclidean_distance"),
-                    # pl.col("word2vec_skipgram_max_recency_euclidean_distance"),
-                    # pl.col("word2vec_skipgram_max_weighted_recency_euclidean_distance"),
-                    pl.col("word2vec_skipgram_max_duration_euclidean_distance"),
-                    # pl.col(
-                    #     "word2vec_skipgram_max_weighted_duration_euclidean_distance"
-                    # ),
-                ]
-            ).alias("word2vec_euclidean_distance_min"),
-        ]
-    )
-
     logging.info(f"joined with sessionXword2vec features! shape {cand_df.shape}")
 
     # # read fasttext features
@@ -554,7 +538,8 @@ def fcombine_features(mode: str, event: str, ix: int):
         "click_weight_with_last_event_in_session_aid",
         "buys_weight_with_last_event_in_session_aid",
         "buy2buy_weight_with_last_event_in_session_aid",
-        # "session_covisit_buy2buy_cnt",
+        "word2vec_skipgram_last_event_cosine_distance",
+        "word2vec_skipgram_last_event_euclidean_distance"
         # "session_covisit_buys_cnt",
         # "session_covisit_click_cnt",
     ]

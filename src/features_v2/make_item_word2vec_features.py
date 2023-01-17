@@ -48,7 +48,7 @@ def calculate_distance_metrics(
     last_event_aids: list,
     # max_recency_aids: list,
     # max_weighted_recency_aids: list,
-    max_duration_aids: list,
+    # max_duration_aids: list,
     # max_weighted_duration_aids: list,
 ):
     vectors1 = []
@@ -111,21 +111,21 @@ def calculate_distance_metrics(
     #     nd_vectors1, nd_vectors2
     # )
 
-    vectors2 = []
-    for target in max_duration_aids:
-        try:
-            vector2 = embedding.get_vector(target)
-        except KeyError:
-            vector2 = [0 for _ in range(VECT_SIZE)]
-        vectors2.append(vector2)
+    # vectors2 = []
+    # for target in max_duration_aids:
+    #     try:
+    #         vector2 = embedding.get_vector(target)
+    #     except KeyError:
+    #         vector2 = [0 for _ in range(VECT_SIZE)]
+    #     vectors2.append(vector2)
 
-    # convert list to array 2d
-    nd_vectors2 = np.array(vectors2)
-    # compute cosine similarity
-    max_duration_cosine_distances = vectorized_cosine_distance(nd_vectors1, nd_vectors2)
-    max_duration_euclidean_distances = vectorized_euclidean_distance(
-        nd_vectors1, nd_vectors2
-    )
+    # # convert list to array 2d
+    # nd_vectors2 = np.array(vectors2)
+    # # compute cosine similarity
+    # max_duration_cosine_distances = vectorized_cosine_distance(nd_vectors1, nd_vectors2)
+    # max_duration_euclidean_distances = vectorized_euclidean_distance(
+    #     nd_vectors1, nd_vectors2
+    # )
 
     # vectors2 = []
     # for target in max_weighted_duration_aids:
@@ -152,8 +152,8 @@ def calculate_distance_metrics(
         # max_recency_euclidean_distances,
         # max_weighted_recency_cosine_distances,
         # max_weighted_recency_euclidean_distances,
-        max_duration_cosine_distances,
-        max_duration_euclidean_distances,
+        # max_duration_cosine_distances,
+        # max_duration_euclidean_distances,
         # max_weighted_duration_cosine_distances,
         # max_weighted_duration_euclidean_distances,
     )
@@ -229,8 +229,8 @@ def gen_word2vec_features(
             # word2vec_skipgram_max_recency_euclidean_distances,
             # word2vec_skipgram_max_weighted_recency_cosine_distances,
             # word2vec_skipgram_max_weighted_recency_euclidean_distances,
-            word2vec_skipgram_max_duration_cosine_distances,
-            word2vec_skipgram_max_duration_euclidean_distances,
+            # word2vec_skipgram_max_duration_cosine_distances,
+            # word2vec_skipgram_max_duration_euclidean_distances,
             # word2vec_skipgram_max_weighted_duration_cosine_distances,
             # word2vec_skipgram_max_weighted_duration_euclidean_distances,
         ) = calculate_distance_metrics(
@@ -239,7 +239,7 @@ def gen_word2vec_features(
             last_event_aids=last_event_aids,
             # max_recency_aids=max_recency_aids,
             # max_weighted_recency_aids=max_weighted_recency_aids,
-            max_duration_aids=max_duration_aids,
+            # max_duration_aids=max_duration_aids,
             # max_weighted_duration_aids=max_weighted_duration_aids,
         )
 
@@ -275,8 +275,8 @@ def gen_word2vec_features(
             # "word2vec_skipgram_max_recency_euclidean_distance": word2vec_skipgram_max_recency_euclidean_distances,
             # "word2vec_skipgram_max_weighted_recency_cosine_distance": word2vec_skipgram_max_weighted_recency_cosine_distances,
             # "word2vec_skipgram_max_weighted_recency_euclidean_distance": word2vec_skipgram_max_weighted_recency_euclidean_distances,
-            "word2vec_skipgram_max_duration_cosine_distance": word2vec_skipgram_max_duration_cosine_distances,
-            "word2vec_skipgram_max_duration_euclidean_distance": word2vec_skipgram_max_duration_euclidean_distances,
+            # "word2vec_skipgram_max_duration_cosine_distance": word2vec_skipgram_max_duration_cosine_distances,
+            # "word2vec_skipgram_max_duration_euclidean_distance": word2vec_skipgram_max_duration_euclidean_distances,
             # "word2vec_skipgram_max_weighted_duration_cosine_distance": word2vec_skipgram_max_weighted_duration_cosine_distances,
             # "word2vec_skipgram_max_weighted_duration_euclidean_distance": word2vec_skipgram_max_weighted_duration_euclidean_distances,
             # "word2vec_cbow_last_event_cosine_distance": word2vec_cbow_last_event_cosine_distances,

@@ -15,15 +15,15 @@
 # make candidate_word2vec_duration_list MODE=training_train
 # make candidate_word2vec_weighted_recency_list MODE=training_train
 # make candidate_word2vec_weighted_duration_list MODE=training_train
-make candidate_rows MODE=training_train
-make session_features MODE=training_train
+# make candidate_rows MODE=training_train
+# make session_features MODE=training_train
 # make session_covisit_features MODE=training_train
-make item_features MODE=training_train
-make session_item_features MODE=training_train
-make item_hour_features MODE=training_train
-make item_weekday_features MODE=training_train
-make session_representation_items MODE=training_train
-make item_covisitation_features MODE=training_train START=0 END=30
+# make item_features MODE=training_train
+# make session_item_features MODE=training_train
+# make item_hour_features MODE=training_train
+# make item_weekday_features MODE=training_train
+# make session_representation_items MODE=training_train
+# make item_covisitation_features MODE=training_train START=0 END=30
 # make matrix_factorization_features MODE=training_train START=0 END=30
 make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
@@ -272,3 +272,5 @@ WEEK_DATA=w2
 # old covisit + new fea cnt | rel dif cnt | word2vec Overall Recall@20 = 0.5679267843233935
 # old covisit + word2vec fea 99 Overall Recall@20 = 0.5696375091863197
 # old covisit + word2vec fea 101 Overall Recall@20 = 0.5696375091863197
+# old covisit + word2vec fea 101 Overall | add sample weights for word2vec sample
+
