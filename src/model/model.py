@@ -212,7 +212,7 @@ class CATRanker(RankingModel):
         kwargs["custom_metric"] = ["MAP:top=20", "NDCG:top=20"]
         # kwargs[
         #     "loss_function"
-        # ] = "QueryCrossEntropy"  # YetiRank, StochasticFilter, StochasticRank,
+        # ] = "QueryCrossEntropy"Z  # YetiRank, StochasticFilter, StochasticRank,
 
         self.feature_importances_ = None
         self.best_score_ = 0
@@ -224,9 +224,13 @@ class CATRanker(RankingModel):
         self._model = CatBoostRanker(**kwargs)
         # self._model = CatBoostRanker(loss_function="PairLogit", **kwargs)
 
-    def fit(self, X_train, X_val, y_train, y_val, group_train, group_val):
+    def fit(
+        self, X_train, X_val, y_train, y_val, group_train, group_val, weights_train
+    ):
 
-        train_pool = Pool(data=X_train, label=y_train, group_id=group_train)
+        train_pool = Pool(
+            data=X_train, label=y_train, group_id=group_train, weight=weights_train
+        )
 
         val_pool = Pool(data=X_val, label=y_val, group_id=group_val)
 

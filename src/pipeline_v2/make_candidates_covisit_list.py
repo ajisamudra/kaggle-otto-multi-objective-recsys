@@ -28,7 +28,8 @@ logging = get_logger()
 
 
 def suggest_clicks(
-    n_candidate: int,
+    n_past_aids_cand: int,
+    n_covisit_cand: int,
     ses2aids: dict,
     ses2types: dict,
     covisit_click: dict,
@@ -45,32 +46,36 @@ def suggest_clicks(
         unique_aids = list(dict.fromkeys(aids[::-1]))
         types = ses2types[session]
 
+        # past aids
         # RERANK CANDIDATES USING WEIGHTS
-        if len(unique_aids) >= 20:
+        if len(unique_aids) > 20:
             weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
             aids_temp = Counter()
             # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
             for aid, w, t in zip(aids, weights, types):
                 aids_temp[aid] += w * CFG.type_weight_multipliers[t]
-            candidate = [k for k, v in aids_temp.most_common(n_candidate)]
+            past_aid_candidate = [k for k, v in aids_temp.most_common(n_past_aids_cand)]
 
         else:
-            # USE "CLICKS" CO-VISITATION MATRIX
-            aids2 = list(
-                itertools.chain(
-                    *[covisit_click[aid] for aid in unique_aids if aid in covisit_click]
-                )
-            )
-            # RERANK CANDIDATES
-            top_aids2 = [
-                aid2
-                for aid2, cnt in Counter(aids2).most_common(n_candidate)
-                if aid2 not in unique_aids
-            ]
-            candidate = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
+            past_aid_candidate = list(unique_aids)[:n_past_aids_cand]
 
-            # # # USE TOP20 TEST CLICKS
-            # candidate = result + list(top_clicks)[: n_candidate - len(result)]
+        # covisit candidate
+        # USE "CLICKS" CO-VISITATION MATRIX
+        aids2 = list(
+            itertools.chain(
+                *[covisit_click[aid] for aid in unique_aids if aid in covisit_click]
+            )
+        )
+        # RERANK CANDIDATES
+        top_aids2 = [
+            aid2
+            for aid2, cnt in Counter(aids2).most_common(n_covisit_cand)
+            if aid2 not in unique_aids
+        ]
+        covisit_candidate = top_aids2[:n_covisit_cand]
+
+        # final candidates
+        candidate = past_aid_candidate + covisit_candidate
 
         # append to list result
         rank_list = [i for i in range(len(candidate))]
@@ -86,7 +91,8 @@ def suggest_clicks(
 
 
 def suggest_carts(
-    n_candidate: int,
+    n_past_aids_cand: int,
+    n_covisit_cand: int,
     ses2aids: dict,
     ses2types: dict,
     covisit_click: dict,
@@ -112,14 +118,27 @@ def suggest_carts(
         # reverse the order
         unique_buys = list(dict.fromkeys(unique_buys[::-1]))
 
+        # past aids
         # RERANK CANDIDATES USING WEIGHTS
-        if len(unique_aids) >= 20:
-            weights = np.logspace(0.5, 1, len(aids), base=2, endpoint=True) - 1
+        if len(unique_aids) > 20:
+            weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
             aids_temp = Counter()
-
-            # Rerank based on repeat items and types of items
+            # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
             for aid, w, t in zip(aids, weights, types):
                 aids_temp[aid] += w * CFG.type_weight_multipliers[t]
+            past_aid_candidate = [k for k, v in aids_temp.most_common(n_past_aids_cand)]
+
+        else:
+            past_aid_candidate = list(unique_aids)[:n_past_aids_cand]
+
+        # covisit candidates
+        if len(unique_aids) >= 20:
+            # using covisit matrix
+            aids1 = list(
+                itertools.chain(
+                    *[covisit_click[aid] for aid in unique_aids if aid in covisit_click]
+                )
+            )
 
             # Rerank candidates using"top_20_carts" co-visitation matrix
             aids2 = list(
@@ -127,10 +146,14 @@ def suggest_carts(
                     *[covisit_buys[aid] for aid in unique_buys if aid in covisit_buys]
                 )
             )
-            for aid in aids2:
-                aids_temp[aid] += 0.1
 
-            candidate = [k for k, v in aids_temp.most_common(n_candidate)]
+            # RERANK CANDIDATES
+            top_aids2 = [
+                aid2
+                for aid2, cnt in Counter(aids1 + aids2).most_common(n_covisit_cand)
+                if aid2 not in unique_aids
+            ]
+            covisit_candidate = top_aids2[:n_covisit_cand]
 
         else:
             # Use "cart order" and "clicks" co-visitation matrices
@@ -148,13 +171,13 @@ def suggest_carts(
             # RERANK CANDIDATES
             top_aids2 = [
                 aid2
-                for aid2, cnt in Counter(aids1 + aids2).most_common(n_candidate)
+                for aid2, cnt in Counter(aids1 + aids2).most_common(n_covisit_cand)
                 if aid2 not in unique_aids
             ]
-            candidate = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
+            covisit_candidate = top_aids2[:n_covisit_cand]
 
-            # # USE TOP20 TEST ORDERS
-            # candidate = result + list(top_carts)[: n_candidate - len(result)]
+        # final candidates
+        candidate = past_aid_candidate + covisit_candidate
 
         # append to list result
         rank_list = [i for i in range(len(candidate))]
@@ -170,7 +193,8 @@ def suggest_carts(
 
 
 def suggest_buys(
-    n_candidate: int,
+    n_past_aids_cand: int,
+    n_covisit_cand: int,
     ses2aids: dict,
     ses2types: dict,
     covisit_buys: dict,
@@ -196,14 +220,28 @@ def suggest_buys(
         # reverse the order
         unique_buys = list(dict.fromkeys(unique_buys[::-1]))
 
+        # past aids
         # RERANK CANDIDATES USING WEIGHTS
-        if len(unique_aids) >= 20:
-            weights = np.logspace(0.5, 1, len(aids), base=2, endpoint=True) - 1
+        if len(unique_aids) > 20:
+            weights = np.logspace(0.1, 1, len(aids), base=2, endpoint=True) - 1
             aids_temp = Counter()
-
-            # Rerank based on repeat items and types of items
+            # RERANK BASED ON REPEAT ITEMS AND TYPE OF ITEMS
             for aid, w, t in zip(aids, weights, types):
                 aids_temp[aid] += w * CFG.type_weight_multipliers[t]
+            past_aid_candidate = [k for k, v in aids_temp.most_common(n_past_aids_cand)]
+
+        else:
+            past_aid_candidate = list(unique_aids)[:n_past_aids_cand]
+
+        # covisit candidate
+        # RERANK CANDIDATES USING WEIGHTS
+        if len(unique_aids) >= 20:
+            # USE "CART ORDER" CO-VISITATION MATRIX
+            aids2 = list(
+                itertools.chain(
+                    *[covisit_buys[aid] for aid in unique_aids if aid in covisit_buys]
+                )
+            )
 
             # RERANK CANDIDATES USING "BUY2BUY" CO-VISITATION MATRIX
             aids3 = list(
@@ -216,10 +254,13 @@ def suggest_buys(
                 )
             )
 
-            for aid in aids3:
-                aids_temp[aid] += 0.1  # type: ignore
-
-            candidate = [k for k, v in aids_temp.most_common(n_candidate)]
+            # RERANK CANDIDATES
+            top_aids2 = [
+                aid2
+                for aid2, cnt in Counter(aids2 + aids3).most_common(n_covisit_cand)
+                if aid2 not in unique_aids
+            ]
+            covisit_candidate = top_aids2[:n_covisit_cand]
 
         else:
             # USE "CART ORDER" CO-VISITATION MATRIX
@@ -241,12 +282,13 @@ def suggest_buys(
             # RERANK CANDIDATES
             top_aids2 = [
                 aid2
-                for aid2, cnt in Counter(aids2 + aids3).most_common(n_candidate)
+                for aid2, cnt in Counter(aids2 + aids3).most_common(n_covisit_cand)
                 if aid2 not in unique_aids
             ]
-            candidate = list(unique_aids) + top_aids2[: n_candidate - len(unique_aids)]
-            # # # USE TOP20 TEST ORDERS
-            # candidate = result + list(top_orders)[: n_candidate - len(result)]
+            covisit_candidate = top_aids2[:n_covisit_cand]
+
+        # final candidates
+        candidate = past_aid_candidate + covisit_candidate
 
         # append to list result
         rank_list = [i for i in range(len(candidate))]
@@ -310,14 +352,16 @@ def generate_candidates_covisitation(
             logging.info(f"start of suggesting {event}")
             if event == "clicks":
                 candidates_list, ranks_list = suggest_clicks(
-                    n_candidate=CFG.covisit_candidates,
+                    n_past_aids_cand=CFG.past_candidates,
+                    n_covisit_cand=CFG.covisit_candidates,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     covisit_click=top_20_clicks,
                 )
             elif event == "carts":
                 candidates_list, ranks_list = suggest_carts(
-                    n_candidate=CFG.covisit_candidates,
+                    n_past_aids_cand=CFG.past_candidates,
+                    n_covisit_cand=CFG.covisit_candidates,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     covisit_click=top_20_clicks,
@@ -325,7 +369,8 @@ def generate_candidates_covisitation(
                 )
             elif event == "orders":
                 candidates_list, ranks_list = suggest_buys(
-                    n_candidate=CFG.covisit_candidates,
+                    n_past_aids_cand=CFG.past_candidates,
+                    n_covisit_cand=CFG.covisit_candidates,
                     ses2aids=ses2aids,
                     ses2types=ses2types,
                     covisit_buy2buy=top_15_buy2buy,

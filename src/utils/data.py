@@ -86,9 +86,9 @@ def get_top20_covisitation_click_df(mode: str = "local"):
     else:
         covisit_dir = get_scoring_covisitation_dir()
 
-    top_20_clicks = pl.read_parquet(covisit_dir / f"top_20_clicks_v{VER}_0.pqt")
+    top_20_clicks = pl.read_parquet(covisit_dir / f"top_20_clicks_v{VER_FEA}_0.pqt")
     for k in range(1, DISK_PIECES):
-        df_chunk = pl.read_parquet(covisit_dir / f"top_20_clicks_v{VER}_{k}.pqt")
+        df_chunk = pl.read_parquet(covisit_dir / f"top_20_clicks_v{VER_FEA}_{k}.pqt")
         top_20_clicks = pl.concat([top_20_clicks, df_chunk])
 
     top_20_clicks = top_20_clicks.select(["aid_x", "aid_y", "wgt"])
@@ -103,7 +103,7 @@ def get_top15_covisitation_buy2buy_df(mode: str = "local"):
     else:
         covisit_dir = get_scoring_covisitation_dir()
 
-    top_15_buy2buy = pl.read_parquet(covisit_dir / f"top_15_buy2buy_v{VER}_0.pqt")
+    top_15_buy2buy = pl.read_parquet(covisit_dir / f"top_15_buy2buy_v{VER_FEA}_0.pqt")
     top_15_buy2buy = top_15_buy2buy.select(["aid_x", "aid_y", "wgt"])
     top_15_buy2buy = freemem(top_15_buy2buy)
     return top_15_buy2buy
@@ -116,9 +116,9 @@ def get_top15_covisitation_buys_df(mode: str = "local"):
     else:
         covisit_dir = get_scoring_covisitation_dir()
 
-    top_15_buys = pl.read_parquet(covisit_dir / f"top_15_carts_orders_v{VER}_0.pqt")
+    top_15_buys = pl.read_parquet(covisit_dir / f"top_15_carts_orders_v{VER_FEA}_0.pqt")
     for k in range(1, DISK_PIECES):
-        df_chunk = pl.read_parquet(covisit_dir / f"top_15_carts_orders_v{VER}_{k}.pqt")
+        df_chunk = pl.read_parquet(covisit_dir / f"top_15_carts_orders_v{VER_FEA}_{k}.pqt")
         top_15_buys = pl.concat([top_15_buys, df_chunk])
 
     top_15_buys = top_15_buys.select(["aid_x", "aid_y", "wgt"])

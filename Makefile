@@ -2,114 +2,117 @@ SAMPLE_MODE="scoring" # training
 MODE="training_train" # training_test / scoring_train / scoring_test
 
 sample_last_week_data:
-	python src/preprocess_v3/split_local_train_label.py --mode $(SAMPLE_MODE)
+	python src/preprocess_v2/split_local_train_label.py --mode $(SAMPLE_MODE)
 
 split_into_chunks:
-	python src/preprocess_v3/split_data_into_chunks.py --mode $(MODE)
+	python src/preprocess_v2/split_data_into_chunks.py --mode $(MODE)
 
 preprocess_query_representation:
-	python src/preprocess_v3/make_query_representation.py --mode $(MODE)
+	python src/preprocess_v2/make_query_representation.py --mode $(MODE)
 
 preprocess_popular_daily_candidate:
-	python src/preprocess_v3/make_popular_daily_item_candidates.py --mode $(MODE)
+	python src/preprocess_v2/make_popular_daily_item_candidates.py --mode $(MODE)
 
 preprocess_popular_week_candidate:
-	python src/preprocess_v3/make_popular_week_item_candidates.py --mode $(MODE)
+	python src/preprocess_v2/make_popular_week_item_candidates.py --mode $(MODE)
 
 preprocess_popular_datehour_candidate:
-	python src/preprocess_v3/make_popular_datehour_item_candidates.py --mode $(MODE)
+	python src/preprocess_v2/make_popular_datehour_item_candidates.py --mode $(MODE)
 
 preprocess_popular_hour_candidate:
-	python src/preprocess_v3/make_popular_hour_item_candidates.py --mode $(MODE)
+	python src/preprocess_v2/make_popular_hour_item_candidates.py --mode $(MODE)
 
 candidate_past_aids_list:
-	python src/pipeline_v3/make_candidates_past_aids_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_past_aids_list.py --mode $(MODE)
 
 candidate_covisit_list:
-	python src/pipeline_v3/make_candidates_covisit_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_covisit_list.py --mode $(MODE)
 
 candidate_matrix_fact_list:
-	python src/pipeline_v3/make_candidates_matrix_factorization_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_matrix_factorization_list.py --mode $(MODE)
 
 candidate_word2vec_list:
-	python src/pipeline_v3/make_candidates_word2vec_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_word2vec_list.py --mode $(MODE)
 
 candidate_word2vec_duration_list:
-	python src/pipeline_v3/make_candidates_word2vec_duration_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_word2vec_duration_list.py --mode $(MODE)
 
 candidate_word2vec_weighted_recency_list:
-	python src/pipeline_v3/make_candidates_word2vec_weighted_recency_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_word2vec_weighted_recency_list.py --mode $(MODE)
 
 candidate_word2vec_weighted_duration_list:
-	python src/pipeline_v3/make_candidates_word2vec_weighted_duration_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_word2vec_weighted_duration_list.py --mode $(MODE)
 
 candidate_fasttext_list:
-	python src/pipeline_v3/make_candidates_fasttext_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_fasttext_list.py --mode $(MODE)
 
 candidate_popular_daily_list:
-	python src/pipeline_v3/make_candidates_popular_daily_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_popular_daily_list.py --mode $(MODE)
 
 candidate_popular_datehour_list:
-	python src/pipeline_v3/make_candidates_popular_datehour_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_popular_datehour_list.py --mode $(MODE)
 
 candidate_popular_hour_list:
-	python src/pipeline_v3/make_candidates_popular_hour_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_popular_hour_list.py --mode $(MODE)
 
 candidate_popular_week_list:
-	python src/pipeline_v3/make_candidates_popular_week_list.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_popular_week_list.py --mode $(MODE)
 
 candidate_list_eval:
-	python src/pipeline_v3/eval_candidate_list.py --mode $(MODE)
+	python src/pipeline_v2/eval_candidate_list.py --mode $(MODE)
 
 candidate_rows:
-	python src/pipeline_v3/make_candidates_rows.py --mode $(MODE)
+	python src/pipeline_v2/make_candidates_rows.py --mode $(MODE)
 
 session_features:
-	python src/features_v3/make_session_features.py --mode $(MODE)
+	python src/features_v2/make_session_features.py --mode $(MODE)
+
+session_covisit_features:
+	python src/features_v2/make_session_covisitation_features.py --mode $(MODE)
 
 session_item_features:
-	python src/features_v3/make_session_item_features.py --mode $(MODE)
+	python src/features_v2/make_session_item_features.py --mode $(MODE)
 
 session_item_features_l2:
-	python src/features_v3/make_session_item_features_l2.py --mode $(MODE)
+	python src/features_v2/make_session_item_features_l2.py --mode $(MODE)
 
 item_features:
-	python src/features_v3/make_item_features.py --mode $(MODE)
+	python src/features_v2/make_item_features.py --mode $(MODE)
 
 item_hour_features:
-	python src/features_v3/make_item_hour_features.py --mode $(MODE)
+	python src/features_v2/make_item_hour_features.py --mode $(MODE)
 
 item_weekday_features:
-	python src/features_v3/make_item_weekday_features.py --mode $(MODE)
+	python src/features_v2/make_item_weekday_features.py --mode $(MODE)
 
 session_representation_items:
-	python src/features_v3/make_session_representation_items.py --mode $(MODE)
+	python src/features_v2/make_session_representation_items.py --mode $(MODE)
 
 START=0
 END=10
 item_covisitation_features:
-	python src/features_v3/make_item_covisitation_features_v2.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/features_v2/make_item_covisitation_features_v2.py --mode $(MODE) --istart $(START) --iend $(END)
 
 item_covisitation_features_old:
-	python src/features_v3/make_item_covisitation_features.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/features_v2/make_item_covisitation_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 matrix_factorization_features:
-	python src/features_v3/make_item_matrix_fact_features.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/features_v2/make_item_matrix_fact_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 word2vec_features:
-	python src/features_v3/make_item_word2vec_features.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/features_v2/make_item_word2vec_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 fasttext_features:
-	python src/features_v3/make_item_fasttext_features.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/features_v2/make_item_fasttext_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 combine_features:
-	python src/pipeline_v3/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/pipeline_v2/make_combine_features.py --mode $(MODE) --istart $(START) --iend $(END)
 
 target_encoding:
-	python src/features_v3/make_target_encoding_features.py --mode $(MODE)
+	python src/features_v2/make_target_encoding_features.py --mode $(MODE)
 
 combine_features_l2:
-	python src/pipeline_v3/make_combine_features_l2.py --mode $(MODE) --istart $(START) --iend $(END)
+	python src/pipeline_v2/make_combine_features_l2.py --mode $(MODE) --istart $(START) --iend $(END)
 
 remake_session_features: session_features combine_features
 remake_session_item_features: session_item_features combine_features

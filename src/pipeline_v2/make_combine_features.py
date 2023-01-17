@@ -184,6 +184,9 @@ def fcombine_features(mode: str, event: str, ix: int):
     itemXcovisit_path = (
         f"{itemXcovisit_fea_path}/{name}_{ix}_{event}_item_covisitation_feas.parquet"
     )
+    sessionXcovisit_path = (
+        f"{itemXcovisit_fea_path}/{name}_{ix}_session_covisit_feas.parquet"
+    )
     matrix_fact_path = (
         f"{MatrixFact_fea_path}/{name}_{ix}_{event}_matrix_fact_feas.parquet"
     )
@@ -228,14 +231,47 @@ def fcombine_features(mode: str, event: str, ix: int):
     )
     cand_df = cand_df.fill_null(0)
 
-    # drop cols
-    cand_df = cand_df.drop(
-        columns=[
-            "max_rank_covisit",
-        ]
+    # fraction of rank score to total rank score in session
+    cand_df = cand_df.with_columns(
+        [
+            # window event count session
+            pl.col("log_rank_covisit_score")
+            .sum()
+            .over("session")
+            .alias("total_log_rank_covisit_score"),
+        ],
     )
 
+    cand_df = cand_df.with_columns(
+        [
+            # frac compare to total in particular session
+            (pl.col("log_rank_covisit_score") / pl.col("total_log_rank_covisit_score"))
+            .fill_nan(0)
+            .alias("frac_log_rank_covisit_score_to_all"),
+        ],
+    )
+
+    # drop cols
+    cand_df = cand_df.drop(columns=["max_rank_covisit", "total_log_rank_covisit_score"])
+
     logging.info(f"the log_recency rank_covisit features added! shape {cand_df.shape}")
+
+    # # read session-covisitation features
+    # sess_covisit_agg = pl.read_parquet(sessionXcovisit_path)
+    # logging.info(
+    #     f"read sessionXcovisitation features with shape {sess_covisit_agg.shape}"
+    # )
+    # cand_df = cand_df.join(
+    #     sess_covisit_agg,
+    #     how="left",
+    #     left_on=["session", "candidate_aid"],
+    #     right_on=["session", "aid_y"],
+    # ).fill_null(0)
+
+    # del sess_covisit_agg
+    # gc.collect()
+
+    # cand_df = cand_df.fill_null(0)
 
     # read item-covisitation features
     item_covisit_agg = pl.read_parquet(itemXcovisit_path)
@@ -518,9 +554,9 @@ def fcombine_features(mode: str, event: str, ix: int):
         "click_weight_with_last_event_in_session_aid",
         "buys_weight_with_last_event_in_session_aid",
         "buy2buy_weight_with_last_event_in_session_aid",
-        "word2vec_skipgram_last_event_cosine_distance",
-        "word2vec_skipgram_last_event_euclidean_distance",
-        "word2vec_skipgram_max_duration_cosine_distance",
+        # "session_covisit_buy2buy_cnt",
+        # "session_covisit_buys_cnt",
+        # "session_covisit_click_cnt",
     ]
     for f in tqdm(DIF_FEAS):
         cand_df = calc_relative_diff_w_mean(df=cand_df, feature=f)

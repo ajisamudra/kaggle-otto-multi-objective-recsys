@@ -217,6 +217,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             train_df = pl.DataFrame()
             val_df = pl.DataFrame()
             if EVENT == "orders":
+                wgt = 6.45
                 for i in range(CFG.N_train):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
@@ -234,6 +235,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     val_df = pl.concat([val_df, df_chunk])
 
             elif EVENT == "carts":
+                wgt = 4.45
                 train_df = pl.DataFrame()
                 for i in range(CFG.N_train):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
@@ -252,6 +254,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     val_df = pl.concat([val_df, df_chunk])
 
             else:
+                wgt = 3.3
                 for i in range(int(CFG.N_train / 5)):
                     filepath = f"{input_path}/train_{i}_{EVENT}_combined.parquet"
                     df_chunk = pl.read_parquet(filepath)
@@ -292,6 +295,10 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             X_train = train_df[selected_features]
             group_train = train_df["session"]
             y_train = train_df[TARGET]
+
+            weights_train = list(
+                train_df["retrieval_word2vec"].apply(lambda x: wgt if x == 1 else 1)
+            )
 
             X_val = val_df[selected_features]
             group_val = val_df["session"]
@@ -361,6 +368,7 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     y_val=y_val,
                     group_train=group_train,
                     group_val=group_val,
+                    weights_train=weights_train,
                 )
 
             hyperparams = model.get_params()
