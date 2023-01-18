@@ -3,6 +3,8 @@ from typing import Union
 import pandas as pd
 from lightgbm import LGBMRanker, LGBMClassifier, log_evaluation, early_stopping
 from catboost import CatBoostClassifier, CatBoostRanker, Pool, CatBoostRegressor
+from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 
 #### CLASSIFEIR MODEL
 
@@ -383,6 +385,33 @@ class EnsembleModels:
         y_preds = pd.DataFrame()
         for ix, model in enumerate(self.list_models):
             y_pred = model.predict(X)
+            # convert np ndarray to pd Series
+            y_pred = pd.Series(y_pred, name=f"y_pred_{ix}")
+            y_preds = pd.concat([y_preds, y_pred], axis=1)
+        y_preds = y_preds.mean(axis=1)
+        return y_preds
+
+
+### STACKING MODEL
+class StackingModels:
+    """Wrapper for Stacking Models
+    It has list of trained models with different set of training data
+
+    The final prediction score will be average of scores from the list of trained models
+    """
+
+    def __init__(self):
+        self.list_models = []
+
+    def append(self, model: Union[LogisticRegression, MLPClassifier]):
+        self.list_models.append(model)
+        return self
+
+    def predict(self, X):
+        # average of score from list_models
+        y_preds = pd.DataFrame()
+        for ix, model in enumerate(self.list_models):
+            y_pred = model.predict_proba(X)[:, 1]
             # convert np ndarray to pd Series
             y_pred = pd.Series(y_pred, name=f"y_pred_{ix}")
             y_preds = pd.concat([y_preds, y_pred], axis=1)

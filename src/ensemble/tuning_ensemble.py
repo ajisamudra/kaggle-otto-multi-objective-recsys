@@ -32,32 +32,32 @@ NTRIAL = 15
 CFG_MODEL = {
     "clicks_models": [
         "2022-12-25_clicks_cat_ranker_45439_89900",  # cv 0.56873
-        "2022-12-26_clicks_lgbm_ranker_48370_89600",  # cv 0.567242
+        # "2022-12-26_clicks_lgbm_ranker_48370_89600",  # cv 0.567242
         "2023-01-02_clicks_cat_ranker_60593_91362",  # cv 0.57012
-        "2023-01-02_clicks_lgbm_ranker_61844_91502",  # cv 0.56920
+        # "2023-01-02_clicks_lgbm_ranker_61844_91502",  # cv 0.56920
         "2023-01-10_clicks_cat_ranker_61483_91316",  # cv 0.56993
         # "2023-01-17_clicks_cat_regressor_69418_93202",  # cv 0.5696
-        # "2023-01-17_clicks_cat_classifier_69783_92833",  # cv 0.5690
+        "2023-01-17_clicks_cat_classifier_69783_92833",  # cv 0.5690
         # "2023-01-17_clicks_cat_ranker_71442_93554",  # cv 0.56974
     ],
     "carts_models": [
         "2022-12-25_carts_cat_ranker_65389_94260",  # cv 0.56873
-        "2022-12-26_carts_lgbm_ranker_66196_93867",  # cv 0.567242
+        # "2022-12-26_carts_lgbm_ranker_66196_93867",  # cv 0.567242
         "2023-01-02_carts_cat_ranker_75708_94697",  # cv 0.57012
-        "2023-01-02_carts_lgbm_ranker_75879_94504",  # cv 0.56920
+        # "2023-01-02_carts_lgbm_ranker_75879_94504",  # cv 0.56920
         "2023-01-10_carts_cat_ranker_76221_94688",  # cv 0.56993
         # "2023-01-17_carts_cat_regressor_70657_93800",  # cv 0.5696
-        # "2023-01-17_carts_cat_classifier_72864_93779",  # cv 0.5690
+        "2023-01-17_carts_cat_classifier_72864_93779",  # cv 0.5690
         # "2023-01-17_carts_cat_ranker_74566_93914",  # cv 0.56974
     ],
     "orders_models": [
         "2022-12-25_orders_cat_ranker_80132_96912",  # cv 0.56873
-        "2022-12-26_orders_lgbm_ranker_78372_95814",  # cv 0.567242
+        # "2022-12-26_orders_lgbm_ranker_78372_95814",  # cv 0.567242
         "2023-01-02_orders_cat_ranker_86779_97309",  # cv 0.57012
-        "2023-01-02_orders_lgbm_ranker_85371_96813",  # cv 0.56920
+        # "2023-01-02_orders_lgbm_ranker_85371_96813",  # cv 0.56920
         "2023-01-10_orders_cat_ranker_87315_97301",  # cv 0.56993
         # "2023-01-17_orders_cat_regressor_86921_97516",  # cv 0.5696
-        # "2023-01-17_orders_cat_classifier_89226_97489",  # cv 0.5690
+        "2023-01-17_orders_cat_classifier_89226_97489",  # cv 0.5690
         # "2023-01-17_orders_cat_ranker_88789_97503",  # cv 0.56974
     ],
 }
@@ -65,6 +65,8 @@ CFG_MODEL = {
 
 def measure_ensemble_scores(hyperparams: dict):
     N_test = 40
+    # N_test 40 overall recall@20: 0.571519776732214
+    # N_test 39 overall recall@20: 0.5717626784357688
     week_model = "w2"
     CONFIG = {
         "clicks_weights": [
@@ -72,7 +74,7 @@ def measure_ensemble_scores(hyperparams: dict):
             hyperparams["click_wgt_2"],
             hyperparams["click_wgt_3"],
             hyperparams["click_wgt_4"],
-            hyperparams["click_wgt_5"],
+            # hyperparams["click_wgt_5"],
             # hyperparams["click_wgt_6"],
         ],
         "carts_weights": [
@@ -80,7 +82,7 @@ def measure_ensemble_scores(hyperparams: dict):
             hyperparams["cart_wgt_2"],
             hyperparams["cart_wgt_3"],
             hyperparams["cart_wgt_4"],
-            hyperparams["cart_wgt_5"],
+            # hyperparams["cart_wgt_5"],
             # hyperparams["cart_wgt_6"],
         ],
         "orders_weights": [
@@ -88,7 +90,7 @@ def measure_ensemble_scores(hyperparams: dict):
             hyperparams["order_wgt_2"],
             hyperparams["order_wgt_3"],
             hyperparams["order_wgt_4"],
-            hyperparams["order_wgt_5"],
+            # hyperparams["order_wgt_5"],
             # hyperparams["order_wgt_6"],
         ],
         "clicks_powers": [
@@ -96,7 +98,7 @@ def measure_ensemble_scores(hyperparams: dict):
             hyperparams["click_pow"],
             hyperparams["click_pow"],
             hyperparams["click_pow"],
-            hyperparams["click_pow"],
+            # hyperparams["click_pow"],
             # hyperparams["click_pow"],
         ],
         "carts_powers": [
@@ -104,7 +106,7 @@ def measure_ensemble_scores(hyperparams: dict):
             hyperparams["cart_pow"],
             hyperparams["cart_pow"],
             hyperparams["cart_pow"],
-            hyperparams["cart_pow"],
+            # hyperparams["cart_pow"],
             # hyperparams["cart_pow"],
         ],
         "orders_powers": [
@@ -112,7 +114,7 @@ def measure_ensemble_scores(hyperparams: dict):
             hyperparams["order_pow"],
             hyperparams["order_pow"],
             hyperparams["order_pow"],
-            hyperparams["order_pow"],
+            # hyperparams["order_pow"],
             # hyperparams["order_pow"],
         ],
     }
@@ -314,24 +316,24 @@ def constraints(trial):
 def tune_ensemble():
     logging.info("measure ensemble recall@20 before tuning")
     hyperparams = {
-        "click_wgt_1": 0.2,
-        "click_wgt_2": 0.2,
-        "click_wgt_3": 0.2,
-        "click_wgt_4": 0.2,
-        "click_wgt_5": 0.2,
-        # "click_wgt_6": 0.2,
-        "cart_wgt_1": 0.2,
-        "cart_wgt_2": 0.2,
-        "cart_wgt_3": 0.2,
-        "cart_wgt_4": 0.2,
-        "cart_wgt_5": 0.2,
-        # "cart_wgt_6": 0.2,
-        "order_wgt_1": 0.2,
-        "order_wgt_2": 0.2,
-        "order_wgt_3": 0.2,
-        "order_wgt_4": 0.2,
-        "order_wgt_5": 0.2,
-        # "order_wgt_6": 0.2,
+        "click_wgt_1": 0.25,
+        "click_wgt_2": 0.25,
+        "click_wgt_3": 0.25,
+        "click_wgt_4": 0.25,
+        "click_wgt_5": 0.25,
+        # "click_wgt_6": 0.25,
+        "cart_wgt_1": 0.25,
+        "cart_wgt_2": 0.25,
+        "cart_wgt_3": 0.25,
+        "cart_wgt_4": 0.25,
+        "cart_wgt_5": 0.25,
+        # "cart_wgt_6": 0.25,
+        "order_wgt_1": 0.25,
+        "order_wgt_2": 0.25,
+        "order_wgt_3": 0.25,
+        "order_wgt_4": 0.25,
+        "order_wgt_5": 0.25,
+        # "order_wgt_6": 0.25,
         "click_pow": 2,
         "cart_pow": 2,
         "order_pow": 2,

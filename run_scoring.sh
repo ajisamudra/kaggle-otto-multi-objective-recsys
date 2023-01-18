@@ -196,3 +196,23 @@ python src/scoring/score.py --event clicks --week_data $WEEK_DATA --week_model w
 
 # make submission
 python src/scoring/make_submission.py --click_model $CLICK_MODEL --cart_model $CART_MODEL --order_model $ORDER_MODEL --week_data $WEEK_DATA --week_model w2
+
+
+# correction
+# N_test 40 overall recall@20: 0.571519776732214
+# N_test 39 overall recall@20: 0.5717626784357688
+
+# stacking Overall Recall@20 = 0.5717332853973489 -> corrected 0.5715 ish
+# "2022-12-25_orders_cat_ranker_80132_96912",  # cv 0.56873
+# "2023-01-02_orders_cat_ranker_86779_97309",  # cv 0.57012
+# "2023-01-02_orders_lgbm_ranker_85371_96813",  # cv 0.56920
+# "2023-01-10_orders_cat_ranker_87315_97301",  # cv 0.56993
+# "2023-01-17_orders_cat_classifier_89226_97489",  # cv 0.5690
+
+# stacking Overall Recall@20 = 0.5716936928185055 -> corrected 0.5714 ish
+# "2022-12-25_orders_cat_ranker_80132_96912",  # cv 0.56873
+# "2022-12-26_orders_lgbm_ranker_78372_95814",  # cv 0.567242
+# "2023-01-02_orders_cat_ranker_86779_97309",  # cv 0.57012
+# "2023-01-02_orders_lgbm_ranker_85371_96813",  # cv 0.56920
+# "2023-01-10_orders_cat_ranker_87315_97301",  # cv 0.56993
+# "2023-01-17_orders_cat_classifier_89226_97489",  # cv 0.5690

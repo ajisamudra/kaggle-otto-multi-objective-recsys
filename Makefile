@@ -185,3 +185,18 @@ eval_submission:
 	python src/scoring/eval_submission.py --click_model $(CLICK_MODEL) --cart_model $(CART_MODEL) --order_model $(ORDER_MODEL)
 
 score_and_eval: submission eval_submission
+
+
+dataset_stacking:
+	python src/stacking/make_stacking_dataset.py --mode $(MODE)
+
+train_stacking:
+	python src/stacking/train_stacking.py --algo=$(ALGO)
+
+score_stacking:
+	python src/stacking/score_stacking.py --artifact $(CLICK_MODEL) --event clicks --week_data $(WEEK_DATA) --week_model w2
+	python src/stacking/score_stacking.py --artifact $(CART_MODEL) --event carts --week_data $(WEEK_DATA) --week_model w2
+	python src/stacking/score_stacking.py --artifact $(ORDER_MODEL) --event orders --week_data $(WEEK_DATA) --week_model w2
+
+submission_stacking:
+	python src/stacking/make_submission_stacking.py --click_model $(CLICK_MODEL)  --cart_model $(CART_MODEL) --order_model $(ORDER_MODEL) --week_data $(WEEK_DATA) --week_model w2

@@ -28,7 +28,7 @@
 # make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
 # make session_item_features_l2 MODE=training_train
-make combine_features  MODE=training_train START=0 END=30
+# make combine_features  MODE=training_train START=0 END=30
 # make target_encoding MODE=training_train
 # make target_encoding MODE=training_test
 # make combine_features_l2  MODE=training_train START=0 END=30
@@ -68,7 +68,7 @@ make combine_features  MODE=training_train START=0 END=30
 # make fasttext_features MODE=training_test START=0 END=50
 # make fasttext_features MODE=training_test START=50 END=100
 # make session_item_features_l2 MODE=training_test
-make combine_features  MODE=training_test START=0 END=40
+# make combine_features  MODE=training_test START=0 END=40
 # make combine_features  MODE=training_test START=25 END=50
 # make combine_features  MODE=training_test START=50 END=75
 # make combine_features  MODE=training_test START=75 END=100
@@ -124,9 +124,9 @@ make combine_features  MODE=training_test START=0 END=40
 # make combine_features  MODE=training_test START=50 END=75
 # make combine_features  MODE=training_test START=75 END=100
 
-make train ALGO=cat_ranker
-make train ALGO=cat_classifier
-make train ALGO=cat_regressor
+# make train ALGO=cat_ranker
+# make train ALGO=cat_classifier
+# make train ALGO=cat_regressor
 # make item_covisitation_features MODE=training_train START=0 END=30
 # make item_covisitation_features MODE=training_test START=0 END=40
 # make train ALGO=lgbm_ranker
@@ -278,3 +278,7 @@ WEEK_DATA=w2
 # old covisit + word2vec fea 100 Overall | add sample weights for word2vec sample (cat_clf) Overall Recall@20 = 0.568174903004428
 # old covisit + word2vec fea 100 Overall (cat_clf logloss) Overall Recall@20 = 0.5690935984165175
 # cat_clf without max duration covisit Overall Recall@20 = 0.5678851943915693
+
+
+make dataset_stacking MODE=training_test
+make train_stacking ALGO=logreg
