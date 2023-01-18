@@ -28,30 +28,37 @@ logging = get_logger()
 TARGET = "label"
 NTRIAL = 15
 
+# Overall Recall@20 = 0.5707801382513511
 CFG_MODEL = {
     "clicks_models": [
-        "2022-12-25_clicks_cat_ranker_45439_89900",
-        "2022-12-26_clicks_lgbm_ranker_48370_89600",
-        "2023-01-02_clicks_cat_ranker_60593_91362",
-        "2023-01-02_clicks_lgbm_ranker_61844_91502",
-        # "2023-01-10_clicks_cat_ranker_61483_91316",
-        "2023-01-13_clicks_cat_classifier_71560_93440",
+        "2022-12-25_clicks_cat_ranker_45439_89900",  # cv 0.56873
+        "2022-12-26_clicks_lgbm_ranker_48370_89600",  # cv 0.567242
+        "2023-01-02_clicks_cat_ranker_60593_91362",  # cv 0.57012
+        "2023-01-02_clicks_lgbm_ranker_61844_91502",  # cv 0.56920
+        "2023-01-10_clicks_cat_ranker_61483_91316",  # cv 0.56993
+        # "2023-01-17_clicks_cat_regressor_69418_93202",  # cv 0.5696
+        # "2023-01-17_clicks_cat_classifier_69783_92833",  # cv 0.5690
+        # "2023-01-17_clicks_cat_ranker_71442_93554",  # cv 0.56974
     ],
     "carts_models": [
-        "2022-12-25_carts_cat_ranker_65389_94260",
-        "2022-12-26_carts_lgbm_ranker_66196_93867",
-        "2023-01-02_carts_cat_ranker_75708_94697",
-        "2023-01-02_carts_lgbm_ranker_75879_94504",
-        # "2023-01-10_carts_cat_ranker_76221_94688",
-        "2023-01-13_carts_cat_classifier_74699_93978",
+        "2022-12-25_carts_cat_ranker_65389_94260",  # cv 0.56873
+        "2022-12-26_carts_lgbm_ranker_66196_93867",  # cv 0.567242
+        "2023-01-02_carts_cat_ranker_75708_94697",  # cv 0.57012
+        "2023-01-02_carts_lgbm_ranker_75879_94504",  # cv 0.56920
+        "2023-01-10_carts_cat_ranker_76221_94688",  # cv 0.56993
+        # "2023-01-17_carts_cat_regressor_70657_93800",  # cv 0.5696
+        # "2023-01-17_carts_cat_classifier_72864_93779",  # cv 0.5690
+        # "2023-01-17_carts_cat_ranker_74566_93914",  # cv 0.56974
     ],
     "orders_models": [
-        "2022-12-25_orders_cat_ranker_80132_96912",
-        "2022-12-26_orders_lgbm_ranker_78372_95814",
-        "2023-01-02_orders_cat_ranker_86779_97309",
-        "2023-01-02_orders_lgbm_ranker_85371_96813",
-        # "2023-01-10_orders_cat_ranker_87315_97301",
-        "2023-01-13_orders_cat_classifier_89862_97679",
+        "2022-12-25_orders_cat_ranker_80132_96912",  # cv 0.56873
+        "2022-12-26_orders_lgbm_ranker_78372_95814",  # cv 0.567242
+        "2023-01-02_orders_cat_ranker_86779_97309",  # cv 0.57012
+        "2023-01-02_orders_lgbm_ranker_85371_96813",  # cv 0.56920
+        "2023-01-10_orders_cat_ranker_87315_97301",  # cv 0.56993
+        # "2023-01-17_orders_cat_regressor_86921_97516",  # cv 0.5696
+        # "2023-01-17_orders_cat_classifier_89226_97489",  # cv 0.5690
+        # "2023-01-17_orders_cat_ranker_88789_97503",  # cv 0.56974
     ],
 }
 

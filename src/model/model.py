@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Union
 import pandas as pd
 from lightgbm import LGBMRanker, LGBMClassifier, log_evaluation, early_stopping
-from catboost import CatBoostClassifier, CatBoostRanker, Pool
+from catboost import CatBoostClassifier, CatBoostRanker, Pool, CatBoostRegressor
 
 #### CLASSIFEIR MODEL
 
@@ -95,11 +95,14 @@ class CatClassifier(ClassifierModel):
         self.hyperprams = {}
 
     def fit(self, X_train, X_val, y_train, y_val):
+
+        train_pool = Pool(data=X_train, label=y_train)
+        val_pool = Pool(data=X_val, label=y_val)
+
         self._model.fit(
-            X=X_train,
-            y=y_train,
+            train_pool,
+            eval_set=val_pool,
             use_best_model=True,
-            eval_set=[(X_val, y_val)],
             early_stopping_rounds=self._early_stopping_rounds,
             verbose=self._verbose,
         )
@@ -122,6 +125,53 @@ class CatClassifier(ClassifierModel):
     def predict(self, X_test):
         result = self._model.predict_proba(X_test, ntree_end=self.best_iteration)
         return result[:, 1]
+
+    def get_params(self):
+        return self.hyperprams
+
+
+class CatRegressor(ClassifierModel):
+    def __init__(self, **kwargs):
+        self._early_stopping_rounds = kwargs.get("early_stopping_rounds", 200)
+        self._verbose = kwargs.pop("verbose", 100)
+
+        self.feature_importances_ = None
+        self.best_score_ = 0
+        self.best_iteration = 0
+
+        self._model = CatBoostRegressor(**kwargs)
+        self.hyperprams = {}
+
+    def fit(self, X_train, X_val, y_train, y_val, weights_train, weights_val):
+
+        train_pool = Pool(data=X_train, label=y_train, weight=weights_train)
+        val_pool = Pool(data=X_val, label=y_val, weight=weights_val)
+
+        self._model.fit(
+            train_pool,
+            eval_set=val_pool,
+            use_best_model=True,
+            early_stopping_rounds=self._early_stopping_rounds,
+            verbose=self._verbose,
+        )
+
+        # feature importance as DataFrame
+        self.feature_importances_ = pd.DataFrame(
+            {
+                "feature": X_train.columns.to_list(),
+                "importance": self._model.feature_importances_,
+            }
+        ).sort_values(by="importance", ascending=False, ignore_index=True)
+
+        # best_score as float
+        self.best_score_ = self._model.get_best_score()
+        self.best_iteration = self._model.get_best_iteration()
+        self.hyperprams = self._model.get_all_params()
+
+        return self
+
+    def predict(self, X_test):
+        return self._model.predict(X_test, ntree_end=self.best_iteration)
 
     def get_params(self):
         return self.hyperprams
@@ -224,13 +274,9 @@ class CATRanker(RankingModel):
         self._model = CatBoostRanker(**kwargs)
         # self._model = CatBoostRanker(loss_function="PairLogit", **kwargs)
 
-    def fit(
-        self, X_train, X_val, y_train, y_val, group_train, group_val, weights_train
-    ):
+    def fit(self, X_train, X_val, y_train, y_val, group_train, group_val):
 
-        train_pool = Pool(
-            data=X_train, label=y_train, group_id=group_train, weight=weights_train
-        )
+        train_pool = Pool(data=X_train, label=y_train, group_id=group_train)
 
         val_pool = Pool(data=X_val, label=y_val, group_id=group_val)
 

@@ -23,6 +23,7 @@ from src.utils.constants import (
 from src.model.model import (
     EnsembleModels,
     CatClassifier,
+    CatRegressor,
     CATRanker,
     ClassifierModel,
     LGBClassifier,
@@ -205,6 +206,8 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                 model = LGBClassifier(**hyperparams)
             elif algo == "cat_classifier":
                 model = CatClassifier(**hyperparams)
+            elif algo == "cat_regressor":
+                model = CatRegressor(**hyperparams)
             elif algo == "lgbm_ranker":
                 model = LGBRanker(**hyperparams)
             elif algo == "cat_ranker":
@@ -292,13 +295,12 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
             #     "diff_w_mean_word2vec_skipgram_last_event_cosine_distance"
             # )
 
+            weights_train = train_df[TARGET].apply(lambda x: 10 if x == 1 else 1)
+            weights_val = val_df[TARGET].apply(lambda x: 10 if x == 1 else 1)
+
             X_train = train_df[selected_features]
             group_train = train_df["session"]
             y_train = train_df[TARGET]
-
-            weights_train = list(
-                train_df["retrieval_word2vec"].apply(lambda x: wgt if x == 1 else 1)
-            )
 
             X_val = val_df[selected_features]
             group_val = val_df["session"]
@@ -350,6 +352,15 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                 model.fit(X_train=X_train, X_val=X_val, y_train=y_train, y_val=y_val)
             elif algo == "cat_classifier":
                 model.fit(X_train=X_train, X_val=X_val, y_train=y_train, y_val=y_val)
+            elif algo == "cat_regressor":
+                model.fit(
+                    X_train=X_train,
+                    X_val=X_val,
+                    y_train=y_train,
+                    y_val=y_val,
+                    weights_train=weights_train,
+                    weights_val=weights_val,
+                )
             elif algo == "lgbm_ranker":
                 model.fit(
                     X_train=X_train,
@@ -368,7 +379,6 @@ def train(algo: str, events: list, week: str, n: int, eval: int):
                     y_val=y_val,
                     group_train=group_train,
                     group_val=group_val,
-                    weights_train=weights_train,
                 )
 
             hyperparams = model.get_params()

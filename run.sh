@@ -25,7 +25,7 @@
 # make session_representation_items MODE=training_train
 # make item_covisitation_features MODE=training_train START=0 END=30
 # make matrix_factorization_features MODE=training_train START=0 END=30
-make word2vec_features START=0 END=30
+# make word2vec_features START=0 END=30
 # make fasttext_features START=0 END=30
 # make session_item_features_l2 MODE=training_train
 make combine_features  MODE=training_train START=0 END=30
@@ -49,21 +49,21 @@ make combine_features  MODE=training_train START=0 END=30
 # make candidate_fasttext_list MODE=training_test
 # make candidate_matrix_fact_list MODE=training_test
 # make candidate_list_eval MODE=training_test
-make candidate_rows MODE=training_test
-make session_features MODE=training_test
+# make candidate_rows MODE=training_test
+# make session_features MODE=training_test
 # make session_covisit_features MODE=training_test
-make item_features MODE=training_test
-make session_item_features MODE=training_test
-make item_hour_features MODE=training_test
-make item_weekday_features MODE=training_test
-make session_representation_items MODE=training_test
-make item_covisitation_features MODE=training_test START=0 END=40
+# make item_features MODE=training_test
+# make session_item_features MODE=training_test
+# make item_hour_features MODE=training_test
+# make item_weekday_features MODE=training_test
+# make session_representation_items MODE=training_test
+# make item_covisitation_features MODE=training_test START=0 END=40
 # make item_covisitation_features MODE=training_test START=50 END=100
 # make matrix_factorization_features MODE=training_test START=0 END=25
 # make matrix_factorization_features MODE=training_test START=25 END=50
 # make matrix_factorization_features MODE=training_test START=50 END=75
 # make matrix_factorization_features MODE=training_test START=75 END=100
-make word2vec_features MODE=training_test START=0 END=50
+# make word2vec_features MODE=training_test START=0 END=50
 # make word2vec_features MODE=training_test START=50 END=100
 # make fasttext_features MODE=training_test START=0 END=50
 # make fasttext_features MODE=training_test START=50 END=100
@@ -125,7 +125,8 @@ make combine_features  MODE=training_test START=0 END=40
 # make combine_features  MODE=training_test START=75 END=100
 
 make train ALGO=cat_ranker
-# make train ALGO=cat_classifier
+make train ALGO=cat_classifier
+make train ALGO=cat_regressor
 # make item_covisitation_features MODE=training_train START=0 END=30
 # make item_covisitation_features MODE=training_test START=0 END=40
 # make train ALGO=lgbm_ranker
@@ -272,5 +273,8 @@ WEEK_DATA=w2
 # old covisit + new fea cnt | rel dif cnt | word2vec Overall Recall@20 = 0.5679267843233935
 # old covisit + word2vec fea 99 Overall Recall@20 = 0.5696375091863197
 # old covisit + word2vec fea 101 Overall Recall@20 = 0.5696375091863197
-# old covisit + word2vec fea 101 Overall | add sample weights for word2vec sample
-
+# old covisit + word2vec fea 100 Overall | add sample weights for word2vec sample (cat_rank eval map) Overall Recall@20 = 0.5697469846192875 | cat_ranker not able to consume sample weight; eval metrics MAP
+# old covisit + word2vec fea 100 Overall | add sample weights for word2vec sample (cat_rank eval ndcg) not working, by default eval metrics is ndcg
+# old covisit + word2vec fea 100 Overall | add sample weights for word2vec sample (cat_clf) Overall Recall@20 = 0.568174903004428
+# old covisit + word2vec fea 100 Overall (cat_clf logloss) Overall Recall@20 = 0.5690935984165175
+# cat_clf without max duration covisit Overall Recall@20 = 0.5678851943915693
